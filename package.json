@@ -1,0 +1,13 @@
+{
+  "name": "uport-node",
+  "version": "0.1.0",
+  "description": "Library for interacting with uport from server side node applications",
+  "main": "src/index.js",
+  "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
+  "license": "MIT",
+  "dependencies": {
+    "jsontokens": "^0.6.5",
+    "uport-persona": "^2.0.3",
+    "uport-registry": "^2.0.5"
+  }
+}
