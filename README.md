@@ -22,7 +22,7 @@ The identity is controlled by a Controller Contract, which is basically an acces
 
 Our default uport controller contract is controlled by a single device, but you can add multiple recovery contacts to help retain control if you lose that device. Feel free to replace the controller contract with your own contract.
 
-### THe uport registry
+### The uport registry
 
 A uport identity also optionally has a public profile stored on ipfs and linked to your identity through the uport registry. This profile consists of JSON using the [Schema.org](http://schema.org/) conventions.
 
@@ -47,7 +47,6 @@ Create your server keypair. This is for signing JWT tokens from within your serv
 openssl ecparam -name secp256k1 -genkey -noout -out keypair.pem
 ```
 
-
 Paste in the public key generated from the step above.
 
 Hit the button “Save Attributes” and a QR code will appear for signing by your mobile app.
@@ -58,14 +57,14 @@ In your application you must first configure your Uport object.
 
 ```
 import { Uport, SimpleSigner } from 'uport-node'
-``
+
 const signer = SimpleSigner(process.env.PRIVATE_KEY)
 const uport = new Uport({
   appName: "App Name",
-``  appUport: "UPORT ADDRESS FOR YOUR APP",
+  appUport: "UPORT ADDRESS FOR YOUR APP",
   signer: signer,
   json_rpc: "https://ropsten.infura.io",
-})`
+})
 ```
 
 ## Requesting information from your users
@@ -83,9 +82,13 @@ uport.request({type:'shareReq'}, (error, requestToken) => {
 You can ask for specific private data like this:
 
 ```
-uport.request({type:'shareReq',requested:['name','phone','identity_no']}, (error, requestToken) => {
+uport.request({
+        type:'shareReq',
+        requested:['name','phone','identity_no']
+    }, 
+    (error, requestToken) => {
   // send requestToken to browser
-})
+)
 ```
 
 In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
