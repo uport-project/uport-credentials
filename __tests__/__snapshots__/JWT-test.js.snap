@@ -1,0 +1,44 @@
+exports[`test accepts a valid audience 1`] = `
+Object {
+  "aud": "0x001122",
+  "iat": 1485321133996,
+  "iss": "0x001122",
+}
+`;
+
+exports[`test accepts a valid exp 1`] = `
+Object {
+  "exp": 1485321133997,
+  "iat": 1485321133996,
+  "iss": "0x001122",
+}
+`;
+
+exports[`test creates a JWT with correct format 1`] = `
+Object {
+  "header": Object {
+    "alg": "ES256K",
+    "typ": "JWT",
+  },
+  "payload": Object {
+    "iat": 1485321133996,
+    "iss": "0x001122",
+    "requested": Array [
+      "name",
+      "phone",
+    ],
+  },
+  "signature": "zxGLQKo2WjgefrxEQWfwm_oago8Qr4YctBJoqNAm2XKE-48bADjolSo2T_tED9LnSikxqFIM9gNGpNgcY8JPdg",
+}
+`;
+
+exports[`test verifies the JWT and return correct payload 1`] = `
+Object {
+  "iat": 1485321133996,
+  "iss": "0x001122",
+  "requested": Array [
+    "name",
+    "phone",
+  ],
+}
+`;

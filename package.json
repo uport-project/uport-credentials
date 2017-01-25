@@ -1,7 +1,7 @@
 {
   "name": "uport-node",
   "version": "0.1.0",
-  "description": "Library for interacting with uport from server side node applications",
+  "description": "Library for interacting with uport profiles and attestations",
   "main": "src/index.js",
   "scripts": {
     "test": "jest"
