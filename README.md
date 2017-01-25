@@ -74,7 +74,7 @@ To request information from your user you create a Selective Disclosure Request 
 The most basic request to get a users public uport identity details:
 
 '''javascript
-uport.request({type:'shareReq'}, (error, requestToken) => {
+uport.request().then(requestToken) => {
   // send requestToken to browser
 })
 '''
@@ -83,10 +83,8 @@ You can ask for specific private data like this:
 
 '''javascript
 uport.request({
-        type:'shareReq',
-        requested:['name','phone','identity_no']
-    }, 
-    (error, requestToken) => {
+    requested: ['name','phone','identity_no']
+  }.then(requestToken) => {
   // send requestToken to browser
 )
 '''
@@ -94,7 +92,7 @@ uport.request({
 In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
 
 '''javascript
-window.uport.request(requestToken, function (error, responseToken) {
+window.uport.request(requestToken).then(response => {
   // send response back to server
 })
 '''
@@ -102,7 +100,7 @@ window.uport.request(requestToken, function (error, responseToken) {
 Back in your server code you receive the token:
 
 '''javascript
-uport.receive(responseToken, (error, profile) => {
+uport.receive(responseToken).then(profile) => {
   // Store user profile
 })
 '''
@@ -115,18 +113,17 @@ As part of the selective disclosure request you can ask for permission from your
 
 '''javascript
 uport.request({
-    type:'shareReq',
-    requested:[...],
-    capabilities: ['push']},
-    (error, requestToken) => {
-      // send to browser
-    })
+  requested:[...],
+  capabilities: ['push']
+}).then(requestToken => {
+  // send to browser
+})
 '''
 
 Present it to the user like before. On the server you can receive the push token like this:
 
 '''javascript
-uport.receive(responseToken, (error, profile) => {
+uport.receive(responseToken).then(profile => {
   // Store user profile
   // Store push token securely
   console.log(profile.pushToken)
@@ -150,24 +147,22 @@ uport.attest({
   sub: '0x...', // uport address of user
   exp: <future timestamp>, // If your information is not permanent make sure to add an expires timestamp
   claims: {name:'John Smith'}
-}, (error, attestation) => {
+}).then(attestation) => {
   // send attestation to user
 })
 '''
 
-Like before you want to send this to your user. You can either do this in the browser
+As before you will want to send this to your user. You can do this in the browser
 
 '''javascript
-window.uport.request(attestation, function (error, response) {
-   // check for errors
+window.uport.request(attestation).then(response) {
 })
 '''
 
 If you requested a push notification token in the above selective disclosure step you can also send attestations directly to your users app in real time.
 
 '''javascript
-uport.pushTo(pushToken, attestation, function (error, response) {
-   // check for errors
+uport.pushTo(pushToken, attestation).then(response) {
 })
 '''
 
@@ -183,7 +178,7 @@ const txRequest = tokenContract.transfer(....)
 In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
 
 '''javascript
-window.uport.request(txRequest, function (error, txResponse) {
+window.uport.request(txRequest).then(txResponse) {
   // send response back to server
 })
 '''

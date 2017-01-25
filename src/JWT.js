@@ -1,14 +1,18 @@
-import { TokenSigner, createUnsignedToken, TokenVerifier, decodeToken } from 'json-tokens' 
+import { createUnsignedToken, TokenVerifier, decodeToken } from 'jsontokens' 
 
 const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
 
-export function createJWT ({address, signer}, payload, callback) {
-  const signingInput = createUnsignedToken(JOSE_HEADER, payload)
-
-  signer(signingInput, (error, signature) => {
-    if (error) return callback(error)
-    callback(null, [signingInput, signature].join('.'))
-  })
+export function createJWT ({address, signer}, payload) {
+  const signingInput = createUnsignedToken(
+    JOSE_HEADER,
+    {...payload, iss: address, iat: new Date().getTime()}
+  )
+  return new Promise((resolve, reject) =>
+    signer(signingInput, (error, signature) => {
+      if (error) return reject(error)
+      resolve([signingInput, signature].join('.'))
+    })
+  )
 }
 
 export function verifyJWT (jwt, callback) {
