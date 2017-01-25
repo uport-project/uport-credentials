@@ -43,9 +43,9 @@ Now fill in a few basic details like your App's name. Company Name. URL, logo et
 
 Create your server keypair. This is for signing JWT tokens from within your server.
 
-'''
+```
 openssl ecparam -name secp256k1 -genkey -noout -out keypair.pem
-'''
+```
 
 Paste in the public key generated from the step above.
 
@@ -55,7 +55,7 @@ Hit the button “Save Attributes” and a QR code will appear for signing by yo
 
 In your application you must first configure your Uport object.
 
-'''javascript
+```javascript
 import { Uport, SimpleSigner } from 'uport-node'
 
 const signer = SimpleSigner(process.env.PRIVATE_KEY)
@@ -65,7 +65,7 @@ const uport = new Uport({
   signer: signer,
   json_rpc: "https://ropsten.infura.io",
 })
-'''
+```
 
 ## Requesting information from your users
 
@@ -73,37 +73,37 @@ To request information from your user you create a Selective Disclosure Request 
 
 The most basic request to get a users public uport identity details:
 
-'''javascript
+```javascript
 uport.request().then(requestToken) => {
   // send requestToken to browser
 })
-'''
+```
 
 You can ask for specific private data like this:
 
-'''javascript
+```javascript
 uport.request({
     requested: ['name','phone','identity_no']
   }.then(requestToken) => {
   // send requestToken to browser
 )
-'''
+```
 
 In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
 
-'''javascript
+```javascript
 window.uport.request(requestToken).then(response => {
   // send response back to server
 })
-'''
+```
 
 Back in your server code you receive the token:
 
-'''javascript
+```javascript
 uport.receive(responseToken).then(profile) => {
   // Store user profile
 })
-'''
+```
 
 For more information about the contents of the profile object see the uport-persona documentation.
 
@@ -111,24 +111,24 @@ For more information about the contents of the profile object see the uport-pers
 
 As part of the selective disclosure request you can ask for permission from your users to communicate directly with their app.
 
-'''javascript
+```javascript
 uport.request({
   requested:[...],
   capabilities: ['push']
 }).then(requestToken => {
   // send to browser
 })
-'''
+```
 
 Present it to the user like before. On the server you can receive the push token like this:
 
-'''javascript
+```javascript
 uport.receive(responseToken).then(profile => {
   // Store user profile
   // Store push token securely
   console.log(profile.pushToken)
 })
-'''
+```
 
 ## Attesting information about your users
 
@@ -142,7 +142,7 @@ Attestations are shareable private information that one party can sign about ano
 
 ### Creating an attestation
 
-'''javascript
+```javascript
 uport.attest({
   sub: '0x...', // uport address of user
   exp: <future timestamp>, // If your information is not permanent make sure to add an expires timestamp
@@ -150,38 +150,38 @@ uport.attest({
 }).then(attestation) => {
   // send attestation to user
 })
-'''
+```
 
 As before you will want to send this to your user. You can do this in the browser
 
-'''javascript
+```javascript
 window.uport.request(attestation).then(response) {
 })
-'''
+```
 
 If you requested a push notification token in the above selective disclosure step you can also send attestations directly to your users app in real time.
 
-'''javascript
+```javascript
 uport.pushTo(pushToken, attestation).then(response) {
 })
-'''
+```
 
 ## Asking users to sign Ethereum transactions
 
-'''javascript
+```javascript
 import { Uport, Contract } from 'uport-node'
 
 const tokenContract = new Contract(address, abi)
 const txRequest = tokenContract.transfer(....)
-'''
+```
 
 In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
 
-'''javascript
+```javascript
 window.uport.request(txRequest).then(txResponse) {
   // send response back to server
 })
-'''
+```
 
 
 Back in your server code you receive the `txResponse`. This is a standard ethereum transaction object that you can verify.
@@ -190,9 +190,9 @@ Back in your server code you receive the `txResponse`. This is a standard ethere
 
 You can easily create custom signers that integrates into your existing signing infrastructure.
 
-'''javascript
+```javascript
 function sign(data, callback) {
     const signature = // send your data to your back end signer and return DER signed data
     callback(null, signature)
 }
-'''
+```
