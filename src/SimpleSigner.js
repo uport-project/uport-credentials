@@ -1,4 +1,4 @@
-import { SECP256K1Client } from 'json-tokens'
+import { SECP256K1Client } from 'jsontokens'
 
 export default function SimpleSigner (privateKey) {
   return (data, callback) => {
