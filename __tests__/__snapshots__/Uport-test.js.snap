@@ -5,7 +5,7 @@ Object {
     "typ": "JWT",
   },
   "payload": Object {
-    "iat": 1485320824401,
+    "iat": 1485321133996,
     "iss": "0x001122",
     "requested": Array [
       "name",
@@ -13,6 +13,25 @@ Object {
     ],
     "type": "shareReq",
   },
-  "signature": "mGxkl9MFlXr72q8hgxvTNBMR5BNLgYGhh2EoDx3XHxzljrJa6y3raOdbSOjnMGodFts2wdALMfiGovryCGufIg",
+  "signature": "831teGtcqKacto5LDMLVURpCHxUN9Vvx2IN0-b05Q5gU3Md1wiuRDM91tP5Q0AyYTr1RTnkoYwmMcNH7wke7oA",
+}
+`;
+
+exports[`test has correct payload in JWT for an attestation 1`] = `
+Object {
+  "header": Object {
+    "alg": "ES256K",
+    "typ": "JWT",
+  },
+  "payload": Object {
+    "claim": Object {
+      "email": "bingbangbung@email.com",
+    },
+    "exp": 1485321134996,
+    "iat": 1485321133996,
+    "iss": "0x001122",
+    "sub": "0x112233",
+  },
+  "signature": "-mEzVMPYnzqFhOr0O7fs71-dWAacnllVyOdWQY0zh2ZdIt7-30IYTewds4tGlkLmMky-Y1ZjRmIsxmM7xvAgxg",
 }
 `;
