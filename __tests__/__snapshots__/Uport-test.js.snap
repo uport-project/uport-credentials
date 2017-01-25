@@ -1,3 +1,18 @@
+exports[`test has correct payload in JWT for a plain request for public details 1`] = `
+Object {
+  "header": Object {
+    "alg": "ES256K",
+    "typ": "JWT",
+  },
+  "payload": Object {
+    "iat": 1485321133996,
+    "iss": "0x001122",
+    "type": "shareReq",
+  },
+  "signature": "x5wOEbEa8gQtKtfteSDHkkIaW30kZmI9I8EQLk8-DmxL9GteEa9hvIAi8Zhxo22FPDFErxIpp48Ckgp9_ZsIEA",
+}
+`;
+
 exports[`test has correct payload in JWT for a request 1`] = `
 Object {
   "header": Object {

@@ -17,6 +17,12 @@ it('creates a valid JWT for a request', () => {
   })
 })
 
+it('has correct payload in JWT for a plain request for public details', () => {
+  return uport.request().then((jwt) => {
+    return expect(decodeToken(jwt)).toMatchSnapshot()
+  })
+})
+
 it('has correct payload in JWT for a request', () => {
   return uport.request({requested: ['name', 'phone']}).then((jwt) => {
     return expect(decodeToken(jwt)).toMatchSnapshot()
