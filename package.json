@@ -2,9 +2,10 @@
   "name": "uport-node",
   "version": "0.1.0",
   "description": "Library for interacting with uport profiles and attestations",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "babel src/ --out-dir dist/"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "license": "MIT",
