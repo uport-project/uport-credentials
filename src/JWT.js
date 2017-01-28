@@ -18,9 +18,7 @@ export function createJWT ({address, signer}, payload) {
 
 export function verifyJWT ({registry, address}, jwt) {
   return new Promise((resolve, reject) => {
-    // 1. decode jwt
     const {payload} = decodeToken(jwt)
-    // 2. Fetch uport-registry profile for iss
     registry(payload.iss).then(profile => {
       if (!profile) return reject(new Error('No profile found, unable to verify JWT'))
       const verifier = new TokenVerifier('ES256K', profile.publicKey)

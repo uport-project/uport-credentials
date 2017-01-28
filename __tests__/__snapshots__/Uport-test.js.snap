@@ -50,3 +50,18 @@ Object {
   "signature": "-mEzVMPYnzqFhOr0O7fs71-dWAacnllVyOdWQY0zh2ZdIt7-30IYTewds4tGlkLmMky-Y1ZjRmIsxmM7xvAgxg",
 }
 `;
+
+exports[`test returns profile mixing public and private claims 1`] = `
+Object {
+  "name": "Davie",
+  "phone": "+15555551234",
+  "publicKey": "03fdd57adec3d438ea237fe46b33ee1e016eda6b585c3e27ea66686c2ea5358479",
+}
+`;
+
+exports[`test returns profile with only public claims 1`] = `
+Object {
+  "name": "David Chaum",
+  "publicKey": "03fdd57adec3d438ea237fe46b33ee1e016eda6b585c3e27ea66686c2ea5358479",
+}
+`;
