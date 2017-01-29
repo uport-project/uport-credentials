@@ -2,10 +2,16 @@ import { createJWT, verifyJWT } from './JWT'
 import UportLite from 'uport-lite'
 
 export default class Uport {
-  constructor (settings) {
+  constructor (settings = {}) {
     this.settings = settings
     if (!this.settings.registry) {
-      this.settings.registry = UportLite()
+      const registry = UportLite()
+      this.settings.registry = (address) => new Promise((resolve, reject) => {
+        registry(address, (error, profile) => {
+          if (error) return reject(error)
+          resolve(profile)
+        })
+      })
     }
   }
 
@@ -26,8 +32,4 @@ export default class Uport {
     return createJWT(this.settings, {sub, claim, exp})
   }
 
-  // send push 
-  pushTo (pushToken, data, callback) {
-
-  }
 }

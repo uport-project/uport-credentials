@@ -45,6 +45,13 @@ it('rejects a JWT with missing publicKey', () => {
   )
 })
 
+const badJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1ZXN0ZWQiOlsibmFtZSIsInBob25lIl0sImlzcyI6IjB4MDAxMTIyIiwiaWF0IjoxNDg1MzIxMTMzOTk2fQ.zxGLQKo2WjgefrxEQWfwm_oago8Qr4YctBJoqNAm2XKE-48bADjolSo2T_tED9LnSikxqFIM9gNGpNgcY8JPdf'
+it('rejects a JWT with bad signature', () => {
+  return verifyJWT({registry, address: '0x001122'}, badJwt).catch(error =>
+    expect(error.message).toEqual('Signature invalid for JWT')
+  ).then((p) => expect(p).toBeFalsy())
+})
+
 it('accepts a valid exp', () => {
   return createJWT({address: '0x001122', signer}, {exp: 1485321133996+1}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).then(({payload}) =>
