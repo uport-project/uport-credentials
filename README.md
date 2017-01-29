@@ -75,7 +75,7 @@ To request information from your user you create a Selective Disclosure Request 
 The most basic request to get a users public uport identity details:
 
 ```javascript
-uport.requestCredentials().then(requestToken) => {
+uport.requestCredentials().then(requestToken => {
   // send requestToken to browser
 })
 ```
@@ -85,9 +85,9 @@ You can ask for specific private data like this:
 ```javascript
 uport.requestCredentials({
     requested: ['name','phone','identity_no']
-  }.then(requestToken) => {
+  }.then(requestToken => {
   // send requestToken to browser
-)
+  })
 ```
 
 In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
@@ -101,7 +101,7 @@ window.uport.request(requestToken).then(response => {
 Back in your server code you receive the token:
 
 ```javascript
-uport.receiveCredentials(responseToken).then(profile) => {
+uport.receiveCredentials(responseToken).then(profile => {
   // Store user profile
 })
 ```
@@ -148,7 +148,7 @@ uport.attestCredentials({
   sub: '0x...', // uport address of user
   exp: <future timestamp>, // If your information is not permanent make sure to add an expires timestamp
   claims: {name:'John Smith'}
-}).then(attestation) => {
+}).then(attestation => {
   // send attestation to user
 })
 ```
@@ -156,7 +156,8 @@ uport.attestCredentials({
 As before you will want to send this to your user. You can do this in the browser
 
 ```javascript
-window.uport.request(attestation).then(response) {
+window.uport.request(attestation).then(response => {
+
 })
 ```
 
@@ -165,7 +166,8 @@ If you requested a push notification token in the above selective disclosure ste
 
 ```javascript
 // Coming soon, not yet implemented
-uport.pushTo(pushToken, attestation).then(response) {
+uport.pushTo(pushToken, attestation).then(response => {
+
 })
 ```
 
@@ -181,7 +183,7 @@ const txRequest = tokenContract.transfer(....)
 In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
 
 ```javascript
-window.uport.request(txRequest).then(txResponse) {
+window.uport.request(txRequest).then(txResponse => {
   // send response back to server
 })
 ```
@@ -194,7 +196,7 @@ You can easily create custom signers that integrates into your existing signing 
 
 ```javascript
 function sign(data, callback) {
-    const signature = // send your data to your back end signer and return DER signed data
+    const signature = '' // send your data to your back end signer and return DER signed data
     callback(null, signature)
 }
 ```
