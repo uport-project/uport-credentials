@@ -1,5 +1,5 @@
 {
-  "name": "uport-node",
+  "name": "uport",
   "version": "0.1.0",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
