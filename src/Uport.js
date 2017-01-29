@@ -16,19 +16,19 @@ export default class Uport {
   }
 
   // Create request token
-  request (payload) {
+  requestCredentials (payload) {
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
 
   // Receive response token from user and return data to promise
-  receive (token) {
+  receiveCredentials (token) {
     return verifyJWT(this.settings, token).then(({payload, profile}) => (
       {...profile, ...(payload.own || {})}
     ))
   }
 
   // Create attestation
-  attest ({sub, claim, exp}) {
+  attestCredentials ({sub, claim, exp}) {
     return createJWT(this.settings, {sub, claim, exp})
   }
 

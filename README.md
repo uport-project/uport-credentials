@@ -31,6 +31,8 @@ When interacting privately with a user you will be interchanging signed JWT. To 
 
 ### Creating your app uport identity
 
+* TBD *
+
 Open the file `./manager/index.html` in your browser.
 
 It will ask you to login by scanning a QR code using your uport app.
@@ -60,10 +62,9 @@ import { Uport, SimpleSigner } from 'uport-node'
 
 const signer = SimpleSigner(process.env.PRIVATE_KEY)
 const uport = new Uport({
-  appName: "App Name",
-  appUport: "UPORT ADDRESS FOR YOUR APP",
-  signer: signer,
-  json_rpc: "https://ropsten.infura.io",
+  appName: 'App Name,
+  address: 'UPORT ADDRESS FOR YOUR APP',
+  signer: signer
 })
 ```
 
@@ -74,7 +75,7 @@ To request information from your user you create a Selective Disclosure Request 
 The most basic request to get a users public uport identity details:
 
 ```javascript
-uport.request().then(requestToken) => {
+uport.requestCredentials().then(requestToken) => {
   // send requestToken to browser
 })
 ```
@@ -82,7 +83,7 @@ uport.request().then(requestToken) => {
 You can ask for specific private data like this:
 
 ```javascript
-uport.request({
+uport.requestCredentials({
     requested: ['name','phone','identity_no']
   }.then(requestToken) => {
   // send requestToken to browser
@@ -100,7 +101,7 @@ window.uport.request(requestToken).then(response => {
 Back in your server code you receive the token:
 
 ```javascript
-uport.receive(responseToken).then(profile) => {
+uport.receiveCredentials(responseToken).then(profile) => {
   // Store user profile
 })
 ```
@@ -112,7 +113,7 @@ For more information about the contents of the profile object see the uport-pers
 As part of the selective disclosure request you can ask for permission from your users to communicate directly with their app.
 
 ```javascript
-uport.request({
+uport.requestCredentials({
   requested:[...],
   capabilities: ['push']
 }).then(requestToken => {
@@ -123,7 +124,7 @@ uport.request({
 Present it to the user like before. On the server you can receive the push token like this:
 
 ```javascript
-uport.receive(responseToken).then(profile => {
+uport.receiveCredentials(responseToken).then(profile => {
   // Store user profile
   // Store push token securely
   console.log(profile.pushToken)
@@ -143,7 +144,7 @@ Attestations are shareable private information that one party can sign about ano
 ### Creating an attestation
 
 ```javascript
-uport.attest({
+uport.attestCredentials({
   sub: '0x...', // uport address of user
   exp: <future timestamp>, // If your information is not permanent make sure to add an expires timestamp
   claims: {name:'John Smith'}
@@ -159,9 +160,11 @@ window.uport.request(attestation).then(response) {
 })
 ```
 
+
 If you requested a push notification token in the above selective disclosure step you can also send attestations directly to your users app in real time.
 
 ```javascript
+// Coming soon, not yet implemented
 uport.pushTo(pushToken, attestation).then(response) {
 })
 ```
@@ -182,7 +185,6 @@ window.uport.request(txRequest).then(txResponse) {
   // send response back to server
 })
 ```
-
 
 Back in your server code you receive the `txResponse`. This is a standard ethereum transaction object that you can verify.
 

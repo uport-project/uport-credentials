@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "test": "jest",
-    "build": "./node_modules/.bin/babel src -d lib"
+    "build:es5": "./node_modules/.bin/babel src -d lib",
+    "build": "yarn test && yarn build:es5"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "license": "MIT",
