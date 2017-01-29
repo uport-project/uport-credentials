@@ -31,7 +31,7 @@ When interacting privately with a user you will be interchanging signed JWT. To 
 
 ### Creating your app uport identity
 
-* TBD *
+*TBD*
 
 Open the file `./manager/index.html` in your browser.
 
@@ -62,7 +62,7 @@ import { Uport, SimpleSigner } from 'uport-node'
 
 const signer = SimpleSigner(process.env.PRIVATE_KEY)
 const uport = new Uport({
-  appName: 'App Name,
+  appName: 'App Name',
   address: 'UPORT ADDRESS FOR YOUR APP',
   signer: signer
 })
