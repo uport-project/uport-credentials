@@ -241,7 +241,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    registry(payload.iss).then(function (profile) {
 	      if (!profile) return reject(new Error('No profile found, unable to verify JWT'));
-	      var verifier = new _jsontokens.TokenVerifier('ES256K', profile.publicKey);
+	      var publicKey = profile.publicKey.match(/^0x/) ? profile.publicKey.slice(2) : profile.publicKey;
+	      var verifier = new _jsontokens.TokenVerifier('ES256K', publicKey);
 	      if (verifier.verify(jwt)) {
 	        if (payload.exp && payload.exp <= new Date().getTime()) {
 	          return reject(new Error('JWT has expired'));
