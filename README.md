@@ -1,4 +1,4 @@
-# uport-node
+# uport-js
 
 ## WORK IN PROGRESS
 
