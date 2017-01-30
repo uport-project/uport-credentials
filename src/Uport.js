@@ -23,7 +23,7 @@ export default class Uport {
   // Receive response token from user and return data to promise
   receiveCredentials (token) {
     return verifyJWT(this.settings, token).then(({payload, profile}) => (
-      {...profile, ...(payload.own || {})}
+      {...profile, ...(payload.own || {}), address: payload.iss}
     ))
   }
 
