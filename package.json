@@ -1,6 +1,6 @@
 {
   "name": "uport",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
   "files": [
@@ -11,7 +11,8 @@
   "scripts": {
     "test": "jest",
     "build:es5": "./node_modules/.bin/babel src -d lib",
-    "build": "yarn test && yarn build:es5"
+    "build:browser": "./node_modules/.bin/webpack --config webpack.config.js",
+    "build": "yarn test && yarn build:es5 && yarn build:browser"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "license": "MIT",
@@ -27,6 +28,7 @@
     "babel": "^6.5.2",
     "babel-cli": "^6.22.2",
     "babel-jest": "^18.0.0",
+    "babel-loader": "^6.2.10",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
     "babel-plugin-transform-object-rest-spread": "^6.22.0",
     "babel-polyfill": "^6.22.0",
@@ -34,6 +36,8 @@
     "babel-preset-react": "^6.22.0",
     "babel-register": "^6.22.0",
     "jest": "^18.1.0",
-    "mockdate": "^2.0.1"
+    "json-loader": "^0.5.4",
+    "mockdate": "^2.0.1",
+    "webpack": "^1.14.0"
   }
 }
