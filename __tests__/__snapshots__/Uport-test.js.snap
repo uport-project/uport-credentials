@@ -53,6 +53,7 @@ Object {
 
 exports[`test returns profile mixing public and private claims 1`] = `
 Object {
+  "address": "0x001122",
   "name": "Davie",
   "phone": "+15555551234",
   "publicKey": "03fdd57adec3d438ea237fe46b33ee1e016eda6b585c3e27ea66686c2ea5358479",
@@ -61,6 +62,7 @@ Object {
 
 exports[`test returns profile with only public claims 1`] = `
 Object {
+  "address": "0x001122",
   "name": "David Chaum",
   "publicKey": "03fdd57adec3d438ea237fe46b33ee1e016eda6b585c3e27ea66686c2ea5358479",
 }
