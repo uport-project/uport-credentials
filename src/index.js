@@ -1,6 +1,6 @@
-import Uport from './Uport'
+import Credentials from './Credentials'
 import SimpleSigner from './SimpleSigner'
 import Contract from './Contract'
 import JWT from './JWT'
 
-export default { Uport, SimpleSigner, Contract, JWT }
+module.exports = { Credentials, SimpleSigner, Contract, JWT }

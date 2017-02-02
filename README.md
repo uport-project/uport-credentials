@@ -58,10 +58,10 @@ Hit the button “Save Attributes” and a QR code will appear for signing by yo
 In your application you must first configure your Uport object.
 
 ```javascript
-import { Uport, SimpleSigner } from 'uport-node'
+import { Credentials, SimpleSigner } from 'uport'
 
 const signer = SimpleSigner(process.env.PRIVATE_KEY)
-const uport = new Uport({
+const credentials = new Credentials({
   appName: 'App Name',
   address: 'UPORT ADDRESS FOR YOUR APP',
   signer: signer
@@ -75,7 +75,7 @@ To request information from your user you create a Selective Disclosure Request 
 The most basic request to get a users public uport identity details:
 
 ```javascript
-uport.requestCredentials().then(requestToken => {
+credentials.createRequest().then(requestToken => {
   // send requestToken to browser
 })
 ```
@@ -83,7 +83,7 @@ uport.requestCredentials().then(requestToken => {
 You can ask for specific private data like this:
 
 ```javascript
-uport.requestCredentials({
+credentials.createRequest({
     requested: ['name','phone','identity_no']
   }.then(requestToken => {
   // send requestToken to browser
@@ -93,7 +93,7 @@ uport.requestCredentials({
 In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
 
 ```javascript
-window.uport.request(requestToken).then(response => {
+window.uport.credentials.request(requestToken).then(response => {
   // send response back to server
 })
 ```
@@ -101,7 +101,7 @@ window.uport.request(requestToken).then(response => {
 Back in your server code you receive the token:
 
 ```javascript
-uport.receiveCredentials(responseToken).then(profile => {
+credentials.receive(responseToken).then(profile => {
   // Store user profile
 })
 ```
@@ -113,7 +113,7 @@ For more information about the contents of the profile object see the uport-pers
 As part of the selective disclosure request you can ask for permission from your users to communicate directly with their app.
 
 ```javascript
-uport.requestCredentials({
+credentials.createRequest({
   requested:[...],
   capabilities: ['push']
 }).then(requestToken => {
@@ -124,7 +124,7 @@ uport.requestCredentials({
 Present it to the user like before. On the server you can receive the push token like this:
 
 ```javascript
-uport.receiveCredentials(responseToken).then(profile => {
+credentials.receive(responseToken).then(profile => {
   // Store user profile
   // Store push token securely
   console.log(profile.pushToken)
@@ -144,7 +144,7 @@ Attestations are shareable private information that one party can sign about ano
 ### Creating an attestation
 
 ```javascript
-uport.attestCredentials({
+credentials.attest({
   sub: '0x...', // uport address of user
   exp: <future timestamp>, // If your information is not permanent make sure to add an expires timestamp
   claims: {name:'John Smith'}
@@ -156,7 +156,7 @@ uport.attestCredentials({
 As before you will want to send this to your user. You can do this in the browser
 
 ```javascript
-window.uport.request(attestation).then(response => {
+window.uport.credentials.request(attestation).then(response => {
 
 })
 ```
@@ -166,7 +166,7 @@ If you requested a push notification token in the above selective disclosure ste
 
 ```javascript
 // Coming soon, not yet implemented
-uport.pushTo(pushToken, attestation).then(response => {
+credentials.uport.pushTo(pushToken, attestation).then(response => {
 
 })
 ```
@@ -174,7 +174,7 @@ uport.pushTo(pushToken, attestation).then(response => {
 ## Asking users to sign Ethereum transactions
 
 ```javascript
-import { Uport, Contract } from 'uport-node'
+import { Contract } from 'uport'
 
 const tokenContract = new Contract(address, abi)
 const txRequest = tokenContract.transfer(....)
@@ -183,7 +183,7 @@ const txRequest = tokenContract.transfer(....)
 In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
 
 ```javascript
-window.uport.request(txRequest).then(txResponse => {
+window.uport.credentials.request(txRequest).then(txResponse => {
   // send response back to server
 })
 ```

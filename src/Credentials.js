@@ -1,7 +1,7 @@
 import { createJWT, verifyJWT } from './JWT'
 import UportLite from 'uport-lite'
 
-export default class Uport {
+export default class Credentials {
   constructor (settings = {}) {
     this.settings = settings
     if (!this.settings.registry) {
@@ -16,19 +16,19 @@ export default class Uport {
   }
 
   // Create request token
-  requestCredentials (payload) {
+  createRequest (payload) {
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
 
   // Receive response token from user and return data to promise
-  receiveCredentials (token) {
+  receive (token) {
     return verifyJWT(this.settings, token).then(({payload, profile}) => (
       {...profile, ...(payload.own || {}), address: payload.iss}
     ))
   }
 
   // Create attestation
-  attestCredentials ({sub, claim, exp}) {
+  attest ({sub, claim, exp}) {
     return createJWT(this.settings, {sub, claim, exp})
   }
 
