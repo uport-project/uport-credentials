@@ -1,7 +1,7 @@
 import { createJWT, verifyJWT } from './JWT'
 import UportLite from 'uport-lite'
 
-export default class Uport {
+export default class Credentials {
   constructor (settings = {}) {
     this.settings = settings
     if (!this.settings.registry) {

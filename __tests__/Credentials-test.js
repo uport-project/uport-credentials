@@ -1,4 +1,4 @@
-import Uport from '../src/Uport'
+import Credentials from '../src/Credentials'
 import { createJWT } from '../src/JWT'
 import SimpleSigner from '../src/SimpleSigner'
 import { SECP256K1Client, TokenVerifier, decodeToken } from 'jsontokens'
@@ -11,7 +11,7 @@ const signer = SimpleSigner(privateKey)
 const verifier = new TokenVerifier('ES256K', publicKey)
 const profileA = {publicKey, name: 'David Chaum'}
 const registry = (address) => new Promise((resolve, reject) => resolve(address === '0x001122' ? profileA : null))
-const uport = new Uport({signer, address: '0x001122', registry})
+const uport = new Credentials({signer, address: '0x001122', registry})
 
 it('creates a valid JWT for a request', () => {
   return uport.requestCredentials({requested: ['name', 'phone']}).then((jwt) => {
@@ -60,7 +60,7 @@ it('returns profile with only public claims', () => {
 })
 
 it('has a default registry that looks up profile', () => {
-  return new Uport().settings.registry('0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c').then(profile =>
+  return new Credentials().settings.registry('0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c').then(profile =>
     expect(profile.publicKey).toEqual('0x0482780d59037778ea03c7d5169dd7cf47a835cb6d57a606b4e6cf98000a28d20d6d6bfae223cc76fd2f63d8a382a1c054788c4fafb1062ee89e718b96e0896d40')
   )
 })

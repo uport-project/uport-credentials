@@ -56,13 +56,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
+	var _Credentials = __webpack_require__(1);
 
-	var _Uport = __webpack_require__(1);
-
-	var _Uport2 = _interopRequireDefault(_Uport);
+	var _Credentials2 = _interopRequireDefault(_Credentials);
 
 	var _SimpleSigner = __webpack_require__(104);
 
@@ -80,7 +76,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return obj && obj.__esModule ? obj : { default: obj };
 	}
 
-	exports.default = { Uport: _Uport2.default, SimpleSigner: _SimpleSigner2.default, Contract: _Contract2.default, JWT: _JWT2.default };
+	module.exports = { Credentials: _Credentials2.default, SimpleSigner: _SimpleSigner2.default, Contract: _Contract2.default, JWT: _JWT2.default };
 
 /***/ },
 /* 1 */
@@ -128,13 +124,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
-	var Uport = function () {
-	  function Uport() {
+	var Credentials = function () {
+	  function Credentials() {
 	    var _this = this;
 
 	    var settings = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-	    _classCallCheck(this, Uport);
+	    _classCallCheck(this, Credentials);
 
 	    this.settings = settings;
 	    if (!this.settings.registry) {
@@ -155,7 +151,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Create request token
 
 
-	  _createClass(Uport, [{
+	  _createClass(Credentials, [{
 	    key: 'requestCredentials',
 	    value: function requestCredentials(payload) {
 	      return (0, _JWT.createJWT)(this.settings, _extends({}, payload, { type: 'shareReq' }));
@@ -186,10 +182,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }]);
 
-	  return Uport;
+	  return Credentials;
 	}();
 
-	exports.default = Uport;
+	exports.default = Credentials;
 
 /***/ },
 /* 2 */
