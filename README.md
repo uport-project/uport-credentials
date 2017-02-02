@@ -75,7 +75,7 @@ To request information from your user you create a Selective Disclosure Request 
 The most basic request to get a users public uport identity details:
 
 ```javascript
-credentials.requestCredentials().then(requestToken => {
+credentials.createRequest().then(requestToken => {
   // send requestToken to browser
 })
 ```
@@ -83,7 +83,7 @@ credentials.requestCredentials().then(requestToken => {
 You can ask for specific private data like this:
 
 ```javascript
-credentials.requestCredentials({
+credentials.createRequest({
     requested: ['name','phone','identity_no']
   }.then(requestToken => {
   // send requestToken to browser
@@ -101,7 +101,7 @@ window.uport.credentials.request(requestToken).then(response => {
 Back in your server code you receive the token:
 
 ```javascript
-credentials.receiveCredentials(responseToken).then(profile => {
+credentials.receive(responseToken).then(profile => {
   // Store user profile
 })
 ```
@@ -113,7 +113,7 @@ For more information about the contents of the profile object see the uport-pers
 As part of the selective disclosure request you can ask for permission from your users to communicate directly with their app.
 
 ```javascript
-credentials.requestCredentials({
+credentials.createRequest({
   requested:[...],
   capabilities: ['push']
 }).then(requestToken => {
@@ -124,7 +124,7 @@ credentials.requestCredentials({
 Present it to the user like before. On the server you can receive the push token like this:
 
 ```javascript
-credentials.receiveCredentials(responseToken).then(profile => {
+credentials.receive(responseToken).then(profile => {
   // Store user profile
   // Store push token securely
   console.log(profile.pushToken)
@@ -144,7 +144,7 @@ Attestations are shareable private information that one party can sign about ano
 ### Creating an attestation
 
 ```javascript
-credentials.attestCredentials({
+credentials.attest({
   sub: '0x...', // uport address of user
   exp: <future timestamp>, // If your information is not permanent make sure to add an expires timestamp
   claims: {name:'John Smith'}

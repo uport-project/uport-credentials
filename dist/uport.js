@@ -152,16 +152,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	  _createClass(Credentials, [{
-	    key: 'requestCredentials',
-	    value: function requestCredentials(payload) {
+	    key: 'createRequest',
+	    value: function createRequest(payload) {
 	      return (0, _JWT.createJWT)(this.settings, _extends({}, payload, { type: 'shareReq' }));
 	    }
 
 	    // Receive response token from user and return data to promise
 
 	  }, {
-	    key: 'receiveCredentials',
-	    value: function receiveCredentials(token) {
+	    key: 'receive',
+	    value: function receive(token) {
 	      return (0, _JWT.verifyJWT)(this.settings, token).then(function (_ref) {
 	        var payload = _ref.payload,
 	            profile = _ref.profile;
@@ -172,8 +172,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // Create attestation
 
 	  }, {
-	    key: 'attestCredentials',
-	    value: function attestCredentials(_ref2) {
+	    key: 'attest',
+	    value: function attest(_ref2) {
 	      var sub = _ref2.sub,
 	          claim = _ref2.claim,
 	          exp = _ref2.exp;

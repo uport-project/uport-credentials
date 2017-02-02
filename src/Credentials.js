@@ -16,19 +16,19 @@ export default class Credentials {
   }
 
   // Create request token
-  requestCredentials (payload) {
+  createRequest (payload) {
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
 
   // Receive response token from user and return data to promise
-  receiveCredentials (token) {
+  receive (token) {
     return verifyJWT(this.settings, token).then(({payload, profile}) => (
       {...profile, ...(payload.own || {}), address: payload.iss}
     ))
   }
 
   // Create attestation
-  attestCredentials ({sub, claim, exp}) {
+  attest ({sub, claim, exp}) {
     return createJWT(this.settings, {sub, claim, exp})
   }
 
