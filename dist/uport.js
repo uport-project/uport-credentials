@@ -162,7 +162,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'receive',
 	    value: function receive(token) {
-	      return (0, _JWT.verifyJWT)(this.settings, token).then(function (_ref) {
+	      var callbackUrl = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+	      return (0, _JWT.verifyJWT)(this.settings, token, callbackUrl).then(function (_ref) {
 	        var payload = _ref.payload,
 	            profile = _ref.profile;
 	        return _extends({}, profile, payload.own || {}, { address: payload.iss });
@@ -230,6 +232,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function verifyJWT(_ref2, jwt) {
 	  var registry = _ref2.registry,
 	      address = _ref2.address;
+	  var callbackUrl = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
 	  return new Promise(function (resolve, reject) {
 	    var _decodeToken = (0, _jsontokens.decodeToken)(jwt),
@@ -243,8 +246,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (payload.exp && payload.exp <= new Date().getTime()) {
 	          return reject(new Error('JWT has expired'));
 	        }
-	        if (payload.aud && payload.aud !== address) {
-	          return reject(new Error('JWT audience does not match your address'));
+	        if (payload.aud) {
+	          if (payload.aud.match(/^0x[0-9a-fA-F]+$/)) {
+	            if (!address) {
+	              return reject(new Error('JWT audience is required but your app address has not been configured'));
+	            }
+	            if (payload.aud !== address) {
+	              return reject(new Error('JWT audience does not match your address'));
+	            }
+	          } else {
+	            if (!callbackUrl) {
+	              return reject(new Error('JWT audience matching your callback url is required but one wasn\'t passed in'));
+	            }
+	            if (payload.aud !== callbackUrl) {
+	              return reject(new Error('JWT audience does not match the callback url'));
+	            }
+	          }
 	        }
 	        resolve({ payload: payload, profile: profile });
 	      } else {
