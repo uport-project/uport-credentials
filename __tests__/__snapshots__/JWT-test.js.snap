@@ -6,6 +6,14 @@ Object {
 }
 `;
 
+exports[`test accepts a valid audience using callback_url 1`] = `
+Object {
+  "aud": "http://chasqui.uport.me/unique",
+  "iat": 1485321133996,
+  "iss": "0x001122",
+}
+`;
+
 exports[`test accepts a valid exp 1`] = `
 Object {
   "exp": 1485321133997,

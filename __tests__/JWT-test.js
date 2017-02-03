@@ -76,6 +76,14 @@ it('accepts a valid audience', () => {
   )
 })
 
+it('accepts a valid audience using callback_url', () => {
+  return createJWT({ address: '0x001122', signer }, { aud: 'http://chasqui.uport.me/unique' }).then(jwt =>
+    verifyJWT({ registry }, jwt, 'http://chasqui.uport.me/unique').then(({payload}) =>
+      expect(payload).toMatchSnapshot()
+    )
+  )
+})
+
 it('rejects invalid audience', () => {
   return createJWT({address: '0x001122', signer}, {aud: '0x001123' }).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>

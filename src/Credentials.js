@@ -21,8 +21,8 @@ export default class Credentials {
   }
 
   // Receive response token from user and return data to promise
-  receive (token) {
-    return verifyJWT(this.settings, token).then(({payload, profile}) => (
+  receive (token, callbackUrl = null) {
+    return verifyJWT(this.settings, token, callbackUrl).then(({payload, profile}) => (
       {...profile, ...(payload.own || {}), address: payload.iss}
     ))
   }

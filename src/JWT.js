@@ -16,7 +16,7 @@ export function createJWT ({address, signer}, payload) {
   )
 }
 
-export function verifyJWT ({registry, address}, jwt) {
+export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
   return new Promise((resolve, reject) => {
     const {payload} = decodeToken(jwt)
     registry(payload.iss).then(profile => {
@@ -27,8 +27,22 @@ export function verifyJWT ({registry, address}, jwt) {
         if (payload.exp && payload.exp <= new Date().getTime()) {
           return reject(new Error('JWT has expired'))
         }
-        if (payload.aud && payload.aud !== address) {
-          return reject(new Error('JWT audience does not match your address'))
+        if (payload.aud) {
+          if (payload.aud.match(/^0x[0-9a-fA-F]+$/)) {
+            if (!address) {
+              return reject(new Error('JWT audience is required but your app address has not been configured'))
+            }
+            if (payload.aud !== address) {
+              return reject(new Error('JWT audience does not match your address'))
+            }
+          } else {
+            if (!callbackUrl) {
+              return reject(new Error('JWT audience matching your callback url is required but one wasn\'t passed in'))
+            }
+            if (payload.aud !== callbackUrl) {
+              return reject(new Error('JWT audience does not match the callback url'))
+            }
+          }
         }
         resolve({payload, profile})
       } else {
