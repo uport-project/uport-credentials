@@ -23,6 +23,18 @@ it('creates a JWT with correct format', () => {
   })
 })
 
+it('throws an error if no signer is configured', () => {
+  return createJWT({address: '0x001122'}, { requested: ['name', 'phone'] }).catch(error => {
+    return expect(error.message).toEqual('No Signer functionality has been configured')
+  })
+})
+
+it('throws an error if no address is configured', () => {
+  return createJWT({signer}, { requested: ['name', 'phone'] }).catch(error => {
+    return expect(error.message).toEqual('No application identity address has been configured')
+  })
+})
+
 const incomingJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1ZXN0ZWQiOlsibmFtZSIsInBob25lIl0sImlzcyI6IjB4MDAxMTIyIiwiaWF0IjoxNDg1MzIxMTMzOTk2fQ.zxGLQKo2WjgefrxEQWfwm_oago8Qr4YctBJoqNAm2XKE-48bADjolSo2T_tED9LnSikxqFIM9gNGpNgcY8JPdg'
 
 it('verifies the JWT and return correct payload', () => {
