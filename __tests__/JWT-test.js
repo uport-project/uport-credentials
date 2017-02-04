@@ -23,6 +23,18 @@ it('creates a JWT with correct format', () => {
   })
 })
 
+it('throws an error if no signer is configured', () => {
+  return createJWT({address: '0x001122'}, { requested: ['name', 'phone'] }).catch(error => {
+    return expect(error.message).toEqual('No Signer functionality has been configured')
+  })
+})
+
+it('throws an error if no address is configured', () => {
+  return createJWT({signer}, { requested: ['name', 'phone'] }).catch(error => {
+    return expect(error.message).toEqual('No application identity address has been configured')
+  })
+})
+
 const incomingJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1ZXN0ZWQiOlsibmFtZSIsInBob25lIl0sImlzcyI6IjB4MDAxMTIyIiwiaWF0IjoxNDg1MzIxMTMzOTk2fQ.zxGLQKo2WjgefrxEQWfwm_oago8Qr4YctBJoqNAm2XKE-48bADjolSo2T_tED9LnSikxqFIM9gNGpNgcY8JPdg'
 
 it('verifies the JWT and return correct payload', () => {
@@ -88,6 +100,30 @@ it('rejects invalid audience', () => {
   return createJWT({address: '0x001122', signer}, {aud: '0x001123' }).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
       expect(error.message).toEqual('JWT audience does not match your address')
+    ).then((p) => expect(p).toBeFalsy())
+  )
+})
+
+it('rejects an invalid audience using callback_url where callback is wrong', () => {
+  return createJWT({ address: '0x001122', signer }, { aud: 'http://chasqui.uport.me/unique' }).then(jwt =>
+    verifyJWT({ registry }, jwt, 'http://chasqui.uport.me/unique/1').catch(error =>
+      expect(error.message).toEqual('JWT audience does not match the callback url')
+    )
+  )
+})
+
+it('rejects an invalid audience using callback_url where callback is missing', () => {
+  return createJWT({ address: '0x001122', signer }, { aud: 'http://chasqui.uport.me/unique' }).then(jwt =>
+    verifyJWT({ registry }, jwt).catch(error =>
+      expect(error.message).toEqual('JWT audience matching your callback url is required but one wasn\'t passed in')
+    )
+  )
+})
+
+it('rejects invalid audience as no address is present', () => {
+  return createJWT({ address: '0x001122', signer }, { aud: '0x001123' }).then(jwt =>
+    verifyJWT({ registry }, jwt).catch(error =>
+      expect(error.message).toEqual('JWT audience is required but your app address has not been configured')
     ).then((p) => expect(p).toBeFalsy())
   )
 })

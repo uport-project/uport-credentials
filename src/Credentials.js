@@ -16,7 +16,17 @@ export default class Credentials {
   }
 
   // Create request token
-  createRequest (payload) {
+  createRequest (params = {}) {
+    const payload = {}
+    if (params.requested) {
+      payload.requested = params.requested
+    }
+    if (params.notifications) {
+      payload.permissions = ['notifications']
+    }
+    if (params.callbackUrl) {
+      payload.callback = params.callbackUrl
+    }
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
 
@@ -32,4 +42,8 @@ export default class Credentials {
     return createJWT(this.settings, {sub, claim, exp})
   }
 
+  // Lookup public uport address of any user
+  lookup (address) {
+    return this.settings.registry(address)
+  }
 }

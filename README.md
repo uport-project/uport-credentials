@@ -84,16 +84,18 @@ You can ask for specific private data like this:
 
 ```javascript
 credentials.createRequest({
-    requested: ['name','phone','identity_no']
+    requested: ['name','phone','identity_no'],
+    callbackUrl: 'https://....' // URL to send the response of the request to 
   }.then(requestToken => {
   // send requestToken to browser
   })
 ```
 
-In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
+In your front end use [uport-connect](https://github.com/uport-project/uport-connect) to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
 
 ```javascript
-window.uport.credentials.request(requestToken).then(response => {
+const connect = new uportconnect.Connect('app name')
+connect.showRequest(requestToken).then(response => {
   // send response back to server
 })
 ```
@@ -115,7 +117,7 @@ As part of the selective disclosure request you can ask for permission from your
 ```javascript
 credentials.createRequest({
   requested:[...],
-  capabilities: ['push']
+  notifications: true
 }).then(requestToken => {
   // send to browser
 })
@@ -156,17 +158,15 @@ credentials.attest({
 As before you will want to send this to your user. You can do this in the browser
 
 ```javascript
-window.uport.credentials.request(attestation).then(response => {
-
-})
+const connect = new uportconnect.Connect('app name')
+connect.showRequest(attestation) // no response is needed for an attestation
 ```
-
 
 If you requested a push notification token in the above selective disclosure step you can also send attestations directly to your users app in real time.
 
 ```javascript
 // Coming soon, not yet implemented
-credentials.uport.pushTo(pushToken, attestation).then(response => {
+credentials.pushTo(pushToken, attestation).then(response => {
 
 })
 ```
@@ -176,6 +176,7 @@ credentials.uport.pushTo(pushToken, attestation).then(response => {
 ```javascript
 import { Contract } from 'uport'
 
+// Coming soon
 const tokenContract = new Contract(address, abi)
 const txRequest = tokenContract.transfer(....)
 ```
@@ -183,7 +184,8 @@ const txRequest = tokenContract.transfer(....)
 In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
 
 ```javascript
-window.uport.credentials.request(txRequest).then(txResponse => {
+const connect = new uportconnect.Connect('app name')
+connect.sendTransaction(txRequest).then(txResponse => {
   // send response back to server
 })
 ```
