@@ -103,3 +103,27 @@ it('rejects invalid audience', () => {
     ).then((p) => expect(p).toBeFalsy())
   )
 })
+
+it('rejects an invalid audience using callback_url where callback is wrong', () => {
+  return createJWT({ address: '0x001122', signer }, { aud: 'http://chasqui.uport.me/unique' }).then(jwt =>
+    verifyJWT({ registry }, jwt, 'http://chasqui.uport.me/unique/1').catch(error =>
+      expect(error.message).toEqual('JWT audience does not match the callback url')
+    )
+  )
+})
+
+it('rejects an invalid audience using callback_url where callback is missing', () => {
+  return createJWT({ address: '0x001122', signer }, { aud: 'http://chasqui.uport.me/unique' }).then(jwt =>
+    verifyJWT({ registry }, jwt).catch(error =>
+      expect(error.message).toEqual('JWT audience matching your callback url is required but one wasn\'t passed in')
+    )
+  )
+})
+
+it('rejects invalid audience as no address is present', () => {
+  return createJWT({ address: '0x001122', signer }, { aud: '0x001123' }).then(jwt =>
+    verifyJWT({ registry }, jwt).catch(error =>
+      expect(error.message).toEqual('JWT audience is required but your app address has not been configured')
+    ).then((p) => expect(p).toBeFalsy())
+  )
+})
