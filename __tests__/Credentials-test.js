@@ -25,8 +25,26 @@ it('has correct payload in JWT for a plain request for public details', () => {
   })
 })
 
+it('ignores unsupported request parameters', () => {
+  return uport.createRequest({signing: true, sellSoul: true}).then((jwt) => {
+    return expect(decodeToken(jwt)).toMatchSnapshot()
+  })
+})
+
 it('has correct payload in JWT for a request', () => {
   return uport.createRequest({requested: ['name', 'phone']}).then((jwt) => {
+    return expect(decodeToken(jwt)).toMatchSnapshot()
+  })
+})
+
+it('has correct payload in JWT for a request with callbackUrl', () => {
+  return uport.createRequest({ requested: ['name', 'phone'], callbackUrl: 'https://myserver.com'}).then((jwt) => {
+    return expect(decodeToken(jwt)).toMatchSnapshot()
+  })
+})
+
+it('has correct payload in JWT for a request for push notifications', () => {
+  return uport.createRequest({ requested: ['name', 'phone'], notifications: true }).then((jwt) => {
     return expect(decodeToken(jwt)).toMatchSnapshot()
   })
 })
@@ -61,6 +79,12 @@ it('returns profile with only public claims', () => {
 
 it('has a default registry that looks up profile', () => {
   return new Credentials().settings.registry('0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c').then(profile =>
+    expect(profile.publicKey).toEqual('0x0482780d59037778ea03c7d5169dd7cf47a835cb6d57a606b4e6cf98000a28d20d6d6bfae223cc76fd2f63d8a382a1c054788c4fafb1062ee89e718b96e0896d40')
+  )
+})
+
+it('has ability to lookup profile', () => {
+  return new Credentials().lookup('0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c').then(profile =>
     expect(profile.publicKey).toEqual('0x0482780d59037778ea03c7d5169dd7cf47a835cb6d57a606b4e6cf98000a28d20d6d6bfae223cc76fd2f63d8a382a1c054788c4fafb1062ee89e718b96e0896d40')
   )
 })

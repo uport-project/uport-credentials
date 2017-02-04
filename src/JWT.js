@@ -8,12 +8,14 @@ export function createJWT ({address, signer}, payload) {
     JOSE_HEADER,
     {...payload, iss: address, iat: new Date().getTime()}
   )
-  return new Promise((resolve, reject) =>
-    signer(signingInput, (error, signature) => {
+  return new Promise((resolve, reject) => {
+    if (!signer) return reject(new Error('No Signer functionality has been configured'))
+    if (!address) return reject(new Error('No application identity address has been configured'))
+    return signer(signingInput, (error, signature) => {
       if (error) return reject(error)
       resolve([signingInput, signature].join('.'))
     })
-  )
+  })
 }
 
 export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
