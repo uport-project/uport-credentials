@@ -153,7 +153,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  _createClass(Credentials, [{
 	    key: 'createRequest',
-	    value: function createRequest(payload) {
+	    value: function createRequest() {
+	      var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+	      var payload = {};
+	      if (params.requested) {
+	        payload.requested = params.requested;
+	      }
+	      if (params.notifications) {
+	        payload.permissions = ['notifications'];
+	      }
+	      if (params.callbackUrl) {
+	        payload.callback = params.callbackUrl;
+	      }
 	      return (0, _JWT.createJWT)(this.settings, _extends({}, payload, { type: 'shareReq' }));
 	    }
 
@@ -181,6 +193,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	          exp = _ref2.exp;
 
 	      return (0, _JWT.createJWT)(this.settings, { sub: sub, claim: claim, exp: exp });
+	    }
+
+	    // Lookup public uport address of any user
+
+	  }, {
+	    key: 'lookup',
+	    value: function lookup(address) {
+	      return this.settings.registry(address);
 	    }
 	  }]);
 
@@ -222,6 +242,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  var signingInput = (0, _jsontokens.createUnsignedToken)(JOSE_HEADER, _extends({}, payload, { iss: address, iat: new Date().getTime() }));
 	  return new Promise(function (resolve, reject) {
+	    if (!signer) return reject(new Error('No Signer functionality has been configured'));
+	    if (!address) return reject(new Error('No application identity address has been configured'));
 	    return signer(signingInput, function (error, signature) {
 	      if (error) return reject(error);
 	      resolve([signingInput, signature].join('.'));
