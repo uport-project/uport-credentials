@@ -1,14 +1,14 @@
 # uport-js
 
-## WORK IN PROGRESS
+## Integrate uport in your javascript application
 
-## Integrate uport in your node application
+Uport provides a simple way for your users to login to your website and provide private credentials such as identity information and contact details to you.
 
-Uport provides a simple way for your users to login to your website and provide private information such as identity information and contact details to you.
+You can also “attest” credentials they provide to you or that you yourself have about them. This can be shared back to your customers so you can help them build their digitial identity.
 
-You can also “attest” information they provide to you or that you yourself have about them. This can be shared back to your customers so you can help them build their digitial identity.
+Uport.js provides a simple way for you to integrate uport.js into your javscript application. You can also interact with your uport users directly in the browser. 
 
-Uport.js provides a simple way for you to integrate uport.js into your server side node application. You can also interact with your uport users directly in the browser. We have a browser library uport-lib which can help you do so.
+We have an easy to use browser library [uport-connect](https://github.com/uport-project/uport-connect) which can help you do so.
 
 ## Setup your uport application identity
 
@@ -27,31 +27,6 @@ Our default uport controller contract is controlled by a single device, but you 
 A uport identity also optionally has a public profile stored on ipfs and linked to your identity through the uport registry. This profile consists of JSON using the [Schema.org](http://schema.org/) conventions.
 
 When interacting privately with a user you will be interchanging signed JWT. To verify the signature of the JWT you and your users will be fetching your public key from the public profile.
-
-
-### Creating your app uport identity
-
-*TBD*
-
-Open the file `./manager/index.html` in your browser.
-
-It will ask you to login by scanning a QR code using your uport app.
-
-Once you've logged in. Hit the “Create new application” button, which will take you through the process of creating a new uport identity for your app.
-
-You will see an address which is your apps identity address on the blockchain.
-
-Now fill in a few basic details like your App's name. Company Name. URL, logo etc.
-
-Create your server keypair. This is for signing JWT tokens from within your server.
-
-```
-openssl ecparam -name secp256k1 -genkey -noout -out keypair.pem
-```
-
-Paste in the public key generated from the step above.
-
-Hit the button “Save Attributes” and a QR code will appear for signing by your mobile app.
 
 ## Configure your application
 
@@ -173,15 +148,19 @@ credentials.pushTo(pushToken, attestation).then(response => {
 
 ## Asking users to sign Ethereum transactions
 
+Ethereum smart contracts live on the blockchain and at a certain address. The application interface is known as the abi and can be created by the Solidity compiler.
+
+Our Contract class will let you create a javascript object modelling the SmartContract allowing you to create uport uri's that you can send to the user.
+
 ```javascript
 import { Contract } from 'uport'
-
-// Coming soon
-const tokenContract = new Contract(address, abi)
+const abi = // import from json or have directly in code
+const contract = Contract(abi).at(contractAddress)
+// creates a request for the user to call the transfer() function on the smart contract
 const txRequest = tokenContract.transfer(....)
 ```
 
-In your front end use 'uport-browser' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
+In your front end use 'uport-connect' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
 
 ```javascript
 const connect = new uportconnect.Connect('app name')

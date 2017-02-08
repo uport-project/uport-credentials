@@ -1,6 +1,6 @@
 {
   "name": "uport",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
   "files": [
@@ -19,7 +19,7 @@
   "dependencies": {
     "ethjs-util": "^0.1.3",
     "jsontokens": "^0.6.5",
-    "uport-lite": "^0.1.1"
+    "uport-lite": "^0.2.0"
   },
   "jest": {
     "coverageDirectory": "./coverage/",
