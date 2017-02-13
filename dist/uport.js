@@ -60,11 +60,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _Credentials2 = _interopRequireDefault(_Credentials);
 
-	var _SimpleSigner = __webpack_require__(105);
+	var _SimpleSigner = __webpack_require__(104);
 
 	var _SimpleSigner2 = _interopRequireDefault(_SimpleSigner);
 
-	var _Contract = __webpack_require__(106);
+	var _Contract = __webpack_require__(105);
 
 	var _JWT = __webpack_require__(2);
 
@@ -18278,22 +18278,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 103 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 
-	var XMLHttpRequest = __webpack_require__(104).XMLHttpRequest;
+	var XMLHttpRequest = window.XMLHttpRequest; // eslint-disable-line
 
 	module.exports = XMLHttpRequest;
 
 /***/ },
 /* 104 */
-/***/ function(module, exports) {
-
-	/* (ignored) */
-
-/***/ },
-/* 105 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18314,7 +18308,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 106 */
+/* 105 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18341,7 +18335,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
-	var arrayContainsArray = __webpack_require__(107).arrayContainsArray;
+	var arrayContainsArray = __webpack_require__(106).arrayContainsArray;
 
 	// A derivative work of Nick Dodson's eths-contract https://github.com/ethjs/ethjs-contract/blob/master/src/index.js
 
@@ -18446,13 +18440,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.Contract = Contract;
 
 /***/ },
-/* 107 */
+/* 106 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {'use strict';
 
-	var isHexPrefixed = __webpack_require__(108);
-	var stripHexPrefix = __webpack_require__(109);
+	var isHexPrefixed = __webpack_require__(107);
+	var stripHexPrefix = __webpack_require__(108);
 
 	/**
 	 * Pads a `String` to have an even length
@@ -18672,7 +18666,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7).Buffer))
 
 /***/ },
-/* 108 */
+/* 107 */
 /***/ function(module, exports) {
 
 	/**
@@ -18691,10 +18685,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 109 */
+/* 108 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isHexPrefixed = __webpack_require__(108);
+	var isHexPrefixed = __webpack_require__(107);
 
 	/**
 	 * Removes '0x' from a given `String` is present

@@ -701,9 +701,9 @@ balanced-match@^0.4.1:
   version "0.4.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-0.4.2.tgz#cb3f3e3c732dc0f01ee70b403f302e61d7709838"
 
-"base-x@github:pelle/base-x#7e1e36c751ef743f94bb08b61412ea2a525ae196":
-  version "2.0.4"
-  resolved "https://codeload.github.com/pelle/base-x/tar.gz/7e1e36c751ef743f94bb08b61412ea2a525ae196"
+base-x-bytearray@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/base-x-bytearray/-/base-x-bytearray-0.1.0.tgz#8c2c5052aeab25207b21d866e78c1b59ab65ec2a"
 
 base64-js@^1.0.2:
   version "1.2.0"
@@ -2929,11 +2929,11 @@ uid-number@~0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/uid-number/-/uid-number-0.0.6.tgz#0ea10e8035e8eb5b8e4449f06da1c730663baa81"
 
-uport-lite@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/uport-lite/-/uport-lite-0.2.0.tgz#4cb33f6262011d8a932427fe58f8e7d614f26a0d"
+uport-lite@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/uport-lite/-/uport-lite-0.2.2.tgz#6128542902fa2b1dc558d42da17c1a405a06960c"
   dependencies:
-    base-x pelle/base-x#7e1e36c751ef743f94bb08b61412ea2a525ae196
+    base-x-bytearray "^0.1.0"
     xmlhttprequest "^1.8.0"
 
 url@^0.11.0:
