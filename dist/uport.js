@@ -210,7 +210,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          if (res.statusCode === 200) {
 	            resolve(body);
 	          }
-	          console.log(body.toString());
 	          if (res.statusCode === 403) {
 	            return reject(new Error('Error sending push notification to user: Invalid Token'));
 	          }
