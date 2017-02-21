@@ -141,7 +141,7 @@ If you requested a push notification token in the above selective disclosure ste
 
 ```javascript
 // Coming soon, not yet implemented
-credentials.pushTo(pushToken, attestation).then(response => {
+credentials.push(pushToken, `me.uport:add?attestation=${attestationjwt}`, message).then(response => {
 
 })
 ```

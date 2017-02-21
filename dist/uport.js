@@ -60,11 +60,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _Credentials2 = _interopRequireDefault(_Credentials);
 
-	var _SimpleSigner = __webpack_require__(104);
+	var _SimpleSigner = __webpack_require__(112);
 
 	var _SimpleSigner2 = _interopRequireDefault(_SimpleSigner);
 
-	var _Contract = __webpack_require__(105);
+	var _Contract = __webpack_require__(113);
 
 	var _JWT = __webpack_require__(2);
 
@@ -111,6 +111,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _uportLite = __webpack_require__(101);
 
 	var _uportLite2 = _interopRequireDefault(_uportLite);
+
+	var _nets = __webpack_require__(104);
+
+	var _nets2 = _interopRequireDefault(_nets);
 
 	function _interopRequireDefault(obj) {
 	  return obj && obj.__esModule ? obj : { default: obj };
@@ -177,7 +181,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return (0, _JWT.verifyJWT)(this.settings, token, callbackUrl).then(function (_ref) {
 	        var payload = _ref.payload,
 	            profile = _ref.profile;
-	        return _extends({}, profile, payload.own || {}, { address: payload.iss });
+	        return _extends({}, profile, payload.own || {}, payload.capabilities && payload.capabilities.length === 1 ? { pushToken: payload.capabilities[0] } : {}, { address: payload.iss });
+	      });
+	    }
+	  }, {
+	    key: 'push',
+	    value: function push(token, _ref2) {
+	      var url = _ref2.url;
+
+	      return new Promise(function (resolve, reject) {
+	        if (!token) {
+	          return reject(new Error('Missing push notification token'));
+	        }
+	        if (!url) {
+	          return reject(new Error('Missing payload url for sending to users device'));
+	        }
+
+	        (0, _nets2.default)({
+	          uri: 'https://chasqui.uport.me/api/v1/sns',
+	          json: { url: url },
+	          method: 'POST',
+	          withCredentials: false,
+	          headers: {
+	            Authorization: 'Bearer ' + token
+	          }
+	        }, function (error, res, body) {
+	          if (error) return reject(error);
+	          if (res.statusCode === 200) {
+	            resolve(body);
+	          }
+	          console.log(body.toString());
+	          if (res.statusCode === 403) {
+	            return reject(new Error('Error sending push notification to user: Invalid Token'));
+	          }
+	          reject(new Error('Error sending push notification to user: ' + res.statusCode + ' ' + body.toString()));
+	        });
 	      });
 	    }
 
@@ -185,10 +223,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  }, {
 	    key: 'attest',
-	    value: function attest(_ref2) {
-	      var sub = _ref2.sub,
-	          claim = _ref2.claim,
-	          exp = _ref2.exp;
+	    value: function attest(_ref3) {
+	      var sub = _ref3.sub,
+	          claim = _ref3.claim,
+	          exp = _ref3.exp;
 
 	      return (0, _JWT.createJWT)(this.settings, { sub: sub, claim: claim, exp: exp });
 	    }
@@ -18095,7 +18133,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var base58 = __webpack_require__(102)(BASE58);
 	var hex = __webpack_require__(102)('0123456789abcdef');
 
-	var XMLHttpRequest = __webpack_require__(103);
+	var XMLHttpRequest = typeof window !== 'undefined' ? window.XMLHttpRequest : __webpack_require__(103).XMLHttpRequest;
 
 	var getAttributesData = '0x446d5aa4000000000000000000000000';
 	function http(opts, callback) {
@@ -18280,14 +18318,458 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 103 */
 /***/ function(module, exports) {
 
-	"use strict";
-
-	var XMLHttpRequest = window.XMLHttpRequest; // eslint-disable-line
-
-	module.exports = XMLHttpRequest;
+	/* (ignored) */
 
 /***/ },
 /* 104 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process, Buffer) {var req = __webpack_require__(105)
+
+	module.exports = Nets
+
+	function Nets (opts, cb) {
+	  if (typeof opts === 'string') opts = { uri: opts }
+
+	  // in node, if encoding === null then response will be a Buffer. we want this to be the default
+	  if (!opts.hasOwnProperty('encoding')) opts.encoding = null
+
+	  // in browser, we should by default convert the arraybuffer into a Buffer
+	  if (process.browser && !opts.hasOwnProperty('json') && opts.encoding === null) {
+	    opts.responseType = 'arraybuffer'
+	    var originalCb = cb
+	    cb = bufferify
+	  }
+
+	  function bufferify (err, resp, body) {
+	    if (body) body = new Buffer(new Uint8Array(body))
+	    originalCb(err, resp, body)
+	  }
+
+	  return req(opts, cb)
+	}
+
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(50), __webpack_require__(7).Buffer))
+
+/***/ },
+/* 105 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var window = __webpack_require__(106)
+	var isFunction = __webpack_require__(107)
+	var parseHeaders = __webpack_require__(108)
+	var xtend = __webpack_require__(111)
+
+	module.exports = createXHR
+	createXHR.XMLHttpRequest = window.XMLHttpRequest || noop
+	createXHR.XDomainRequest = "withCredentials" in (new createXHR.XMLHttpRequest()) ? createXHR.XMLHttpRequest : window.XDomainRequest
+
+	forEachArray(["get", "put", "post", "patch", "head", "delete"], function(method) {
+	    createXHR[method === "delete" ? "del" : method] = function(uri, options, callback) {
+	        options = initParams(uri, options, callback)
+	        options.method = method.toUpperCase()
+	        return _createXHR(options)
+	    }
+	})
+
+	function forEachArray(array, iterator) {
+	    for (var i = 0; i < array.length; i++) {
+	        iterator(array[i])
+	    }
+	}
+
+	function isEmpty(obj){
+	    for(var i in obj){
+	        if(obj.hasOwnProperty(i)) return false
+	    }
+	    return true
+	}
+
+	function initParams(uri, options, callback) {
+	    var params = uri
+
+	    if (isFunction(options)) {
+	        callback = options
+	        if (typeof uri === "string") {
+	            params = {uri:uri}
+	        }
+	    } else {
+	        params = xtend(options, {uri: uri})
+	    }
+
+	    params.callback = callback
+	    return params
+	}
+
+	function createXHR(uri, options, callback) {
+	    options = initParams(uri, options, callback)
+	    return _createXHR(options)
+	}
+
+	function _createXHR(options) {
+	    if(typeof options.callback === "undefined"){
+	        throw new Error("callback argument missing")
+	    }
+
+	    var called = false
+	    var callback = function cbOnce(err, response, body){
+	        if(!called){
+	            called = true
+	            options.callback(err, response, body)
+	        }
+	    }
+
+	    function readystatechange() {
+	        if (xhr.readyState === 4) {
+	            loadFunc()
+	        }
+	    }
+
+	    function getBody() {
+	        // Chrome with requestType=blob throws errors arround when even testing access to responseText
+	        var body = undefined
+
+	        if (xhr.response) {
+	            body = xhr.response
+	        } else {
+	            body = xhr.responseText || getXml(xhr)
+	        }
+
+	        if (isJson) {
+	            try {
+	                body = JSON.parse(body)
+	            } catch (e) {}
+	        }
+
+	        return body
+	    }
+
+	    function errorFunc(evt) {
+	        clearTimeout(timeoutTimer)
+	        if(!(evt instanceof Error)){
+	            evt = new Error("" + (evt || "Unknown XMLHttpRequest Error") )
+	        }
+	        evt.statusCode = 0
+	        return callback(evt, failureResponse)
+	    }
+
+	    // will load the data & process the response in a special response object
+	    function loadFunc() {
+	        if (aborted) return
+	        var status
+	        clearTimeout(timeoutTimer)
+	        if(options.useXDR && xhr.status===undefined) {
+	            //IE8 CORS GET successful response doesn't have a status field, but body is fine
+	            status = 200
+	        } else {
+	            status = (xhr.status === 1223 ? 204 : xhr.status)
+	        }
+	        var response = failureResponse
+	        var err = null
+
+	        if (status !== 0){
+	            response = {
+	                body: getBody(),
+	                statusCode: status,
+	                method: method,
+	                headers: {},
+	                url: uri,
+	                rawRequest: xhr
+	            }
+	            if(xhr.getAllResponseHeaders){ //remember xhr can in fact be XDR for CORS in IE
+	                response.headers = parseHeaders(xhr.getAllResponseHeaders())
+	            }
+	        } else {
+	            err = new Error("Internal XMLHttpRequest Error")
+	        }
+	        return callback(err, response, response.body)
+	    }
+
+	    var xhr = options.xhr || null
+
+	    if (!xhr) {
+	        if (options.cors || options.useXDR) {
+	            xhr = new createXHR.XDomainRequest()
+	        }else{
+	            xhr = new createXHR.XMLHttpRequest()
+	        }
+	    }
+
+	    var key
+	    var aborted
+	    var uri = xhr.url = options.uri || options.url
+	    var method = xhr.method = options.method || "GET"
+	    var body = options.body || options.data
+	    var headers = xhr.headers = options.headers || {}
+	    var sync = !!options.sync
+	    var isJson = false
+	    var timeoutTimer
+	    var failureResponse = {
+	        body: undefined,
+	        headers: {},
+	        statusCode: 0,
+	        method: method,
+	        url: uri,
+	        rawRequest: xhr
+	    }
+
+	    if ("json" in options && options.json !== false) {
+	        isJson = true
+	        headers["accept"] || headers["Accept"] || (headers["Accept"] = "application/json") //Don't override existing accept header declared by user
+	        if (method !== "GET" && method !== "HEAD") {
+	            headers["content-type"] || headers["Content-Type"] || (headers["Content-Type"] = "application/json") //Don't override existing accept header declared by user
+	            body = JSON.stringify(options.json === true ? body : options.json)
+	        }
+	    }
+
+	    xhr.onreadystatechange = readystatechange
+	    xhr.onload = loadFunc
+	    xhr.onerror = errorFunc
+	    // IE9 must have onprogress be set to a unique function.
+	    xhr.onprogress = function () {
+	        // IE must die
+	    }
+	    xhr.onabort = function(){
+	        aborted = true;
+	    }
+	    xhr.ontimeout = errorFunc
+	    xhr.open(method, uri, !sync, options.username, options.password)
+	    //has to be after open
+	    if(!sync) {
+	        xhr.withCredentials = !!options.withCredentials
+	    }
+	    // Cannot set timeout with sync request
+	    // not setting timeout on the xhr object, because of old webkits etc. not handling that correctly
+	    // both npm's request and jquery 1.x use this kind of timeout, so this is being consistent
+	    if (!sync && options.timeout > 0 ) {
+	        timeoutTimer = setTimeout(function(){
+	            if (aborted) return
+	            aborted = true//IE9 may still call readystatechange
+	            xhr.abort("timeout")
+	            var e = new Error("XMLHttpRequest timeout")
+	            e.code = "ETIMEDOUT"
+	            errorFunc(e)
+	        }, options.timeout )
+	    }
+
+	    if (xhr.setRequestHeader) {
+	        for(key in headers){
+	            if(headers.hasOwnProperty(key)){
+	                xhr.setRequestHeader(key, headers[key])
+	            }
+	        }
+	    } else if (options.headers && !isEmpty(options.headers)) {
+	        throw new Error("Headers cannot be set on an XDomainRequest object")
+	    }
+
+	    if ("responseType" in options) {
+	        xhr.responseType = options.responseType
+	    }
+
+	    if ("beforeSend" in options &&
+	        typeof options.beforeSend === "function"
+	    ) {
+	        options.beforeSend(xhr)
+	    }
+
+	    // Microsoft Edge browser sends "undefined" when send is called with undefined value.
+	    // XMLHttpRequest spec says to pass null as body to indicate no body
+	    // See https://github.com/naugtur/xhr/issues/100.
+	    xhr.send(body || null)
+
+	    return xhr
+
+
+	}
+
+	function getXml(xhr) {
+	    if (xhr.responseType === "document") {
+	        return xhr.responseXML
+	    }
+	    var firefoxBugTakenEffect = xhr.status === 204 && xhr.responseXML && xhr.responseXML.documentElement.nodeName === "parsererror"
+	    if (xhr.responseType === "" && !firefoxBugTakenEffect) {
+	        return xhr.responseXML
+	    }
+
+	    return null
+	}
+
+	function noop() {}
+
+
+/***/ },
+/* 106 */
+/***/ function(module, exports) {
+
+	/* WEBPACK VAR INJECTION */(function(global) {if (typeof window !== "undefined") {
+	    module.exports = window;
+	} else if (typeof global !== "undefined") {
+	    module.exports = global;
+	} else if (typeof self !== "undefined"){
+	    module.exports = self;
+	} else {
+	    module.exports = {};
+	}
+
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 107 */
+/***/ function(module, exports) {
+
+	module.exports = isFunction
+
+	var toString = Object.prototype.toString
+
+	function isFunction (fn) {
+	  var string = toString.call(fn)
+	  return string === '[object Function]' ||
+	    (typeof fn === 'function' && string !== '[object RegExp]') ||
+	    (typeof window !== 'undefined' &&
+	     // IE8 and below
+	     (fn === window.setTimeout ||
+	      fn === window.alert ||
+	      fn === window.confirm ||
+	      fn === window.prompt))
+	};
+
+
+/***/ },
+/* 108 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var trim = __webpack_require__(109)
+	  , forEach = __webpack_require__(110)
+	  , isArray = function(arg) {
+	      return Object.prototype.toString.call(arg) === '[object Array]';
+	    }
+
+	module.exports = function (headers) {
+	  if (!headers)
+	    return {}
+
+	  var result = {}
+
+	  forEach(
+	      trim(headers).split('\n')
+	    , function (row) {
+	        var index = row.indexOf(':')
+	          , key = trim(row.slice(0, index)).toLowerCase()
+	          , value = trim(row.slice(index + 1))
+
+	        if (typeof(result[key]) === 'undefined') {
+	          result[key] = value
+	        } else if (isArray(result[key])) {
+	          result[key].push(value)
+	        } else {
+	          result[key] = [ result[key], value ]
+	        }
+	      }
+	  )
+
+	  return result
+	}
+
+/***/ },
+/* 109 */
+/***/ function(module, exports) {
+
+	
+	exports = module.exports = trim;
+
+	function trim(str){
+	  return str.replace(/^\s*|\s*$/g, '');
+	}
+
+	exports.left = function(str){
+	  return str.replace(/^\s*/, '');
+	};
+
+	exports.right = function(str){
+	  return str.replace(/\s*$/, '');
+	};
+
+
+/***/ },
+/* 110 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var isFunction = __webpack_require__(107)
+
+	module.exports = forEach
+
+	var toString = Object.prototype.toString
+	var hasOwnProperty = Object.prototype.hasOwnProperty
+
+	function forEach(list, iterator, context) {
+	    if (!isFunction(iterator)) {
+	        throw new TypeError('iterator must be a function')
+	    }
+
+	    if (arguments.length < 3) {
+	        context = this
+	    }
+	    
+	    if (toString.call(list) === '[object Array]')
+	        forEachArray(list, iterator, context)
+	    else if (typeof list === 'string')
+	        forEachString(list, iterator, context)
+	    else
+	        forEachObject(list, iterator, context)
+	}
+
+	function forEachArray(array, iterator, context) {
+	    for (var i = 0, len = array.length; i < len; i++) {
+	        if (hasOwnProperty.call(array, i)) {
+	            iterator.call(context, array[i], i, array)
+	        }
+	    }
+	}
+
+	function forEachString(string, iterator, context) {
+	    for (var i = 0, len = string.length; i < len; i++) {
+	        // no such thing as a sparse string.
+	        iterator.call(context, string.charAt(i), i, string)
+	    }
+	}
+
+	function forEachObject(object, iterator, context) {
+	    for (var k in object) {
+	        if (hasOwnProperty.call(object, k)) {
+	            iterator.call(context, object[k], k, object)
+	        }
+	    }
+	}
+
+
+/***/ },
+/* 111 */
+/***/ function(module, exports) {
+
+	module.exports = extend
+
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+	function extend() {
+	    var target = {}
+
+	    for (var i = 0; i < arguments.length; i++) {
+	        var source = arguments[i]
+
+	        for (var key in source) {
+	            if (hasOwnProperty.call(source, key)) {
+	                target[key] = source[key]
+	            }
+	        }
+	    }
+
+	    return target
+	}
+
+
+/***/ },
+/* 112 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18308,7 +18790,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 /***/ },
-/* 105 */
+/* 113 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -18335,7 +18817,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	}
 
-	var arrayContainsArray = __webpack_require__(106).arrayContainsArray;
+	var arrayContainsArray = __webpack_require__(114).arrayContainsArray;
 
 	// A derivative work of Nick Dodson's eths-contract https://github.com/ethjs/ethjs-contract/blob/master/src/index.js
 
@@ -18440,13 +18922,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.Contract = Contract;
 
 /***/ },
-/* 106 */
+/* 114 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(Buffer) {'use strict';
 
-	var isHexPrefixed = __webpack_require__(107);
-	var stripHexPrefix = __webpack_require__(108);
+	var isHexPrefixed = __webpack_require__(115);
+	var stripHexPrefix = __webpack_require__(116);
 
 	/**
 	 * Pads a `String` to have an even length
@@ -18666,7 +19148,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(7).Buffer))
 
 /***/ },
-/* 107 */
+/* 115 */
 /***/ function(module, exports) {
 
 	/**
@@ -18685,10 +19167,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 108 */
+/* 116 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isHexPrefixed = __webpack_require__(107);
+	var isHexPrefixed = __webpack_require__(115);
 
 	/**
 	 * Removes '0x' from a given `String` is present
