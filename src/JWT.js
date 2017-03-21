@@ -1,4 +1,5 @@
-import { createUnsignedToken, TokenVerifier, decodeToken } from 'jsontokens' 
+import { createUnsignedToken, TokenVerifier, decodeToken } from 'jsontokens'
+import { isMNID, encode} from 'mnid'
 
 const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
 
@@ -18,7 +19,7 @@ export function createJWT ({address, signer}, payload) {
   })
 }
 
-export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
+export function verifyJWT ({registry, address, network}, jwt, callbackUrl = null) {
   return new Promise((resolve, reject) => {
     const {payload} = decodeToken(jwt)
     registry(payload.iss).then(profile => {
@@ -30,11 +31,14 @@ export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
           return reject(new Error('JWT has expired'))
         }
         if (payload.aud) {
-          if (payload.aud.match(/^0x[0-9a-fA-F]+$/)) {
+          if (payload.aud.match(/^0x[0-9a-fA-F]+$/) || isMNID(payload.aud)) {
             if (!address) {
               return reject(new Error('JWT audience is required but your app address has not been configured'))
             }
-            if (payload.aud !== address) {
+
+            const addressMNID = isMNID(address) ? address : encode({network: network.id, address})
+            const audMNID = isMNID(payload.aud) ? payload.aud : encode({network: network.id, address: payload.aud})
+            if (audMNID !== addressMNID) {
               return reject(new Error('JWT audience does not match your address'))
             }
           } else {
