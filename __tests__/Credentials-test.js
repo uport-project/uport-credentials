@@ -39,6 +39,12 @@ describe('createRequest', () => {
     })
   })
 
+  it('has correct payload in JWT for a request asking for verified credentials', () => {
+    return uport.createRequest({requested: ['name', 'phone'], verified: ['name']}).then((jwt) => {
+      return expect(decodeToken(jwt)).toMatchSnapshot()
+    })
+  })
+
   it('has correct payload in JWT for a request with callbackUrl', () => {
     return uport.createRequest({ requested: ['name', 'phone'], callbackUrl: 'https://myserver.com'}).then((jwt) => {
       return expect(decodeToken(jwt)).toMatchSnapshot()
@@ -71,8 +77,20 @@ describe('receive', () => {
     return createJWT({address: '0x001122', signer}, {...payload, type: 'shareResp'})
   }
 
+  function createShareRespWithVerifiedCredential (payload = {}, verifiedClaim = {sub: '0x112233', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133996 + 1000}) {
+    return uport.attest(verifiedClaim).then(jwt => {
+      return createShareResp({...payload, verified: [jwt]})
+    })
+  }
+
   it('returns profile mixing public and private claims', () => {
     return createShareResp({own: {name: 'Davie', phone: '+15555551234'}}).then(jwt => uport.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile mixing public and private claims and verified credentials', () => {
+    return createShareRespWithVerifiedCredential({own: {name: 'Davie', phone: '+15555551234'}}).then(jwt => uport.receive(jwt)).then(profile =>
       expect(profile).toMatchSnapshot()
     )
   })
