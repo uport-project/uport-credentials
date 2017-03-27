@@ -1,8 +1,7 @@
 import { createUnsignedToken, TokenVerifier, decodeToken } from 'jsontokens'
-import { isMNID, encode} from 'mnid'
+import { isMNID, decode} from 'mnid'
 
 const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
-
 
 export function createJWT ({address, signer}, payload) {
   const signingInput = createUnsignedToken(
@@ -19,7 +18,7 @@ export function createJWT ({address, signer}, payload) {
   })
 }
 
-export function verifyJWT ({registry, address, network}, jwt, callbackUrl = null) {
+export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
   return new Promise((resolve, reject) => {
     const {payload} = decodeToken(jwt)
     registry(payload.iss).then(profile => {
@@ -36,9 +35,9 @@ export function verifyJWT ({registry, address, network}, jwt, callbackUrl = null
               return reject(new Error('JWT audience is required but your app address has not been configured'))
             }
 
-            const addressMNID = isMNID(address) ? address : encode({network: network.id, address})
-            const audMNID = isMNID(payload.aud) ? payload.aud : encode({network: network.id, address: payload.aud})
-            if (audMNID !== addressMNID) {
+            const addressHex = isMNID(address) ? decode(address).address : address
+            const audHex = isMNID(payload.aud) ? decode(payload.aud).address : payload.aud
+            if (audHex !== addressHex) {
               return reject(new Error('JWT audience does not match your address'))
             }
           } else {
