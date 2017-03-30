@@ -46,10 +46,11 @@ export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
             }
           }
         }
-        resolve({payload, profile})
+        resolve({payload, profile, jwt})
       } else {
         return reject(new Error('Signature invalid for JWT'))
       }
     }).catch(reject)
   })
 }
+
