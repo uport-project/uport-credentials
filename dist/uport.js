@@ -162,6 +162,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (params.requested) {
 	        payload.requested = params.requested;
 	      }
+	      if (params.verified) {
+	        payload.verified = params.verified;
+	      }
 	      if (params.notifications) {
 	        payload.permissions = ['notifications'];
 	      }
@@ -176,12 +179,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }, {
 	    key: 'receive',
 	    value: function receive(token) {
+	      var _this2 = this;
+
 	      var callbackUrl = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
 	      return (0, _JWT.verifyJWT)(this.settings, token, callbackUrl).then(function (_ref) {
 	        var payload = _ref.payload,
 	            profile = _ref.profile;
-	        return _extends({}, profile, payload.own || {}, payload.capabilities && payload.capabilities.length === 1 ? { pushToken: payload.capabilities[0] } : {}, { address: payload.iss });
+
+	        var credentials = _extends({}, profile, payload.own || {}, payload.capabilities && payload.capabilities.length === 1 ? { pushToken: payload.capabilities[0] } : {}, { address: payload.iss });
+	        if (payload.verified) {
+	          return Promise.all(payload.verified.map(function (token) {
+	            return (0, _JWT.verifyJWT)(_this2.settings, token);
+	          })).then(function (verified) {
+	            return _extends({}, credentials, { verified: verified.map(function (v) {
+	                return _extends({}, v.payload, { jwt: v.jwt });
+	              }) });
+	          });
+	        } else {
+	          return credentials;
+	        }
 	      });
 	    }
 	  }, {
@@ -320,7 +337,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	          }
 	        }
-	        resolve({ payload: payload, profile: profile });
+	        resolve({ payload: payload, profile: profile, jwt: jwt });
 	      } else {
 	        return reject(new Error('Signature invalid for JWT'));
 	      }
