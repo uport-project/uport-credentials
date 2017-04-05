@@ -5,8 +5,9 @@ import nets from 'nets'
 export default class Credentials {
   constructor (settings = {}) {
     this.settings = settings
+    this.settings.networks = settings.networks ? configNetworks(settings.networks) : {}
     if (!this.settings.registry) {
-      const registry = UportLite()
+      const registry = UportLite({networks: this.settings.networks})
       this.settings.registry = (address) => new Promise((resolve, reject) => {
         registry(address, (error, profile) => {
           if (error) return reject(error)
@@ -81,11 +82,25 @@ export default class Credentials {
 
   // Create attestation
   attest ({sub, claim, exp}) {
-    return createJWT(this.settings, {sub, claim, exp})
+    return createJWT(this.settings, {sub: sub, claim, exp})
   }
 
   // Lookup public uport address of any user
   lookup (address) {
     return this.settings.registry(address)
   }
+}
+
+const configNetworks = (nets) => {
+  Object.keys(nets).forEach((key) => {
+    const net = nets[key]
+    if (typeof net === 'object') {
+      ['registry', 'rpcUrl'].forEach((key) => {
+        if (!net.hasOwnProperty(key)) throw new Error(`Malformed network config object, object must have '${key}' key specified.`)
+      })
+    } else {
+      throw new Error(`Network configuration object required`)
+    }
+  })
+  return nets
 }

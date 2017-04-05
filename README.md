@@ -6,7 +6,7 @@ Uport provides a simple way for your users to login to your website and provide 
 
 You can also “attest” credentials they provide to you or that you yourself have about them. This can be shared back to your customers so you can help them build their digitial identity.
 
-Uport.js provides a simple way for you to integrate uport.js into your javscript application. You can also interact with your uport users directly in the browser. 
+Uport.js provides a simple way for you to integrate uport.js into your javscript application. You can also interact with your uport users directly in the browser.
 
 We have an easy to use browser library [uport-connect](https://github.com/uport-project/uport-connect) which can help you do so.
 
@@ -38,10 +38,25 @@ import { Credentials, SimpleSigner } from 'uport'
 const signer = SimpleSigner(process.env.PRIVATE_KEY)
 const credentials = new Credentials({
   appName: 'App Name',
-  address: 'UPORT ADDRESS FOR YOUR APP',
-  signer: signer
+  address: 'MNID Encoded uPort Address For Your App'
+  signer: signer,
+  networks: networks
 })
 ```
+
+Going forward all uPort application ID addresses must be [MNID encoded](https://github.com/uport-project/mnid). MNID will encode the network with the address. Use of hex encoded addresses is deprecated. Using a hex encoded address will indicated you are on ropsten using our deprecated registry, if you require this use case then continue to pass a hex encoded address. If you are on ropsten but using our latest registry, pass a MNID encoded address with ropsten.
+
+The networks object includes a set of networks for which JWTs will be verified over. JWT verification includes an on-chain lookup for the public key mapped to the issuers identity, the MIND encoding of the issuer's address defines the network and registry to use for lookup. If you are interested in verifying JWTs over additional networks, pass in a network configs object, defined as follows:
+
+```javascript
+ const networks = { id: '0x2a' :
+                      { registry: '0x5f8e9351dc2d238fb878b6ae43aa740d62fc9758',
+                        rpcUrl: 'https://kovan.infura.io' },
+                   id: ....   : { ... }
+                 }
+```
+
+Look in [uport-lite](https://github.com/uport-project/uport-lite) for the default networks and registries which will be queried for JWT verification.
 
 ## Requesting information from your users
 
@@ -60,7 +75,7 @@ You can ask for specific private data like this:
 ```javascript
 credentials.createRequest({
     requested: ['name','phone','identity_no'],
-    callbackUrl: 'https://....' // URL to send the response of the request to 
+    callbackUrl: 'https://....' // URL to send the response of the request to
   }.then(requestToken => {
   // send requestToken to browser
   })
