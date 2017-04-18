@@ -1,10 +1,10 @@
 
 var express = require('express');
-var uport = require('../../lib/index.js');
+var uport = require('../lib/index.js');
 var jsontokens = require('jsontokens')
 var bodyParser = require('body-parser')
 
-var signer = uport.SimpleSigner('0x4d8f5b6ba9298038b6cde46e5fa36d7b7a5846cdcd1c63ad9f5dea4384f9e650')
+var signer = uport.SimpleSigner('4d8f5b6ba9298038b6cde46e5fa36d7b7a5846cdcd1c63ad9f5dea4384f9e650')
 
 
 var credentials = new uport.Credentials({
@@ -21,7 +21,7 @@ app.get('/', function (req, res) {
 
   credentials.createRequest({
     verified: ['Custom Attestation'],
-    callbackUrl: 'http://192.168.1.34:8081/callback'
+    callbackUrl: 'http://192.168.1.101:8081/callback'
   }).then( function(requestToken) {
     var uri = 'me.uport:me?requestToken=' + requestToken
     var qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
@@ -34,6 +34,7 @@ app.get('/', function (req, res) {
 app.post('/callback', function (req, res) {
 
   var jwt = req.body.access_token
+  console.log(jwt)
 
   credentials.receive(jwt).then( function(creds) {
     if (creds.address == creds.verified[0].sub && 
@@ -41,6 +42,8 @@ app.post('/callback', function (req, res) {
        creds.verified[0].claim['Custom Attestation'] === 'Custom Value')
     {
       console.log('Credential verified.');
+    } else {
+      console.log('Verification failed.');
     }
   })
 

@@ -4,7 +4,7 @@ var uport = require('../lib/index.js');
 var jsontokens = require('jsontokens')
 
 var app = express();
-var signer = uport.SimpleSigner('0x955d253bca62bf380e34a36ed3802895e4adc297fa861e22bb7ee3e66714592b')
+var signer = uport.SimpleSigner('955d253bca62bf380e34a36ed3802895e4adc297fa861e22bb7ee3e66714592b')
 
 
 var credentials = new uport.Credentials({
@@ -15,7 +15,7 @@ var credentials = new uport.Credentials({
 
 app.get('/', function (req, res) {
   credentials.attest({
-    sub: '2oVV33jifY2nPBLowRS8H7Rkh7fCUDN7hNb',
+    sub: '0x6889ff0d1f90d5c3003b8f13d2de3faf51f6e364',
     exp: 1552046024213,
     claim: {'Custom Attestation' : 'Custom Value'}
   }).then(function (att) {
