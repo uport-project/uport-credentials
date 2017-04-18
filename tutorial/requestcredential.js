@@ -4,11 +4,12 @@ var uport = require('../../lib/index.js');
 var jsontokens = require('jsontokens')
 var bodyParser = require('body-parser')
 
-var signer = uport.SimpleSigner('4894506ba6ed1a2d21cb11331620784ad1ff9adf1676dc2720de5435dcf76ac2');
+var signer = uport.SimpleSigner('0x4d8f5b6ba9298038b6cde46e5fa36d7b7a5846cdcd1c63ad9f5dea4384f9e650')
+
 
 var credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
-  address: '0xe2fef711a5988fbe84b806d4817197f033dde050',
+  address: '0x982024e3540fb5ba26b7e169dcd98503f10686f5',
   signer: signer
 })
 
@@ -36,7 +37,7 @@ app.post('/callback', function (req, res) {
 
   credentials.receive(jwt).then( function(creds) {
     if (creds.address == creds.verified[0].sub && 
-       creds.verified[0].iss == '0xe2fef711a5988fbe84b806d4817197f033dde050' &&
+       creds.verified[0].iss == '0x15bcc15904f2317365cdb6beaf473b2315405763' &&
        creds.verified[0].claim['Custom Attestation'] === 'Custom Value')
     {
       console.log('Credential verified.');

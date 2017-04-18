@@ -4,11 +4,12 @@ var uport = require('../lib/index.js');
 var jsontokens = require('jsontokens')
 
 var app = express();
-var signer = uport.SimpleSigner('4894506ba6ed1a2d21cb11331620784ad1ff9adf1676dc2720de5435dcf76ac2');
+var signer = uport.SimpleSigner('0x955d253bca62bf380e34a36ed3802895e4adc297fa861e22bb7ee3e66714592b')
+
 
 var credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
-  address: '0xe2fef711a5988fbe84b806d4817197f033dde050',
+  address: '0x15bcc15904f2317365cdb6beaf473b2315405763',
   signer: signer
 })
 
