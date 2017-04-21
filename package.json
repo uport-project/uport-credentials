@@ -1,6 +1,6 @@
 {
   "name": "uport",
-  "version": "0.4.0-alpha-1",
+  "version": "0.4.0",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
   "files": [
@@ -12,7 +12,7 @@
     "test": "jest",
     "build:es5": "./node_modules/.bin/babel src -d lib",
     "build:browser": "./node_modules/.bin/webpack --config webpack.config.js",
-    "build": "yarn test && yarn build:es5 && yarn build:browser"
+    "build": "yarn build:es5 && yarn test && yarn build:browser"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "license": "MIT",
@@ -21,7 +21,7 @@
     "jsontokens": "^0.6.5",
     "mnid": "^0.1.1",
     "nets": "^3.2.0",
-    "uport-lite": "next"
+    "uport-lite": "^1.0.0"
   },
   "jest": {
     "coverageDirectory": "./coverage/",
