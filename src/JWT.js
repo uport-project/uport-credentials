@@ -1,7 +1,7 @@
-import { createUnsignedToken, TokenVerifier, decodeToken } from 'jsontokens' 
+import { createUnsignedToken, TokenVerifier, decodeToken } from 'jsontokens'
+import { isMNID, decode} from 'mnid'
 
 const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
-
 
 export function createJWT ({address, signer}, payload) {
   const signingInput = createUnsignedToken(
@@ -30,11 +30,14 @@ export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
           return reject(new Error('JWT has expired'))
         }
         if (payload.aud) {
-          if (payload.aud.match(/^0x[0-9a-fA-F]+$/)) {
+          if (payload.aud.match(/^0x[0-9a-fA-F]+$/) || isMNID(payload.aud)) {
             if (!address) {
               return reject(new Error('JWT audience is required but your app address has not been configured'))
             }
-            if (payload.aud !== address) {
+
+            const addressHex = isMNID(address) ? decode(address).address : address
+            const audHex = isMNID(payload.aud) ? decode(payload.aud).address : payload.aud
+            if (audHex !== addressHex) {
               return reject(new Error('JWT audience does not match your address'))
             }
           } else {
