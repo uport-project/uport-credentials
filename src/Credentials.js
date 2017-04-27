@@ -41,7 +41,13 @@ export default class Credentials {
   // Receive response token from user and return data to promise
   receive (token, callbackUrl = null) {
     return verifyJWT(this.settings, token, callbackUrl).then(({payload, profile}) => {
-      const credentials = {...profile, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
+      const credentials = {  ...profile,
+                             ...(payload.own || {}),
+                             ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}),
+                             address: payload.iss,
+                             pairId: payload.pairId || undefined,
+                             challenge: payload.challenge || undefined
+                          }
       if (payload.nad) {
         credentials.networkAddress = payload.nad
       }
