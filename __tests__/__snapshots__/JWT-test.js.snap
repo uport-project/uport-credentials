@@ -8,7 +8,7 @@ Object {
 
 exports[`test accepts a valid audience using callback_url 1`] = `
 Object {
-  "aud": "http://chasqui.uport.me/unique",
+  "aud": "http://pututu.uport.me/unique",
   "iat": 1485321133996,
   "iss": "0x001122",
 }
