@@ -120,8 +120,8 @@ describe('push', () => {
     nock.enableNetConnect()
   })
 
-  it('pushes url to chasqui', () => {
-    nock('https://chasqui.uport.me', {
+  it('pushes url to pututu', () => {
+    nock('https://pututu.uport.me', {
       reqheaders: {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
@@ -143,7 +143,7 @@ describe('push', () => {
   })
 
   it('handles invalid token', () => {
-    nock('https://chasqui.uport.me', {
+    nock('https://pututu.uport.me', {
       reqheaders: {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
@@ -155,7 +155,7 @@ describe('push', () => {
   })
 
   it('handles random error', () => {
-    nock('https://chasqui.uport.me', {
+    nock('https://pututu.uport.me', {
       reqheaders: {
         'authorization': `Bearer ${PUSHTOKEN}`
       }

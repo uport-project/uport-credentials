@@ -59,7 +59,7 @@ export default class Credentials {
       }
 
       nets({
-        uri: 'https://chasqui.uport.me/api/v1/sns',
+        uri: 'https://pututu.uport.me/api/v1/sns',
         json: {url},
         method: 'POST',
         withCredentials: false,
