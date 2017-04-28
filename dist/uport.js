@@ -220,7 +220,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 
 	        (0, _nets2.default)({
-	          uri: 'https://chasqui.uport.me/api/v1/sns',
+	          uri: 'https://pututu.uport.me/api/v1/sns',
 	          json: { url: url },
 	          method: 'POST',
 	          withCredentials: false,
