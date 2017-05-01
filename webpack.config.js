@@ -13,7 +13,11 @@ module.exports = {
         test: /\.json$/,
         loader: 'json',
       },
-    ],
+      {
+        test: path.resolve(__dirname, 'node_modules/redis'),
+        loader: 'null-loader'
+      }
+    ]
   },
   output: {
     filename: 'uport.js',

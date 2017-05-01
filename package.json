@@ -21,6 +21,7 @@
     "jsontokens": "^0.6.5",
     "mnid": "^0.1.1",
     "nets": "^3.2.0",
+    "null-loader": "^0.1.1",
     "redis": "^2.7.1",
     "uport-lite": "^1.0.0"
   },
