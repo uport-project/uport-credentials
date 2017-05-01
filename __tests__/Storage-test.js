@@ -1,7 +1,5 @@
 import Storage from '../src/Storage'
-
-// TODO stub with
-// https://www.npmjs.com/package/redis-mock
+import redisMock from 'redis-mock'
 
 describe('Storage', () => {
   const challenge = 'db2ad7a398dfdd897f5b7ebac6e5995d482a824917c8251cfe30c86926510fa8'
@@ -16,6 +14,7 @@ describe('Storage', () => {
 
     beforeAll(() => {
       storage = new Storage()
+      storage.client = redisMock.createClient()
       redis = storage.client
     })
 
@@ -50,6 +49,7 @@ describe('Storage', () => {
 
     beforeAll((done) => {
       storage = new Storage()
+      storage.client = redisMock.createClient()
       redis = storage.client
 
       redis.set(`${responseKeyPrefix}:${pairId}`, response, (err, res) => {

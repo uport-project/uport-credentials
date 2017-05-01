@@ -4,6 +4,7 @@ import SimpleSigner from '../src/SimpleSigner'
 import { SECP256K1Client, TokenVerifier, decodeToken } from 'jsontokens'
 const sinon = require('sinon')
 import nock from 'nock'
+import redisMock from 'redis-mock'
 import MockDate from 'mockdate'
 MockDate.set(1485321133996)
 
@@ -33,6 +34,7 @@ describe('createRequest', () => {
     random.onCall(1).returns(rand2);
 
     uport.random = random
+    uport.storage.client = redisMock.createClient()
     redis = uport.storage.client
   })
 
@@ -103,6 +105,7 @@ describe('receive', () => {
 
   beforeAll((done) => {
     uport = new AuthCredentials({signer, address: '0x001122', registry})
+    uport.storage.client = redisMock.createClient()
     redis = uport.storage.client
 
     redis.set(`${challengeKeyPrefix}:${pairId}`, challenge, (err, res) => {
