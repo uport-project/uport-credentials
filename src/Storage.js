@@ -5,6 +5,7 @@ class Storage {
   // options.host options.port
   constructor(options){
     const opts = options || {}
+    if (!redis.createClient) throw new Error('Storage: Redis is not available in this enviroment, use functionality which does not require persistent storage')
     this.client = redis.createClient(opts)
     this.client.on("error", err => {console.log("Error " + err)})
     this.challengeKeyPrefix = opts.challengeKeyPrefix || `challenge`
