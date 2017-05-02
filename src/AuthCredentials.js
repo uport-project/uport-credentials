@@ -43,8 +43,7 @@ class AuthCredentials extends Credentials {
     ).then(res => createJWT(this.settings, {...payload, type: 'shareReq'}))
   }
 
-  // Receive response token from user and return data to promise
-  receive (token, callbackUrl = null) {
+  receive (token, response = '', callbackUrl = null) {
     // Verify sig and check challenge equivalence
     let credentials
     return super.receive(token, callbackUrl).then(res => {
@@ -52,9 +51,16 @@ class AuthCredentials extends Credentials {
       return this.storage.readChallenge(credentials.pairId)
     }).then(val => {
       const challenge = val
-      if (challenge === credentials.challenge) return credentials
+      if (challenge === credentials.challenge) {
+        return this.storage.writeResponse(credentials.pairId, response)
+      }
+      this.storage.writeResponse(credentials.pairId, 'Error')
       throw new Error('Authentication Failed: receive() Challenge did not match')
-    })
+    }).then(res => credentials)
+  }
+
+  authResponse(pairId) {
+    return this.storage.readResponse(pairId)
   }
 }
 
