@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>uPort Example</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://uport.me/library/img/icons/favicon-16x16.png">
+    <script type="text/javascript" src="https://unpkg.com/uport-connect/dist/uport-connect.js"></script>
+    <style>
+      main { padding: 10px 30px; }
+      header { background: #EEE; }
+      .btn-sm{ padding: 3px 10px;
+               border-radius: 0; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header><h1 id="dappName">Uport Auth Server Example</h1></header>
+      <hr/>
+      <section>
+        <h2>Connect uPort</h2>
+        <table>
+          <tobdy>
+            <tr><td><span>Auth Status: </span><span id="authStatus"></span></td></tr>
+            <tr><td><span>Address: </span><span id="addr"></span></td></tr>
+            <tr><td><span>Name: </span><span id="name"></span></td></tr>
+          </tobdy>
+        <table>
+        <button class="btn btn-sm btn-primary" id="connectUportBtn" onclick="loginBtnClick()">Connect uPort</button>
+      </section>
+    </main>
+    <script>
+      // DOM Selector Shortcut for this example
+      let $ = (selector) => document.querySelector(selector)
+
+      // App Setup
+      let uport = new Uport.Connect()
+
+      function loginBtnClick () {
+        // Make request to server, get JWT back
+        function reqListener () {
+          const jwt = this.responseText
+          // your reachable server ip address and port
+          const callback = 'http://192.168.1.101:8081/authResponse'
+
+          connect.sendRequest(jwt, callback).then(res => {
+            console.log(res)
+            $('#addr').textContent = res.credentials.address
+            $('#name').textContent = res.credentials.name
+            $('#authStatus').textContent = res.status
+          }, console.err)
+         })
+        }
+
+        const req = new XMLHttpRequest();
+        req.addEventListener("load", reqListener);
+        req.open('GET', 'http://192.168.1.101:8081/authRequest');
+        req.send();
+      }
+    </script>
+  </body>
+</html>
