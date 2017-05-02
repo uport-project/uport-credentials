@@ -58,6 +58,77 @@ The networks object includes a set of networks for which JWTs will be verified o
 
 Look in [uport-lite](https://github.com/uport-project/uport-lite) for the default networks and registries which will be queried for JWT verification.
 
+## Authentication
+
+Having an asymmetric keypair on an end user's mobile device which can sign data blobs and is linked to an on chain identity allows for strong authentication through a challenge-response protocol. Allowing you as a developer to request the user you are interacting with to prove they are who they say they are or prove that that they control a given uPort Identity. You may this use similarly to traditional authentication by issuing session tokens upon successful authentications, mapping data for you service to a given uPort id and authorizing additional actions. If you are issuing claims you will likely want to authenticate a user before issuing a claim for their identity. If you are consuming claims you will likely want to authenticate a user as well to be sure the claims you received were sent by the claim's subject and not replayed by an attacker.
+
+To use authentication, instantiate AuthCredentials instead of Credentials. AuthCredentials wraps Credentials with additional functionality used for authentication.  This includes adding a challenge during `createRequest` and verifying the challenge during `receive`. It also requires a persistence layer, we provide a minimal implementation using Redis. Redis must be running, to install and start redis in the background, follow the [instructions here](https://redis.io).
+
+```javascript
+import { AuthCredentials, SimpleSigner } from 'uport'
+
+const signer = SimpleSigner(process.env.PRIVATE_KEY)
+const authCredentials = new Authcredentials({
+  ...
+})
+```
+
+To implement authentication you must run a sufficiently secure server which you can receive requests and return responses over HTTPS. You will need an endpoint to receive requests to login. When a login request is received, use `AuthCredentials.createRequest` to prepare a request wrapped with additional authentication params. Be sure to set the callback to an endpoint on your server which you can receive responses from the mobile app. Return the request token to the browser to be displayed in a QR code and passed to the phone.
+
+Once the mobile device receives and verifies the request, it will prepare a response and post it to your callback endpoint. On receiving that response use `AuthCredentials.receive` to verify and parse the response. If the response is valid you can pass a response to the target client (browser). The target client (browser) should be polling for the given response.
+
+#### Setup Outline
+
+Browser makes GET request to the server, JWT challenge request token is returned
+
+```javascript
+// GET https://yourserver.com/authrequest
+authCredentials.createRequest({requested: [..., ...], callback: 'https://yourserver.com/authresponse'}).then(res => {
+  // return the response to the browser
+})
+```
+
+Mobile device makes POST request with the response of the challenge to the server.
+
+```javascript
+// POST https://yourserver.com/authresponse
+authCredentials.receive(jwt, response).then(res => {
+  // Auth Successful
+}).catch(err => {
+  // Auth failed
+})
+```
+
+Browser polls with a GET request for the response from the server.
+
+```javascript
+// GET https://yourserver.com/authresponse?pairId=<paidId>
+authCredentials.authReponse(pairId).then(res => {
+  // return the response to browser
+}).catch(err => {
+  // No response available, not available yet, or authentication failed
+})
+```
+
+#### Storage
+
+Authentication requires a persistent layer. We provide a interface which is a simple Redis client wrapper. The storage object can be instantiated as follows.
+
+```javascript
+import { Storage } from 'uport'
+const Storage = new Storage({host: 'redis-host', port: 'redis-port'})
+// Additional valid redis options can also be passed
+```
+If you already you have your own persistence layer, simple implement a wrapper that implements the same interface and set it when instantiating the AuthCredentials object.
+
+```javascript
+const authCredentials = new AuthCredentials({storage: yourStorageObject, ...})
+```
+
+#### Security Notes
+
+Use HTTPS on your server and follow [redis best security practices](https://redis.io/topics/security).
+
 ## Requesting information from your users
 
 To request information from your user you create a Selective Disclosure Request JWT and present it to your user in the web browser.
