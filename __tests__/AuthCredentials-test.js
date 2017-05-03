@@ -19,8 +19,10 @@ const rand1 = 'db2ad7a398dfdd897f5b7ebac6e5995d482a824917c8251cfe30c86926510fa8'
 const rand2 = '6d98e4827b8912cf4b061d0d16ac68577b6e0632ff2a4ce89ed70c537334f0ac'
 const challenge = rand1
 const pairId = rand2
+const response = 'word'
 const invalidChallenge = rand1
 const challengeKeyPrefix = `challenge`
+const responseKeyPrefix = `response`
 
 describe('createRequest', () => {
 
@@ -103,7 +105,7 @@ describe('receive', () => {
 
   let uport, redis
 
-  beforeAll((done) => {
+  beforeEach((done) => {
     uport = new AuthCredentials({signer, address: '0x001122', registry})
     uport.storage.client = redisMock.createClient()
     redis = uport.storage.client
@@ -159,6 +161,54 @@ describe('receive', () => {
       fail()
     ).catch(err => {
       expect(err).toEqual(expect.stringMatching('Authentication Failed'))
+    })
+  })
+
+  it('deletes the challenge from storage if a valid response is given', () => {
+    return createShareResp().then(jwt => uport.receive(jwt)).then(profile =>
+      redis.get(`${challengeKeyPrefix}:${pairId}`, (err, res) => {
+          if (err) throw new Error('Redis client could not set value')
+          expect(res).toEqual(null)
+      })
+    )
+  })
+})
+
+describe('authResponse', () => {
+
+  let uport, redis
+
+  beforeEach((done) => {
+    uport = new AuthCredentials({signer, address: '0x001122', registry})
+
+    uport.storage.client = redisMock.createClient()
+    redis = uport.storage.client
+
+    redis.set(`${responseKeyPrefix}:${pairId}`, response, (err, res) => {
+        if (err) throw new Error('Redis client could not set value')
+        done()
+    })
+  })
+
+  it('it returns the response for a given pairId', () => {
+    return uport.authResponse(pairId).then(res => {
+      expect(res).toEqual(response)
+    })
+  })
+
+  it('it returns null if there is no key for a given pairId', () => {
+    return uport.authResponse(pairId + '1').then(res => {
+      expect(res).toEqual(null)
+    })
+  })
+
+  it('if requested key is set, it is deleted upon being returned', (done) => {
+    uport.authResponse(pairId).then(res => {
+      redis.get(`${responseKeyPrefix}:${pairId}`, (err, res) => {
+          if (err) throw new Error('Redis client could not set value')
+          expect(res).toEqual(null)
+          done()
+      })
     })
   })
 })

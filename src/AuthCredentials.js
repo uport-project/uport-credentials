@@ -43,6 +43,7 @@ class AuthCredentials extends Credentials {
     ).then(res => createJWT(this.settings, {...payload, type: 'shareReq'}))
   }
 
+  // TODO if it verifies then delte the challenge
   receive (token, response = '', callbackUrl = null) {
     // Verify sig and check challenge equivalence
     let credentials
@@ -52,6 +53,7 @@ class AuthCredentials extends Credentials {
     }).then(val => {
       const challenge = val
       if (challenge === credentials.challenge) {
+        this.storage.deleteChallenge(credentials.pairId)
         return this.storage.writeResponse(credentials.pairId, response)
       }
       this.storage.writeResponse(credentials.pairId, 'Error')
@@ -60,7 +62,12 @@ class AuthCredentials extends Credentials {
   }
 
   authResponse(pairId) {
-    return this.storage.readResponse(pairId)
+    return this.storage.readResponse(pairId).then(res => {
+      if (res) {
+        this.storage.deleteResponse(pairId)
+      }
+      return res
+    })
   }
 }
 
