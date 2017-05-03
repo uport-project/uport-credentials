@@ -22,12 +22,20 @@ class Storage {
     return this.get(this.challengeKey(pairId))
   }
 
+  deleteChallenge(pairId) {
+    return this.del(this.challengeKey(pairId))
+  }
+
   writeResponse(pairId, response) {
     return this.set(this.responseKey(pairId), response)
   }
 
   readResponse(pairId) {
     return this.get(this.responseKey(pairId))
+  }
+
+  deleteResponse(pairId) {
+    return this.del(this.responseKey(pairId))
   }
 
   get(key) {
@@ -42,6 +50,15 @@ class Storage {
   set(key, value) {
     return new Promise((resolve, reject) => {
       this.client.set(key, value, (err, res) => {
+        if (err) reject(err)
+        return resolve(res)
+      })
+    })
+  }
+
+  del(key) {
+    return new Promise((resolve, reject) => {
+      this.client.del(key, (err, res) => {
         if (err) reject(err)
         return resolve(res)
       })
