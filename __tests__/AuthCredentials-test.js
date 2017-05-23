@@ -26,7 +26,7 @@ const responseKeyPrefix = `response`
 
 describe('createRequest', () => {
 
-  let uport, redis
+  let uport, rRedis, cRedis
 
   beforeEach(() => {
     uport = new AuthCredentials({signer, address: '0x001122', registry})
@@ -36,8 +36,10 @@ describe('createRequest', () => {
     random.onCall(1).returns(rand2);
 
     uport.random = random
-    uport.storage.client = redisMock.createClient()
-    redis = uport.storage.client
+    uport.challengeStorage.client = redisMock.createClient()
+    uport.responseStorage.client = redisMock.createClient()
+    rRedis = uport.responseStorage.client
+    cRedis = uport.responseStorage.client
   })
 
   it('creates a valid JWT for a request', () => {
@@ -48,6 +50,7 @@ describe('createRequest', () => {
 
   it('has correct payload in JWT for a plain request for public details', () => {
     return uport.createRequest().then((jwt) => {
+      console.log(jwt)
       return expect(decodeToken(jwt)).toMatchSnapshot()
     })
   })
@@ -92,7 +95,7 @@ describe('createRequest', () => {
 
   it('stores a challenge with the pairId in storage', (done) => {
     uport.createRequest({ requested: ['name', 'phone']}).then((jwt) => {
-      redis.get(`${challengeKeyPrefix}:${pairId}`, (err, res) => {
+      cRedis.get(`${challengeKeyPrefix}:${pairId}`, (err, res) => {
           if (err) throw new Error('Redis client could not get value')
           expect(res).toEqual(challenge)
           done()
@@ -103,14 +106,17 @@ describe('createRequest', () => {
 
 describe('receive', () => {
 
-  let uport, redis
+  let uport, rRedis, cRedis
 
   beforeEach((done) => {
     uport = new AuthCredentials({signer, address: '0x001122', registry})
-    uport.storage.client = redisMock.createClient()
-    redis = uport.storage.client
 
-    redis.set(`${challengeKeyPrefix}:${pairId}`, challenge, (err, res) => {
+    uport.challengeStorage.client = redisMock.createClient()
+    uport.responseStorage.client = redisMock.createClient()
+    rRedis = uport.responseStorage.client
+    cRedis = uport.responseStorage.client
+
+    cRedis.set(`${challengeKeyPrefix}:${pairId}`, challenge, (err, res) => {
         if (err) throw new Error('Redis client could not set value')
         done()
     })
@@ -166,7 +172,7 @@ describe('receive', () => {
 
   it('deletes the challenge from storage if a valid response is given', () => {
     return createShareResp().then(jwt => uport.receive(jwt)).then(profile =>
-      redis.get(`${challengeKeyPrefix}:${pairId}`, (err, res) => {
+      cRedis.get(`${challengeKeyPrefix}:${pairId}`, (err, res) => {
           if (err) throw new Error('Redis client could not set value')
           expect(res).toEqual(null)
       })
@@ -176,15 +182,17 @@ describe('receive', () => {
 
 describe('authResponse', () => {
 
-  let uport, redis
+  let uport, cRedis, rRedis
 
   beforeEach((done) => {
     uport = new AuthCredentials({signer, address: '0x001122', registry})
 
-    uport.storage.client = redisMock.createClient()
-    redis = uport.storage.client
+    uport.challengeStorage.client = redisMock.createClient()
+    uport.responseStorage.client = redisMock.createClient()
+    rRedis = uport.responseStorage.client
+    cRedis = uport.responseStorage.client
 
-    redis.set(`${responseKeyPrefix}:${pairId}`, response, (err, res) => {
+    rRedis.set(`${responseKeyPrefix}:${pairId}`, response, (err, res) => {
         if (err) throw new Error('Redis client could not set value')
         done()
     })
@@ -204,7 +212,7 @@ describe('authResponse', () => {
 
   it('if requested key is set, it is deleted upon being returned', (done) => {
     uport.authResponse(pairId).then(res => {
-      redis.get(`${responseKeyPrefix}:${pairId}`, (err, res) => {
+      rRedis.get(`${responseKeyPrefix}:${pairId}`, (err, res) => {
           if (err) throw new Error('Redis client could not set value')
           expect(res).toEqual(null)
           done()

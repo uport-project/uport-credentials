@@ -3,10 +3,10 @@ import Storage from './Storage.js'
 import crypto from 'crypto'
 import { createJWT } from './JWT'
 
-// Generate random 128 byte hex string
+// Generate random 18 byte hex string
 const random  = () => {
   return new Promise((resolve, reject) => {
-    crypto.randomBytes(32, (err, buf) => {
+    crypto.randomBytes(18, (err, buf) => {
       if (err) reject(error)
       resolve(buf.toString('hex'))
     })
@@ -16,11 +16,14 @@ const random  = () => {
 class AuthCredentials extends Credentials {
   constructor (settings = {}) {
     super(settings)
-    this.storage = settings.storage || new Storage()
+    this.challengeStorage = settings.challengeStorage || new Storage('challenge')
+    this.responseStorage = settings.responseStorage || new Storage('response')
     this.random = settings.random || random
   }
 
   // Create request token
+
+  // TODO the callback doesn't include the pair id
   createRequest (params = {}) {
     const payload = {}
     if (params.requested) {
@@ -39,32 +42,33 @@ class AuthCredentials extends Credentials {
     return Promise.all([this.random(), this.random()]).then(rand => {
       payload.challenge = rand[0]
       payload.pairId = rand[1]
-    }).then(() => this.storage.writeChallenge(payload.pairId, payload.challenge)
+    }).then(() => this.challengeStorage.set(payload.pairId, payload.challenge)
     ).then(res => createJWT(this.settings, {...payload, type: 'shareReq'}))
   }
 
-  // TODO if it verifies then delte the challenge
+
+  //TODO  Make response optional? then it doesn't write the response to the server
   receive (token, response = '', callbackUrl = null) {
     // Verify sig and check challenge equivalence
     let credentials
     return super.receive(token, callbackUrl).then(res => {
       credentials = res
-      return this.storage.readChallenge(credentials.pairId)
+      return this.challengeStorage.get(credentials.pairId)
     }).then(val => {
       const challenge = val
       if (challenge === credentials.challenge) {
-        this.storage.deleteChallenge(credentials.pairId)
-        return this.storage.writeResponse(credentials.pairId, response)
+        this.challengeStorage.del(credentials.pairId)
+        return this.responseStorage.set(credentials.pairId, response)
       }
-      this.storage.writeResponse(credentials.pairId, 'Error')
+      this.responseStorage.set(credentials.pairId, 'Error')
       throw new Error('Authentication Failed: receive() Challenge did not match')
     }).then(res => credentials)
   }
 
   authResponse(pairId) {
-    return this.storage.readResponse(pairId).then(res => {
+    return this.responseStorage.get(pairId).then(res => {
       if (res) {
-        this.storage.deleteResponse(pairId)
+        this.responseStorage.del(pairId)
       }
       return res
     })

@@ -9,18 +9,21 @@ describe('Storage', () => {
   const responseKeyPrefix = `response`
 
   describe('Writes', () => {
-    let storage
-    let redis
+    let rStorage, cStorage
+    let rRedis, cRedis
 
     beforeAll(() => {
-      storage = new Storage()
-      storage.client = redisMock.createClient()
-      redis = storage.client
+      cStorage = new Storage('challenge')
+      rStorage = new Storage('response')
+      cStorage.client = redisMock.createClient()
+      rStorage.client = redisMock.createClient()
+      rRedis = cStorage.client
+      cRedis = rStorage.client
     })
 
     it('writes challenges to storage with key "challenge:<pairId>"', () => {
-      return storage.writeChallenge(pairId, challenge).then((res)=> {
-        redis.get(`${challengeKeyPrefix}:${pairId}`, (err, val) =>{
+      return cStorage.set(pairId, challenge).then((res)=> {
+        cRedis.get(`${challengeKeyPrefix}:${pairId}`, (err, val) =>{
           expect(val).toEqual(challenge)
         })
       }).catch(err => {
@@ -29,8 +32,8 @@ describe('Storage', () => {
     })
 
     it('writes responses to storage with key "response:<pairId>"', () => {
-      return storage.writeResponse(pairId, response).then((res)=> {
-        redis.get(`${responseKeyPrefix}:${pairId}`, (err, val) =>{
+      return rStorage.set(pairId, response).then((res)=> {
+        rRedis.get(`${responseKeyPrefix}:${pairId}`, (err, val) =>{
           expect(val).toEqual(response)
         })
       }).catch(err => {
@@ -40,17 +43,20 @@ describe('Storage', () => {
   })
 
   describe('Reads', () => {
-    let storage
-    let redis
+    let rStorage, cStorage
+    let rRedis, cRedis
 
     beforeAll((done) => {
-      storage = new Storage()
-      storage.client = redisMock.createClient()
-      redis = storage.client
+      cStorage = new Storage('challenge')
+      rStorage = new Storage('response')
+      cStorage.client = redisMock.createClient()
+      rStorage.client = redisMock.createClient()
+      rRedis = cStorage.client
+      cRedis = rStorage.client
 
-      redis.set(`${responseKeyPrefix}:${pairId}`, response, (err, res) => {
+      rRedis.set(`${responseKeyPrefix}:${pairId}`, response, (err, res) => {
         if (err) throw new Error('Redis client could not set value')
-        redis.set(`${challengeKeyPrefix}:${pairId}`, challenge, (err, res) => {
+        cRedis.set(`${challengeKeyPrefix}:${pairId}`, challenge, (err, res) => {
             if (err) throw new Error('Redis client could not set value')
             done()
         })
@@ -58,7 +64,7 @@ describe('Storage', () => {
     })
 
     it('reads challenges from storage', () => {
-      return storage.readChallenge(pairId).then((res)=> {
+      return cStorage.get(pairId).then((res)=> {
         expect(res).toEqual(challenge)
       }).catch(err => {
         fail()
@@ -66,7 +72,7 @@ describe('Storage', () => {
     })
 
     it('reads responses from storage', () => {
-      return storage.readResponse(pairId).then((res)=> {
+      return rStorage.get(pairId).then((res)=> {
         expect(res).toEqual(response)
       }).catch(err => {
         fail()
@@ -75,17 +81,20 @@ describe('Storage', () => {
   })
 
   describe('Deletes', () => {
-    let storage
-    let redis
+    let rStorage, cStorage
+    let rRedis, cRedis
 
     beforeAll((done) => {
-      storage = new Storage()
-      storage.client = redisMock.createClient()
-      redis = storage.client
+      cStorage = new Storage('challenge')
+      rStorage = new Storage('response')
+      cStorage.client = redisMock.createClient()
+      rStorage.client = redisMock.createClient()
+      rRedis = cStorage.client
+      cRedis = rStorage.client
 
-      redis.set(`${responseKeyPrefix}:${pairId}`, response, (err, res) => {
+      rRedis.set(`${responseKeyPrefix}:${pairId}`, response, (err, res) => {
         if (err) throw new Error('Redis client could not set value')
-        redis.set(`${challengeKeyPrefix}:${pairId}`, challenge, (err, res) => {
+        cRedis.set(`${challengeKeyPrefix}:${pairId}`, challenge, (err, res) => {
             if (err) throw new Error('Redis client could not set value')
             done()
         })
@@ -93,10 +102,10 @@ describe('Storage', () => {
     })
 
     afterAll ((done) => {
-      redis.get(`${responseKeyPrefix}:${pairId}`, (err, res) => {
+      rRedis.get(`${responseKeyPrefix}:${pairId}`, (err, res) => {
         if (err) throw new Error('Redis client could not set value')
         expect(res).toEqual(null)
-        redis.get(`${challengeKeyPrefix}:${pairId}`, (err, res) => {
+        cRedis.get(`${challengeKeyPrefix}:${pairId}`, (err, res) => {
             if (err) throw new Error('Redis client could not set value')
             expect(res).toEqual(null)
             done()
@@ -105,14 +114,14 @@ describe('Storage', () => {
     })
 
     it('deletes challenge with key "challenge:<pairId>"', () => {
-      return storage.deleteChallenge(pairId).then((res)=> {
+      return cStorage.del(pairId).then((res)=> {
       }).catch(err => {
         fail()
       })
     })
 
     it('deletes response with key "response:<pairId>"', () => {
-      return storage.deleteResponse(pairId, response).then((res)=> {
+      return rStorage.del(pairId, response).then((res)=> {
       }).catch(err => {
         fail()
       })
