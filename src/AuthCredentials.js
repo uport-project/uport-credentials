@@ -6,7 +6,7 @@ import { createJWT } from './JWT'
 // Generate random 18 byte hex string
 const random  = () => {
   return new Promise((resolve, reject) => {
-    crypto.randomBytes(18, (err, buf) => {
+    crypto.randomBytes(16, (err, buf) => {
       if (err) reject(error)
       resolve(buf.toString('hex'))
     })
@@ -22,8 +22,6 @@ class AuthCredentials extends Credentials {
   }
 
   // Create request token
-
-  // TODO the callback doesn't include the pair id
   createRequest (params = {}) {
     const payload = {}
     if (params.requested) {
@@ -39,30 +37,36 @@ class AuthCredentials extends Credentials {
       payload.callback = params.callbackUrl
     }
 
+    let pairId, challenge
+
     return Promise.all([this.random(), this.random()]).then(rand => {
-      payload.challenge = rand[0]
-      payload.pairId = rand[1]
-    }).then(() => this.challengeStorage.set(payload.pairId, payload.challenge)
+      pairId = rand[0]
+      challenge = rand[1]
+      payload.challenge = `${pairId}.${challenge}`
+    }).then(() => this.challengeStorage.set(pairId, challenge)
     ).then(res => createJWT(this.settings, {...payload, type: 'shareReq'}))
   }
 
-
-  //TODO  Make response optional? then it doesn't write the response to the server
-  receive (token, response = '', callbackUrl = null) {
+  receive (token, response = {}, callbackUrl = null) {
     // Verify sig and check challenge equivalence
-    let credentials
+    let credentials, pairId, challenge
     return super.receive(token, callbackUrl).then(res => {
       credentials = res
-      return this.challengeStorage.get(credentials.pairId)
-    }).then(val => {
-      const challenge = val
-      if (challenge === credentials.challenge) {
-        this.challengeStorage.del(credentials.pairId)
-        return this.responseStorage.set(credentials.pairId, response)
+      if (!credentials.challenge) {
+        throw new Error('Authentication Failed: receive() Not a valid auth response')
       }
-      this.responseStorage.set(credentials.pairId, 'Error')
+      [pairId, challenge] = credentials.challenge.split('.')
+      return this.challengeStorage.get(pairId)
+    }).then(val => {
+      const storedChallenge = val
+      if (storedChallenge === challenge) {
+        this.challengeStorage.del(pairId)
+        response.credentials = credentials
+        return this.responseStorage.set(pairId, JSON.stringify(response))
+      }
+      this.responseStorage.set(pairId, 'Error')
       throw new Error('Authentication Failed: receive() Challenge did not match')
-    }).then(res => credentials)
+    }).then(res => response)
   }
 
   authResponse(pairId) {

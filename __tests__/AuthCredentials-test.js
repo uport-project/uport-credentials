@@ -17,8 +17,10 @@ const registry = (address) => new Promise((resolve, reject) => resolve(address =
 const uport = new AuthCredentials({signer, address: '0x001122', registry})
 const rand1 = 'db2ad7a398dfdd897f5b7ebac6e5995d482a824917c8251cfe30c86926510fa8'
 const rand2 = '6d98e4827b8912cf4b061d0d16ac68577b6e0632ff2a4ce89ed70c537334f0ac'
-const challenge = rand1
-const pairId = rand2
+const challenge = rand1 + '.' + rand2
+const challengeStore = rand2
+const pairId = rand1
+
 const response = 'word'
 const invalidChallenge = rand1
 const challengeKeyPrefix = `challenge`
@@ -89,7 +91,6 @@ describe('createRequest', () => {
     return uport.createRequest({ requested: ['name', 'phone']}).then((jwt) => {
       const decodedJWT = decodeToken(jwt)
       expect(decodedJWT.payload.challenge).toEqual(challenge)
-      expect(decodedJWT.payload.pairId).toEqual(pairId)
     })
   })
 
@@ -97,7 +98,7 @@ describe('createRequest', () => {
     uport.createRequest({ requested: ['name', 'phone']}).then((jwt) => {
       cRedis.get(`${challengeKeyPrefix}:${pairId}`, (err, res) => {
           if (err) throw new Error('Redis client could not get value')
-          expect(res).toEqual(challenge)
+          expect(res).toEqual(challengeStore)
           done()
       })
     })
@@ -116,23 +117,23 @@ describe('receive', () => {
     rRedis = uport.responseStorage.client
     cRedis = uport.responseStorage.client
 
-    cRedis.set(`${challengeKeyPrefix}:${pairId}`, challenge, (err, res) => {
+    cRedis.set(`${challengeKeyPrefix}:${pairId}`, challengeStore, (err, res) => {
         if (err) throw new Error('Redis client could not set value')
         done()
     })
   })
 
   function createShareResp (payload = {}) {
-    return createJWT({address: '0x001122', signer}, {...payload, challenge, pairId, type: 'shareResp'})
+    return createJWT({address: '0x001122', signer}, {...payload, challenge, type: 'shareResp'})
   }
 
   function createInvalidShareResp (payload = {}) {
-    return createJWT({address: '0x001122', signer}, {...payload, challenge: '123456789101121314151617181920', pairId, type: 'shareResp'})
+    return createJWT({address: '0x001122', signer}, {...payload, challenge: pairId + '.123456789101121314151617181920', type: 'shareResp'})
   }
 
   function createShareRespWithVerifiedCredential (payload = {}, verifiedClaim = {sub: '0x112233', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133996 + 1000}) {
     return uport.attest(verifiedClaim).then(jwt => {
-      return createShareResp({...payload, challenge, pairId, verified: [jwt]})
+      return createShareResp({...payload, challenge, verified: [jwt]})
     })
   }
 
@@ -157,15 +158,15 @@ describe('receive', () => {
   })
 
   it('returns pushToken if available', () => {
-    return createShareResp({capabilities: ['PUSHTOKEN']}).then(jwt => uport.receive(jwt)).then(profile =>
-      expect(profile.pushToken).toEqual('PUSHTOKEN')
+    return createShareResp({capabilities: ['PUSHTOKEN']}).then(jwt => uport.receive(jwt)).then(res =>
+      expect(res.credentials.pushToken).toEqual('PUSHTOKEN')
     )
   })
 
   it('throws an error if the challenge is not valid', () => {
-    return createInvalidShareResp().then(jwt => uport.receive(jwt)).then(profile =>
+    return createInvalidShareResp().then(jwt => uport.receive(jwt)).then(profile => {
       fail()
-    ).catch(err => {
+    }).catch(err => {
       expect(err).toEqual(expect.stringMatching('Authentication Failed'))
     })
   })

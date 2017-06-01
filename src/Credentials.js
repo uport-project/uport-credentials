@@ -45,7 +45,6 @@ export default class Credentials {
                              ...(payload.own || {}),
                              ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}),
                              address: payload.iss,
-                             pairId: payload.pairId || undefined,
                              challenge: payload.challenge || undefined
                           }
       if (payload.nad) {
