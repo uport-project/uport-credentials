@@ -99,7 +99,7 @@ authCredentials.receive(jwt, response).then(res => {
 })
 ```
 
-Browser polls with a GET request for the response from the server.
+Browser polls with a GET request for the response from the server. This is only necessary for users on their desktop browser.
 
 ```javascript
 // GET https://yourserver.com/authresponse?pairId=<paidId>
@@ -116,13 +116,15 @@ Authentication requires a persistent layer. We provide a interface which is a si
 
 ```javascript
 import { Storage } from 'uport'
-const Storage = new Storage({host: 'redis-host', port: 'redis-port'})
+const Storage = new Storage(keyPrefix, redisOpts)
 // Additional valid redis options can also be passed
 ```
-If you already you have your own persistence layer, simple implement a wrapper that implements the same interface and set it when instantiating the AuthCredentials object.
+If you already you have your own persistence layer, simply implement a wrapper that implements the same interface and set it when instantiating the AuthCredentials object. You would have to implement the following functions get(key), set(key, value), del(key).
+
+Then instantiate AuthCredentials with your storage layer. AuthCredentials uses two key value mappings, one for challenges and another for managing responses.
 
 ```javascript
-const authCredentials = new AuthCredentials({storage: yourStorageObject, ...})
+const authCredentials = new AuthCredentials({challengeStorage: yourStorageObj, responseStorage: yourStorageObj, ...})
 ```
 
 #### Security Notes
@@ -164,8 +166,8 @@ In your front end use [uport-connect](https://github.com/uport-project/uport-con
 
 ```javascript
 const connect = new uportconnect.Connect('app name')
-connect.showRequest(requestToken).then(response => {
-  // send response back to server
+  connect.sendRequestToken({token, pollUrl, postUrl, uriHandler}).then(response => {
+  // send response back to server yourself or set postUrl, view uport-connect for more details
 })
 ```
 
