@@ -7,7 +7,6 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <link rel="icon" type="image/png" sizes="16x16" href="https://uport.me/library/img/icons/favicon-16x16.png">
     <script type="text/javascript" src="https://unpkg.com/uport-connect/dist/uport-connect.js"></script>
     <style>
       main { padding: 10px 30px; }
@@ -37,29 +36,35 @@
       let $ = (selector) => document.querySelector(selector)
 
       // App Setup
-      let uport = new Uport.Connect()
+      let uport = new uportconnect.Connect()
+      // Set your server host/port
+      const reqUrl  = 'your-url-to-fetch-requests/authRequest'
+      const postUrl = 'your-url-to-receive-responses/auth'
+      let pollUrl   = 'your-url-to-fetch-your-response/authResponse'
 
       function loginBtnClick () {
-        // Make request to server, get JWT back
         function reqListener () {
-          const jwt = this.responseText
-          // your reachable server ip address and port
-          const callback = 'http://192.168.1.101:8081/authResponse'
+          const resObj = JSON.parse(this.responseText)
+          const token = resObj.message
+          const pairId = resObj.pairId
 
-          connect.sendRequest(jwt, callback).then(res => {
-            console.log(res)
+          pollUrl = pollUrl + pairId
+
+          uport.sendRequestToken({token, pollUrl, postUrl}).then(res => {
+            console.log(JSON.stringify(res))
             $('#addr').textContent = res.credentials.address
             $('#name').textContent = res.credentials.name
-            $('#authStatus').textContent = res.status
-          }, console.err)
-         })
-        }
+            $('#authStatus').textContent = res.message.status
+          })
+         }
 
+        // Make request to server, get JWT back
         const req = new XMLHttpRequest();
         req.addEventListener("load", reqListener);
-        req.open('GET', 'http://192.168.1.101:8081/authRequest');
+        req.open('GET', reqUrl);
         req.send();
       }
+
     </script>
   </body>
 </html>
