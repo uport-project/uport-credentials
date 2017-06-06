@@ -176,6 +176,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (params.callbackUrl) {
 	        payload.callback = params.callbackUrl;
 	      }
+	      if (params.network_id) {
+	        payload.net = params.network_id;
+	      }
 	      return (0, _JWT.createJWT)(this.settings, _extends({}, payload, { type: 'shareReq' }));
 	    }
 
@@ -193,6 +196,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            profile = _ref.profile;
 
 	        var credentials = _extends({}, profile, payload.own || {}, payload.capabilities && payload.capabilities.length === 1 ? { pushToken: payload.capabilities[0] } : {}, { address: payload.iss });
+	        if (payload.nad) {
+	          credentials.networkAddress = payload.nad;
+	        }
 	        if (payload.verified) {
 	          return Promise.all(payload.verified.map(function (token) {
 	            return (0, _JWT.verifyJWT)(_this.settings, token);

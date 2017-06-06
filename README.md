@@ -81,6 +81,14 @@ credentials.createRequest({
   })
 ```
 
+If you need to know the users address on a specific ethereum network, specify it's `network_id` (currently defaults to ropsten `0x3`). In this case be aware that the `address` returned will be the address on the public network (currently ropsten) for the users profile. The requested network address will be in the `networkAddress` field and will be MNID encoded.
+
+```javascript
+credentials.createRequest({network_id: '0x4'}).then(requestToken => {
+  // send requestToken to browser
+})
+```
+
 In your front end use [uport-connect](https://github.com/uport-project/uport-connect) to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
 
 ```javascript

@@ -32,6 +32,9 @@ export default class Credentials {
     if (params.callbackUrl) {
       payload.callback = params.callbackUrl
     }
+    if (params.network_id) {
+      payload.net = params.network_id
+    }
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
 
@@ -39,6 +42,9 @@ export default class Credentials {
   receive (token, callbackUrl = null) {
     return verifyJWT(this.settings, token, callbackUrl).then(({payload, profile}) => {
       const credentials = {...profile, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
+      if (payload.nad) {
+        credentials.networkAddress = payload.nad
+      }
       if (payload.verified) {
         return Promise.all(payload.verified.map(token => verifyJWT(this.settings, token))).then(verified => {
           return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
