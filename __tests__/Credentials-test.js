@@ -27,6 +27,12 @@ describe('createRequest', () => {
     })
   })
 
+  it('has correct payload in JWT requesting a specific network_id', () => {
+    return uport.createRequest({network_id: '0x4'}).then((jwt) => {
+      return expect(decodeToken(jwt)).toMatchSnapshot()
+    })
+  })
+
   it('ignores unsupported request parameters', () => {
     return uport.createRequest({signing: true, sellSoul: true}).then((jwt) => {
       return expect(decodeToken(jwt)).toMatchSnapshot()
@@ -97,6 +103,12 @@ describe('receive', () => {
 
   it('returns profile with only public claims', () => {
     return createShareResp().then(jwt => uport.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile with private chain network id claims', () => {
+    return createShareResp({nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'}).then(jwt => uport.receive(jwt)).then(profile =>
       expect(profile).toMatchSnapshot()
     )
   })
