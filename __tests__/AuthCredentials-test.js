@@ -52,7 +52,6 @@ describe('createRequest', () => {
 
   it('has correct payload in JWT for a plain request for public details', () => {
     return uport.createRequest().then((jwt) => {
-      console.log(jwt)
       return expect(decodeToken(jwt)).toMatchSnapshot()
     })
   })
@@ -159,7 +158,7 @@ describe('receive', () => {
 
   it('returns pushToken if available', () => {
     return createShareResp({capabilities: ['PUSHTOKEN']}).then(jwt => uport.receive(jwt)).then(res =>
-      expect(res.credentials.pushToken).toEqual('PUSHTOKEN')
+      expect(res.pushToken).toEqual('PUSHTOKEN')
     )
   })
 
@@ -181,7 +180,7 @@ describe('receive', () => {
   })
 })
 
-describe('authResponse', () => {
+describe('getAuthResponse', () => {
 
   let uport, cRedis, rRedis
 
@@ -191,7 +190,7 @@ describe('authResponse', () => {
     uport.challengeStorage.client = redisMock.createClient()
     uport.responseStorage.client = redisMock.createClient()
     rRedis = uport.responseStorage.client
-    cRedis = uport.responseStorage.client
+    cRedis = uport.challengeStorage.client
 
     rRedis.set(`${responseKeyPrefix}:${pairId}`, response, (err, res) => {
         if (err) throw new Error('Redis client could not set value')
@@ -200,19 +199,19 @@ describe('authResponse', () => {
   })
 
   it('it returns the response for a given pairId', () => {
-    return uport.authResponse(pairId).then(res => {
+    return uport.getAuthResponse(pairId).then(res => {
       expect(res).toEqual(response)
     })
   })
 
   it('it returns null if there is no key for a given pairId', () => {
-    return uport.authResponse(pairId + '1').then(res => {
+    return uport.getAuthResponse(pairId + '1').then(res => {
       expect(res).toEqual(null)
     })
   })
 
   it('if requested key is set, it is deleted upon being returned', (done) => {
-    uport.authResponse(pairId).then(res => {
+    uport.getAuthResponse(pairId).then(res => {
       rRedis.get(`${responseKeyPrefix}:${pairId}`, (err, res) => {
           if (err) throw new Error('Redis client could not set value')
           expect(res).toEqual(null)

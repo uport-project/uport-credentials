@@ -39,8 +39,8 @@
       let uport = new uportconnect.Connect()
       // Set your server host/port
       const reqUrl  = 'your-url-to-fetch-requests/authRequest'
-      const postUrl = 'your-url-to-receive-responses/auth'
-      let pollUrl   = 'your-url-to-fetch-your-response/authResponse'
+      const authUrl = 'your-url-to-verify-response/auth'
+      let resUrl   = 'your-url-to-fetch-your-response/authResponse'
 
       function loginBtnClick () {
         function reqListener () {
@@ -48,9 +48,9 @@
           const token = resObj.message
           const pairId = resObj.pairId
 
-          pollUrl = pollUrl + pairId
+          resUrl = resUrl + pairId
 
-          uport.sendRequestToken({token, pollUrl, postUrl}).then(res => {
+            uport.sendRequestToken({token, resUrl, authUrl}).then(res => {
             console.log(JSON.stringify(res))
             $('#addr').textContent = res.credentials.address
             $('#name').textContent = res.credentials.name

@@ -44,12 +44,12 @@ export default class Credentials {
       const credentials = {  ...profile,
                              ...(payload.own || {}),
                              ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}),
-                             address: payload.iss,
-                             challenge: payload.challenge || undefined
+                             address: payload.iss
                           }
       if (payload.nad) {
         credentials.networkAddress = payload.nad
       }
+      if (payload.challenge) credentials.challenge = payload.challenge
       if (payload.verified) {
         return Promise.all(payload.verified.map(token => verifyJWT(this.settings, token))).then(verified => {
           return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}

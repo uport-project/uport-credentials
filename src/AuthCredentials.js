@@ -3,7 +3,7 @@ import Storage from './Storage.js'
 import crypto from 'crypto'
 import { createJWT } from './JWT'
 
-// Generate random 18 byte hex string
+// Generate random 16 byte hex string
 const random  = () => {
   return new Promise((resolve, reject) => {
     crypto.randomBytes(16, (err, buf) => {
@@ -47,7 +47,7 @@ class AuthCredentials extends Credentials {
     ).then(res => createJWT(this.settings, {...payload, type: 'shareReq'}))
   }
 
-  receive (token, response = {}, callbackUrl = null) {
+  receive(token, callbackUrl = null) {
     // Verify sig and check challenge equivalence
     let credentials, pairId, challenge
     return super.receive(token, callbackUrl).then(res => {
@@ -61,21 +61,27 @@ class AuthCredentials extends Credentials {
       const storedChallenge = val
       if (storedChallenge === challenge) {
         this.challengeStorage.del(pairId)
-        response.credentials = credentials
-        return this.responseStorage.set(pairId, JSON.stringify(response))
+        return credentials
       }
-      this.responseStorage.set(pairId, 'Error')
       throw new Error('Authentication Failed: receive() Challenge did not match')
-    }).then(res => response)
+    }).then(res => credentials)
   }
 
-  authResponse(pairId) {
+  getAuthResponse(pairId) {
     return this.responseStorage.get(pairId).then(res => {
       if (res) {
         this.responseStorage.del(pairId)
       }
       return res
     })
+  }
+
+  setAuthResponse(res) {
+    const token = res.access_token
+    const decodedToken = decodeToken(token)
+    const pairId = decodedToken.payload.challenge.split('.')[0]
+    const response = { message: res }
+    return this.responseStorage.set(pairId, JSON.stringify(response))
   }
 }
 

@@ -37,9 +37,10 @@ app.post('/auth', (req, res) => {
   const jwt = req.body.access_token
   const token = decodeToken(jwt)
   const response = {message: {status: 'Authentication Succesful'}, error: '' }
-  return authCredentials.receive(jwt, response).then(credentials => {
+  return authCredentials.receive(jwt).then(credentials => {
     console.log('Authentication Success')
-    res.send(credentials)
+    const response = {message: {status: 'Authentication Succesful', credentials }, error: '' }
+    res.send(response)
   }).catch(err => {
     console.log('Authentication Failed')
   })
@@ -48,13 +49,18 @@ app.post('/auth', (req, res) => {
 app.get('/authresponse/:pairId', (req, res) => {
   // Browser polling for a response
   const pairId = req.params.pairId
-  authCredentials.authResponse(pairId).then(response => {
+  authCredentials.getAuthResponse(pairId).then(response => {
     if (response === null ) { res.status(404) }
     res.send(response)
   }).catch(err => {
     console.log(err)
     res.status(500)
   })
+})
+
+app.post('/authresponse', (req, res) => {
+  console.log(req.body.access_token)
+  authCredentials.setAuthResponse(req.body).then(val => res.status(200))
 })
 
 const server = app.listen(process.env.PORT || 8081, () => {
