@@ -9,6 +9,7 @@ class Storage {
     this.client.on("error", err => {console.log("Error " + err)})
     this.prefix = prefix ? `${prefix}:` : ''
     this.key = pairId => (`${this.prefix}${pairId}`)
+    this.expire = 120 //seconds
   }
 
   get(key) {
@@ -22,7 +23,7 @@ class Storage {
 
   set(key, value) {
     return new Promise((resolve, reject) => {
-      this.client.set(this.key(key), value, (err, res) => {
+      this.client.setex(this.key(key), this.expire, value, (err, res) => {
         if (err) reject(err)
         return resolve(res)
       })
