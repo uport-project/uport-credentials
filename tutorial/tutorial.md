@@ -70,4 +70,10 @@ Once we have the JWT we wish to validate it. We use the `receive()` function fir
 
 Next we check that the issuer of the response token (i.e. the user) matches the subject (`sub` field) of the returned credential, that the issuer of the returned credential is the Creator App, and that the credential is of the type `Custom Attestation` with value `Custom Value`.
 
-Congratulations, you have verified the credential!
+If everything checks out, you should see the output 
+
+```
+Credential verified.
+```
+
+in the console. Congratulations, you have verified the credential!
