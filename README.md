@@ -108,6 +108,63 @@ credentials.receive(responseToken).then(profile => {
 
 For more information about the contents of the profile object see the uport-persona documentation.
 
+### Challenge/Response
+
+A simple optional challenge/response protocol is supported to ensure that the user you send the request to also is the one signing the response.
+
+To use it create a simple object with 2 functions: `createChallenge()` and `verifyResponse(challenge)`. We include a simple version suitable for in browser usage, but it is very simple to implement one suitable with your back end infrastructure.
+
+To use the simple in memory version pass it in as the `challenger` option to the `Credentials` constructor:
+
+```javascript
+import { Credentials, SimpleSigner, MemoryChallenger } from 'uport'
+
+const signer = SimpleSigner(process.env.PRIVATE_KEY)
+const credentials = new Credentials({
+  appName: 'App Name',
+  address: 'MNID Encoded uPort Address For Your App'
+  signer: signer,
+  challenger: new MemoryChallenger(),
+  networks: networks
+})
+```
+
+Here is a simple unsupported example of implementing a challenger for Redis:
+
+```javascript
+import redis from 'redis'
+import { random } from 'uport'
+
+class RedisChallenger {
+  constructor(options = {}) {
+    this.client = redis.createClient(options.redis || {})
+    this.expire = options.expire || 120
+  }
+
+  createChallenge() {
+    return new Promise((resolve, reject) => {
+      random().then((challenge) => {
+        this.client.setex(`challenge/${challenge}`, 1, (error, res) => {
+          if (error) return reject(error)
+          resolve(challenge)
+        })
+      })
+    }
+  }
+
+  verifiyResponse (challenge) {
+    return new Promise((resolve, reject) => {
+      this.client.get(`challenge/${challenge}`, (error, exists) => {
+        if (error) return reject(error)
+        if (exists) {
+          this.client.del(`challenge/${challenge}`)
+          resolve(true)
+        }
+      })
+  }
+}
+```
+
 ### Requesting Push notification tokens from your users
 
 As part of the selective disclosure request you can ask for permission from your users to communicate directly with their app.
