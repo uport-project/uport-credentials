@@ -10,13 +10,14 @@ var signer = uport.SimpleSigner('28cefd149967e661b38495d2b5ab3964ffa0055912512d7
 var credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
   address: '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92',
-  signer: signer,
-  networks: {'0x4': {'registry' : '0x2cc31912b2b0f3075a87b3640923d45a26cef3ee', 'rpcUrl' : 'https://rinkeby.infura.io'}}
+  signer: signer
+  //networks: {'0x4': {'registry' : '0x2cc31912b2b0f3075a87b3640923d45a26cef3ee', 'rpcUrl' : 'https://rinkeby.infura.io'}}
+  // Note: we use Rinkeby by default, the above is the explicit format for selecting a network
 })
 
 app.get('/', function (req, res) {
   credentials.attest({
-    sub: '2oyKmsRTSk251bJTxzwLQaKsBSMeoky7VZP',
+    sub: '2ovkMrL4jxwRbr1ia9CUUMN5TddtBx9zKmN',
     exp: 1552046024213,
     claim: {'Custom Attestation' : 'Custom Value'}
   }).then(function (att) {

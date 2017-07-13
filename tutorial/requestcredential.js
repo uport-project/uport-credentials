@@ -10,8 +10,9 @@ var signer = uport.SimpleSigner('5acea265dcbf01355956b36f82793a13caf1be650bb74ca
 var credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
   address: '2opiNrGSxTW6sFo6ervHZnEeEXGNGAoupFN',
-  signer: signer,
-  networks: {'0x4': {'registry' : '0x2cc31912b2b0f3075a87b3640923d45a26cef3ee', 'rpcUrl' : 'https://rinkeby.infura.io'}}
+  signer: signer
+//  networks: {'0x4': {'registry' : '0x2cc31912b2b0f3075a87b3640923d45a26cef3ee', 'rpcUrl' : 'https://rinkeby.infura.io'}}
+  // Note: we use Rinkeby by default, the above is the explicit format for selecting a network
 })
 
 var app = express();
