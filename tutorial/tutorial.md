@@ -22,8 +22,7 @@ We then create a `Credentials` object using the signer and the uPort identifier 
 var credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
   address: '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92',
-  signer: signer,
-  networks: {'0x4': {'registry' : '0x2cc31912b2b0f3075a87b3640923d45a26cef3ee', 'rpcUrl' : 'https://rinkeby.infura.io'}}
+  signer: signer
 })
 ```
 
