@@ -26,7 +26,7 @@ Our default uport controller contract is controlled by a single device, but you 
 
 A uport identity also optionally has a public profile stored on ipfs and linked to your identity through the uport registry. This profile consists of JSON using the [Schema.org](http://schema.org/) conventions.
 
-When interacting privately with a user you will be interchanging signed JWT. To verify the signature of the JWT you and your users will be fetching your public key from the public profile.
+When interacting privately with a user you will be interchanging signed JWT([JSON Web Token](https://jwt.io/)). To verify the signature of the JWT you and your users will be fetching your public key from the public profile.
 
 ## Configure your application
 
@@ -38,7 +38,7 @@ import { Credentials, SimpleSigner } from 'uport'
 const signer = SimpleSigner(process.env.PRIVATE_KEY)
 const credentials = new Credentials({
   appName: 'App Name',
-  address: 'MNID Encoded uPort Address For Your App'
+  address: 'MNID Encoded uPort Address For Your App',
   signer: signer,
   networks: networks
 })
