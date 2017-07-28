@@ -79,8 +79,11 @@ describe('attest', () => {
 })
 
 describe('receive', () => {
+
   function createShareResp (payload = {}) {
-    return createJWT({address: '0x001122', signer}, {...payload, type: 'shareResp'})
+    return uport.createRequest({requested: ['name', 'phone']}).then((jwt) => {
+      return createJWT({address: '0x001122', signer}, {...payload, type: 'shareResp', req:jwt})
+    })
   }
 
   function createShareRespWithVerifiedCredential (payload = {}, verifiedClaim = {sub: '0x112233', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133996 + 1000}) {
