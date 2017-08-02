@@ -105,8 +105,15 @@ credentials.receive(responseToken).then(profile => {
   // Store user profile
 })
 ```
-
 For more information about the contents of the profile object see the uport-persona documentation.
+
+### Stateless Challenge/Response
+
+To ensure that the response received was created as a response to your selective disclosure request above, the original request is included in the response from the mobile app.
+
+The default verification rule is that the issuer of the embedded request must match the clientId in your Credentials object and that the original request has not yet expired.
+
+Some applications that exclusively live in the browser are unable to sign the original request. In those cases the request token verification is ignored.
 
 ### Requesting Push notification tokens from your users
 

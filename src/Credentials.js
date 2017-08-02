@@ -1,4 +1,5 @@
 import { createJWT, verifyJWT } from './JWT'
+import { decodeToken } from 'jsontokens'
 import UportLite from 'uport-lite'
 import nets from 'nets'
 
@@ -41,19 +42,38 @@ export default class Credentials {
   // Receive response token from user and return data to promise
   receive (token, callbackUrl = null) {
     return verifyJWT(this.settings, token, callbackUrl).then(({payload, profile}) => {
-      const credentials = {...profile, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
-      if (payload.nad) {
-        credentials.networkAddress = payload.nad
+
+      function processPayload(settings) {
+        const credentials = {...profile, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
+        if (payload.nad) {
+          credentials.networkAddress = payload.nad
+        }
+        if (payload.verified) {
+          return Promise.all(payload.verified.map(token => verifyJWT(settings, token))).then(verified => {
+            return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
+          })
+        } else {
+          return credentials
+        }
       }
-      if (payload.verified) {
-        return Promise.all(payload.verified.map(token => verifyJWT(this.settings, token))).then(verified => {
-          return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
-        })
+
+      if(this.settings.address) {
+        if(payload.req) {
+          return verifyJWT(this.settings, payload.req).then((challenge) => {
+            if(challenge.payload.iss === this.settings.address) {
+              return processPayload(this.settings)
+            }
+          })
+        } else {
+          console.log('Challenge was not included in response')
+        }
       } else {
-        return credentials
+        return processPayload(this.settings)
       }
     })
   }
+
+
 
   push (token, {url}) {
     return new Promise((resolve, reject) => {

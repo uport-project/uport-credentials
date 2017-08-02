@@ -13,6 +13,7 @@ const verifier = new TokenVerifier('ES256K', publicKey)
 const profileA = {publicKey, name: 'David Chaum'}
 const registry = (address) => new Promise((resolve, reject) => resolve(address === '0x001122' ? profileA : null))
 const uport = new Credentials({signer, address: '0x001122', registry})
+const uport2 = new Credentials({registry})
 
 describe('createRequest', () => {
   it('creates a valid JWT for a request', () => {
@@ -79,8 +80,11 @@ describe('attest', () => {
 })
 
 describe('receive', () => {
+
   function createShareResp (payload = {}) {
-    return createJWT({address: '0x001122', signer}, {...payload, type: 'shareResp'})
+    return uport.createRequest({requested: ['name', 'phone']}).then((jwt) => {
+      return createJWT({address: '0x001122', signer}, {...payload, type: 'shareResp', req:jwt})
+    })
   }
 
   function createShareRespWithVerifiedCredential (payload = {}, verifiedClaim = {sub: '0x112233', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133996 + 1000}) {
@@ -118,6 +122,40 @@ describe('receive', () => {
       expect(profile.pushToken).toEqual('PUSHTOKEN')
     )
   })
+
+/////////////////////////////// no address in uport settings ///////////////////////////////
+
+  it('returns profile mixing public and private claims', () => {
+    return createShareResp({own: {name: 'Davie', phone: '+15555551234'}}).then(jwt => uport2.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile mixing public and private claims and verified credentials', () => {
+    return createShareRespWithVerifiedCredential({own: {name: 'Davie', phone: '+15555551234'}}).then(jwt => uport2.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile with only public claims', () => {
+    return createShareResp().then(jwt => uport2.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile with private chain network id claims', () => {
+    return createShareResp({nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'}).then(jwt => uport2.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns pushToken if available', () => {
+    return createShareResp({capabilities: ['PUSHTOKEN']}).then(jwt => uport2.receive(jwt)).then(profile =>
+      expect(profile.pushToken).toEqual('PUSHTOKEN')
+    )
+  })
+
+/////////////////////////////// no address in uport settings///////////////////////////////
 })
 
 describe('push', () => {
