@@ -3,6 +3,8 @@ import { isMNID, decode} from 'mnid'
 
 const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
 
+/**  @module uport-js/JWT */
+
 /**
 *  Creates a signed JWT given an address which becomes the issuer, a signer, and a payload for which the signature is over.
 *
@@ -12,10 +14,10 @@ const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
 *      ...
 *  })
 *
-*  @param    {Object}            [config]           a unsigned credential object
+*  @param    {Object}            [config]           an unsigned credential object
 *  @param    {String}            config.address     address, typically the uPort address of the signer which becomes the issuer
 *  @param    {SimpleSigner}      config.signer      a signer, reference our SimpleSigner.js
-*  @param    {Object}            payload            data payload object
+*  @param    {Object}            payload            payload object
 *  @return   {Promise<Object, Error>}               a promise which resolves with a signed JSON Web Token or rejects with an error
 */
 export function createJWT ({address, signer}, payload) {
@@ -47,11 +49,12 @@ export function createJWT ({address, signer}, payload) {
 *      ...
 *  })
 *
-*  @param    {Object}            [config]           a unsigned credential object
+*  @param    {Object}            [config]           an unsigned credential object
 *  @param    {String}            config.address     address, typically the uPort address of the signer which becomes the issuer
-*  @param    {SimpleSigner}      config.signer      a signer, reference our SimpleSigner.js
-*  @param    {Object}            payload            data payload object
-*  @return   {Promise<Object, Error>}               a promise which resolves with a signed JSON Web Token or rejects with an error
+*  @param    {UportLite}         config.registry    a uPort registry, reference our uport-lite library
+*  @param    {String}            jwt                a JSON Web Token to verify
+*  @param    {String}            callbackUrl        callback url in JWT
+*  @return   {Promise<Object, Error>}               a promise which resolves with a response object or rejects with an error
 */
 export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
   return new Promise((resolve, reject) => {
