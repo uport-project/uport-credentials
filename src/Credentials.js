@@ -3,33 +3,32 @@ import { decodeToken } from 'jsontokens'
 import UportLite from 'uport-lite'
 import nets from 'nets'
 
-
 /**
-*    Credentials allows you to easily created signed payloads used in uPort inlcuding
-*    credentials and signed mobile app requests (ex. selective disclosure requests for
-*    for private data). It also provides signature verification over mobile app response,
-*    helper functions and the ability to send push notifications to users.
+*    The Credentials class allows you to easily create the signed payloads used in uPort inlcuding
+*    credentials and signed mobile app requests (ex. selective disclosure requests
+*    for private data). It also provides signature verification over signed payloads and
+*    allows you to send push notifications to users.
 */
-
-export default class Credentials {
+class Credentials {
 
   /**
    * Instantiates a new uPort Credentials object
    *
    * @example
-   * import { Credentials } from 'uport'
-   * const registry =  new UportLite()
+   * import { Credentials, SimpleSigner } from 'uport'
    * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
-   * const setttings = { registry, networks }
+   * const setttings = { networks, address: '5A8bRWU3F7j3REx3vkJ...', signer: new SimpleSigner(process.env.PRIVATE_KEY)}
    * const credentials = new Credentials(settings)
    *
    * @example
    * import { Credentials } from 'uport'
    * const credentials = new Credentials()
    *
-   * @param       {Object}            [settings]             optional setttings
+   * @param       {Object}            [settings]             setttings
    * @param       {Object}            settings.networks      networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
-   * @param       {UportLite}            settings.registry      a registry object from UportLite
+   * @param       {UportLite}         settings.registry      a registry object from UportLite
+   * @param       {SimpleSigner}      settings.signer        a signer object, see SimpleSigner.js
+   * @param       {Address}           settings.address       your uPort address (may be the address of your application's uPort identity)
    * @return      {Credentials}                              self
    */
   constructor (settings = {}) {
@@ -56,9 +55,18 @@ export default class Credentials {
  *  credentials.createRequest(req).then(jwt => {
  *      ...
  *  })
+
+
+ requested: ['name','phone','identity_no'],
+    callbackUrl: 'https://....' // URL to send the response of the request to
+    notifications: true
+
  *
- *  @param    {Object}                  [params={}]     request params object
- *  @return   {Promise<Object, Error>}                  a promise which resolves with a signed JSON Web Token rejects with an error
+ *  @param    {Object}             [params={}]           request params object
+ *  @param    {Array}              params.requested      an array of attributes for which you are requesting credentials to be shared for
+ *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
+ *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
+ *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
  */
   createRequest (params = {}) {
     const payload = {}
@@ -219,3 +227,5 @@ const configNetworks = (nets) => {
   })
   return nets
 }
+
+export default Credentials
