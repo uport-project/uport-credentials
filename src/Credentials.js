@@ -38,6 +38,8 @@ export default class Credentials {
     }
     if (params.exp) {
       payload.exp = params.exp
+    } else {
+      payload.exp = Date().getTime() + 600000
     }
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
@@ -56,6 +58,8 @@ export default class Credentials {
             return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
           })
         } else {
+          console.log('Hi Zach')
+          console.log(credentials)
           return credentials
         }
       }
@@ -63,7 +67,9 @@ export default class Credentials {
       if(this.settings.address) {
         if(payload.req) {
           return verifyJWT(this.settings, payload.req).then((challenge) => {
-            if(challenge.payload.iss === this.settings.address && challenge.type === 'shareReq') {
+            if(challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
+              console.log(challenge)
+              console.log('PROCESSING PAYLOAD')
               return processPayload(this.settings)
             }
           })
