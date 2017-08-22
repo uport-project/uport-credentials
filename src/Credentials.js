@@ -36,6 +36,9 @@ export default class Credentials {
     if (params.network_id) {
       payload.net = params.network_id
     }
+    if (params.exp) {
+      payload.exp = params.exp
+    }
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
 
@@ -60,7 +63,7 @@ export default class Credentials {
       if(this.settings.address) {
         if(payload.req) {
           return verifyJWT(this.settings, payload.req).then((challenge) => {
-            if(challenge.payload.iss === this.settings.address) {
+            if(challenge.payload.iss === this.settings.address && challenge.type === 'shareReq') {
               return processPayload(this.settings)
             }
           })
