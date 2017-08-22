@@ -36,7 +36,7 @@ export default class Credentials {
     if (params.network_id) {
       payload.net = params.network_id
     }
-    if (params.exp) {
+    if (params.exp) { //checks for expiration on requests, if none is provided the default is 10 min
       payload.exp = params.exp
     } else {
       payload.exp = Date().getTime() + 600000
@@ -58,8 +58,6 @@ export default class Credentials {
             return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
           })
         } else {
-          console.log('Hi Zach')
-          console.log(credentials)
           return credentials
         }
       }
@@ -68,8 +66,6 @@ export default class Credentials {
         if(payload.req) {
           return verifyJWT(this.settings, payload.req).then((challenge) => {
             if(challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
-              console.log(challenge)
-              console.log('PROCESSING PAYLOAD')
               return processPayload(this.settings)
             }
           })
