@@ -85,6 +85,11 @@ class Credentials {
     if (params.network_id) {
       payload.net = params.network_id
     }
+    if (params.exp) { //checks for expiration on requests, if none is provided the default is 10 min
+      payload.exp = params.exp
+    } else {
+      payload.exp = Date().getTime() + 600000
+    }
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
 
@@ -123,7 +128,7 @@ class Credentials {
       if(this.settings.address) {
         if(payload.req) {
           return verifyJWT(this.settings, payload.req).then((challenge) => {
-            if(challenge.payload.iss === this.settings.address) {
+            if(challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
               return processPayload(this.settings)
             }
           })

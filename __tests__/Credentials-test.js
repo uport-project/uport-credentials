@@ -87,6 +87,12 @@ describe('receive', () => {
     })
   }
 
+  function createShareRespWithExpiredRequest (payload = {}) {
+    return uport.createRequest({requested: ['name', 'phone'], exp: Date().getTime() - 3600000}).then((jwt) => {
+      return createJWT({address: '0x001122', signer}, {...payload, type: 'shareResp', req:jwt})
+    })
+  }
+
   function createShareRespWithVerifiedCredential (payload = {}, verifiedClaim = {sub: '0x112233', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133996 + 1000}) {
     return uport.attest(verifiedClaim).then(jwt => {
       return createShareResp({...payload, verified: [jwt]})
@@ -121,6 +127,10 @@ describe('receive', () => {
     return createShareResp({capabilities: ['PUSHTOKEN']}).then(jwt => uport.receive(jwt)).then(profile =>
       expect(profile.pushToken).toEqual('PUSHTOKEN')
     )
+  })
+
+  it('handles response to expired request', () => {
+    return createShareRespWithExpiredRequest().then(jwt => uport.receive(jwt)).catch(error => expect(error.message).toEqual('JWT has expired'))
   })
 
 /////////////////////////////// no address in uport settings ///////////////////////////////
