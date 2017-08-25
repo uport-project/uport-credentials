@@ -26,7 +26,7 @@ Our default uport controller contract is controlled by a single device, but you 
 
 A uport identity also optionally has a public profile stored on ipfs and linked to your identity through the uport registry. This profile consists of JSON using the [Schema.org](http://schema.org/) conventions.
 
-When interacting privately with a user you will be interchanging signed JWT. To verify the signature of the JWT you and your users will be fetching your public key from the public profile.
+When interacting privately with a user you will be interchanging signed JWT([JSON Web Token](https://jwt.io/)). To verify the signature of the JWT you and your users will be fetching your public key from the public profile.
 
 ## Configure your application
 
@@ -38,7 +38,7 @@ import { Credentials, SimpleSigner } from 'uport'
 const signer = SimpleSigner(process.env.PRIVATE_KEY)
 const credentials = new Credentials({
   appName: 'App Name',
-  address: 'MNID Encoded uPort Address For Your App'
+  address: 'MNID Encoded uPort Address For Your App',
   signer: signer,
   networks: networks
 })
@@ -105,8 +105,15 @@ credentials.receive(responseToken).then(profile => {
   // Store user profile
 })
 ```
-
 For more information about the contents of the profile object see the uport-persona documentation.
+
+### Stateless Challenge/Response
+
+To ensure that the response received was created as a response to your selective disclosure request above, the original request is included in the response from the mobile app.
+
+The default verification rule is that the issuer of the embedded request must match the clientId in your Credentials object and that the original request has not yet expired.
+
+Some applications that exclusively live in the browser are unable to sign the original request. In those cases the request token verification is ignored.
 
 ### Requesting Push notification tokens from your users
 

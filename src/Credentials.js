@@ -1,8 +1,36 @@
 import { createJWT, verifyJWT } from './JWT'
+import { decodeToken } from 'jsontokens'
 import UportLite from 'uport-lite'
 import nets from 'nets'
 
-export default class Credentials {
+/**
+*    The Credentials class allows you to easily create the signed payloads used in uPort inlcuding
+*    credentials and signed mobile app requests (ex. selective disclosure requests
+*    for private data). It also provides signature verification over signed payloads and
+*    allows you to send push notifications to users.
+*/
+class Credentials {
+
+  /**
+   * Instantiates a new uPort Credentials object
+   *
+   * @example
+   * import { Credentials, SimpleSigner } from 'uport'
+   * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
+   * const setttings = { networks, address: '5A8bRWU3F7j3REx3vkJ...', signer: new SimpleSigner(process.env.PRIVATE_KEY)}
+   * const credentials = new Credentials(settings)
+   *
+   * @example
+   * import { Credentials } from 'uport'
+   * const credentials = new Credentials()
+   *
+   * @param       {Object}            [settings]             setttings
+   * @param       {Object}            settings.networks      networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
+   * @param       {UportLite}         settings.registry      a registry object from UportLite
+   * @param       {SimpleSigner}      settings.signer        a signer object, see SimpleSigner.js
+   * @param       {Address}           settings.address       your uPort address (may be the address of your application's uPort identity)
+   * @return      {Credentials}                              self
+   */
   constructor (settings = {}) {
     this.settings = settings
     this.settings.networks = settings.networks ? configNetworks(settings.networks) : {}
@@ -17,7 +45,29 @@ export default class Credentials {
     }
   }
 
-  // Create request token
+/**
+ *  Creates a signed request token (JWT) given a request params object.
+ *
+ *  @example
+ *  const req = { requested: ['name', 'country'],
+ *                callbackUrl: 'https://myserver.com',
+ *                notifications: true }
+ *  credentials.createRequest(req).then(jwt => {
+ *      ...
+ *  })
+
+
+ requested: ['name','phone','identity_no'],
+    callbackUrl: 'https://....' // URL to send the response of the request to
+    notifications: true
+
+ *
+ *  @param    {Object}             [params={}]           request params object
+ *  @param    {Array}              params.requested      an array of attributes for which you are requesting credentials to be shared for
+ *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
+ *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
+ *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
+ */
   createRequest (params = {}) {
     const payload = {}
     if (params.requested) {
@@ -35,26 +85,69 @@ export default class Credentials {
     if (params.network_id) {
       payload.net = params.network_id
     }
+    if (params.exp) { //checks for expiration on requests, if none is provided the default is 10 min
+      payload.exp = params.exp
+    } else {
+      payload.exp = Date().getTime() + 600000
+    }
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
 
-  // Receive response token from user and return data to promise
+/**
+  *  Receive signed response token from mobile app. Verifies and parses the given response token.
+  *
+  *  @example
+  *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
+  *  credentials.receive(resToken).then(res => {
+  *      const credentials = res.verified
+         const name =  res.name
+  *      ...
+  *  })
+  *
+  *  @param    {String}                  token                 a response token
+  *  @param    {String}                  [callbackUrl=null]    callbackUrl
+  *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
+  */
   receive (token, callbackUrl = null) {
     return verifyJWT(this.settings, token, callbackUrl).then(({payload, profile}) => {
-      const credentials = {...profile, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
-      if (payload.nad) {
-        credentials.networkAddress = payload.nad
+
+      function processPayload(settings) {
+        const credentials = {...profile, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
+        if (payload.nad) {
+          credentials.networkAddress = payload.nad
+        }
+        if (payload.verified) {
+          return Promise.all(payload.verified.map(token => verifyJWT(settings, token))).then(verified => {
+            return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
+          })
+        } else {
+          return credentials
+        }
       }
-      if (payload.verified) {
-        return Promise.all(payload.verified.map(token => verifyJWT(this.settings, token))).then(verified => {
-          return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
-        })
+
+      if(this.settings.address) {
+        if(payload.req) {
+          return verifyJWT(this.settings, payload.req).then((challenge) => {
+            if(challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
+              return processPayload(this.settings)
+            }
+          })
+        } else {
+          console.log('Challenge was not included in response')
+        }
       } else {
-        return credentials
+        return processPayload(this.settings)
       }
     })
   }
 
+/**
+  *  Send a push notification to a user, consumes a token which allows you to send push notifications
+  *  and a url/uri request you want to send to the user.
+  *
+  *  @param    {String}                  token       a push notification token (get a pn token by requesting push permissions in a request)
+  *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
+  */
   push (token, {url}) {
     return new Promise((resolve, reject) => {
       if (!token) {
@@ -86,12 +179,41 @@ export default class Credentials {
     })
   }
 
-  // Create attestation
+/**
+  *  Create a credential (a signed JSON Web Token)
+  *
+  *  @example
+  *  credentials.attest({
+  *   sub: '5A8bRWU3F7j3REx3vkJ...', // uPort address of user, likely a MNID
+  *   exp: <future timestamp>,
+  *   claim: { name: 'John Smith' }
+  *  }).then( credential => {
+  *   ...
+  *  })
+  *
+  * @param    {Object}            [credential]           a unsigned credential object
+  * @param    {String}            credential.sub         subject of credential (a uPort address)
+  * @param    {String}            credential.claim       claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
+  * @param    {String}            credential.exp         time at which this claim expires and is no longer valid
+  * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
+  */
   attest ({sub, claim, exp}) {
     return createJWT(this.settings, {sub: sub, claim, exp})
   }
 
-  // Lookup public uport address of any user
+/**
+  *  Look up a profile in the registry for a given uPort address. Address must be MNID encoded.
+  *
+  *  @example
+  *  credentials.lookup('5A8bRWU3F7j3REx3vkJ...').then(profile => {
+  *     const name = profile.name
+  *     const pubkey = profile.pubkey
+  *     ...
+  *   })
+  *
+  * @param    {String}            address             a MNID encoded address
+  * @return   {Promise<Object, Error>}                a promise which resolves with parsed profile or rejects with an error
+  */
   lookup (address) {
     return this.settings.registry(address)
   }
@@ -110,3 +232,5 @@ const configNetworks = (nets) => {
   })
   return nets
 }
+
+export default Credentials
