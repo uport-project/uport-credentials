@@ -2,7 +2,7 @@
   "name": "uport",
   "version": "0.5.2",
   "description": "Library for interacting with uport profiles and attestations",
-  "main": "dist/uport.js",
+  "main": "lib/index.js",
   "files": [
     "lib",
     "dist",
@@ -15,7 +15,8 @@
     "build": "yarn build:es5 && yarn test && yarn build:browser",
     "build:docs:html": "./node_modules/.bin/jsdoc src/* README.md -d docs",
     "build:docs:md": "./node_modules/jsdoc-to-markdown/bin/cli.js src/* > DOCS.md",
-    "build:docs": "npm run build:docs:html && npm run build:docs:md"
+    "build:docs": "npm run build:docs:html && npm run build:docs:md",
+    "prepublish": "yarn build"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "license": "MIT",
