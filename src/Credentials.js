@@ -88,7 +88,7 @@ class Credentials {
     if (params.exp) { //checks for expiration on requests, if none is provided the default is 10 min
       payload.exp = params.exp
     } else {
-      payload.exp = Date().getTime() + 600000
+      payload.exp = new Date().getTime() + 600000
     }
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
