@@ -17,7 +17,7 @@ var credentials = new uport.Credentials({
 
 app.get('/', function (req, res) {
   credentials.attest({
-    sub: '2ovkMrL4jxwRbr1ia9CUUMN5TddtBx9zKmN',
+    sub: '2opT3phRXKtkaqjv6LAyR9pqkVwADVECZwx',
     exp: 1552046024213,
     claim: {'Custom Attestation' : 'Custom Value'}
   }).then(function (att) {
@@ -25,8 +25,9 @@ app.get('/', function (req, res) {
     console.log(jsontokens.decodeToken(att))
     var uri = 'me.uport:add?attestations=' + att
     var qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
+    var mobileUrl = 'https://id.uport.me/add?attestations=' + att + '&callback_url=https://www.google.com'
     console.log(uri)
-    res.send('<img src=' + qrurl + '></img>');
+    res.send('<div><img src=' + qrurl + '></img></div><div><a href=' + mobileUrl + '>Click here if on mobile</a></div>')
   })
 })
 
