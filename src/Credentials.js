@@ -88,7 +88,7 @@ class Credentials {
     if (params.exp) { //checks for expiration on requests, if none is provided the default is 10 min
       payload.exp = params.exp
     } else {
-      payload.exp = new Date().getTime() + 600000
+      payload.exp = Date().getTime() / 1000 + 600
     }
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
@@ -194,7 +194,7 @@ class Credentials {
   * @param    {Object}            [credential]           a unsigned credential object
   * @param    {String}            credential.sub         subject of credential (a uPort address)
   * @param    {String}            credential.claim       claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
-  * @param    {String}            credential.exp         time at which this claim expires and is no longer valid
+  * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
   * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
   */
   attest ({sub, claim, exp}) {

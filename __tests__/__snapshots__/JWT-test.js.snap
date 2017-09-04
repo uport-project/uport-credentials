@@ -1,7 +1,7 @@
 exports[`test accepts a valid audience 1`] = `
 Object {
   "aud": "0x001122",
-  "iat": 1485321133996,
+  "iat": 1485321133,
   "iss": "0x001122",
 }
 `;
@@ -9,15 +9,22 @@ Object {
 exports[`test accepts a valid audience using callback_url 1`] = `
 Object {
   "aud": "http://pututu.uport.me/unique",
-  "iat": 1485321133996,
+  "iat": 1485321133,
   "iss": "0x001122",
 }
 `;
 
 exports[`test accepts a valid exp 1`] = `
 Object {
-  "exp": 1485321133997,
-  "iat": 1485321133996,
+  "exp": 1485321134,
+  "iat": 1485321133,
+  "iss": "0x001122",
+}
+`;
+
+exports[`test accepts a valid iat 1`] = `
+Object {
+  "iat": 1485321133,
   "iss": "0x001122",
 }
 `;
@@ -29,20 +36,20 @@ Object {
     "typ": "JWT",
   },
   "payload": Object {
-    "iat": 1485321133996,
+    "iat": 1485321133,
     "iss": "0x001122",
     "requested": Array [
       "name",
       "phone",
     ],
   },
-  "signature": "zxGLQKo2WjgefrxEQWfwm_oago8Qr4YctBJoqNAm2XKE-48bADjolSo2T_tED9LnSikxqFIM9gNGpNgcY8JPdg",
+  "signature": "L0rjVxN1lT1AklZXT49EVPtYsQLZ4vVvtqnsBD5AOCwySoff_0Lff7IPg-A43eUCAPuGVBblKx1flYDt8T87TQ",
 }
 `;
 
 exports[`test verifies the JWT and return correct payload 1`] = `
 Object {
-  "iat": 1485321133996,
+  "iat": 1485321133,
   "iss": "0x001122",
   "requested": Array [
     "name",

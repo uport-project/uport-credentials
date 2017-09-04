@@ -23,7 +23,7 @@ const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
 export function createJWT ({address, signer}, payload) {
   const signingInput = createUnsignedToken(
     JOSE_HEADER,
-    {...payload, iss: address, iat: new Date().getTime()}
+    {iss: address, iat: ( Date.now() / 1000), ...payload }
   )
   return new Promise((resolve, reject) => {
     if (!signer) return reject(new Error('No Signer functionality has been configured'))
@@ -64,7 +64,10 @@ export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
       const publicKey = profile.publicKey.match(/^0x/) ? profile.publicKey.slice(2) : profile.publicKey
       const verifier = new TokenVerifier('ES256K', publicKey)
       if (verifier.verify(jwt)) {
-        if (payload.exp && payload.exp <= new Date().getTime()) {
+        if (payload.iat > Date.now() / 1000) {
+          return reject(new Error('JWT not valid yet (issued in the future)'))
+        }
+        if (payload.exp && payload.exp <= Date.now() / 1000) {
           return reject(new Error('JWT has expired'))
         }
         if (payload.aud) {
