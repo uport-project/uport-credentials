@@ -1,10 +1,10 @@
-# Server-side credential Tutorial
+# Server-side Credentials
 
-In this tutorial we will demonstrate how to create and sign a custom credential on a server (called the Creator) and present this to a uport identity. The user of the uPort app will add this credential to her list of credentials. Then we'll show how another service (called the Requestor) can request this credential and validate the corresponding JSON Web Token.
+Here we will demonstrate how to create and sign a custom credential on a server (called the Creator) and present this to a uport identity. The user of the uPort app will add this credential to her list of credentials. Then we'll show how another service (called the Requestor) can request this credential and validate the corresponding JSON Web Token.
 
-## uPort AppManager
+## Register Your App 
 
-First we wish to create identities for our apps. To do this, go to the [uPort AppManager](https://appmanager.uport.space), connect with your uPort, and select "New App". This will create a uPort identity for your app, and will display a private key, which you will use on the server to sign credentials. It's important that you save this key!
+First we wish to create identities for our apps. To do this, go to the My Apps tab, or alternatively, [uPort AppManager](https://appmanager.uport.space), then connect with your uPort, and select "New App". This will create a uPort identity for your app, and will display a private key, which you will use on the server to sign credentials. It's important that you save this key!
 
 Go ahead and create identities for the Creator and Requestor, or if you wish to skip this step we have created identities for these services already, with the private keys and addresses hard coded in the apps.
 
@@ -13,7 +13,7 @@ Go ahead and create identities for the Creator and Requestor, or if you wish to 
 In the file `createcredential.js` we have a simple node `express` server. In the setup phase we use the private key we got from the App Manager to create a `SimpleSigner` object. This object is what will be signing the credential.
 
 ```
-var signer = uport.SimpleSigner(<your key here>);
+var signer = uport.SimpleSigner(<your key here>)
 ```
 
 We then create a `Credentials` object using the signer and the uPort identifier of our app that we got from the App Manager:
