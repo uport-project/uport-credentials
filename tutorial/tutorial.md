@@ -4,7 +4,7 @@ Here we will demonstrate how to create and sign a custom credential on a server 
 
 ## Register Your App 
 
-First we wish to create identities for our apps. To do this, go to the My Apps tab, or alternatively, [uPort AppManager](https://appmanager.uport.space), then connect with your uPort, and select "New App". This will create a uPort identity for your app, and will display a private key, which you will use on the server to sign credentials. It's important that you save this key!
+First we wish to create identities for our apps. To do this, __go to the My Apps tab__, or alternatively, [uPort AppManager](https://appmanager.uport.space), then connect with your uPort, and select "New App". This will create a uPort identity for your app, and will display a private key, which you will use on the server to sign credentials. It's important that you save this key!
 
 Go ahead and create identities for the Creator and Requestor, or if you wish to skip this step we have created identities for these services already, with the private keys and addresses hard coded in the apps.
 
