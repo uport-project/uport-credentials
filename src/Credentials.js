@@ -166,12 +166,11 @@ class Credentials {
       }
 
       const plaintext = padMessage(JSON.stringify({url, message}))
-      console.log(plaintext)
 
       const enc = encryptMessage(plaintext, pubEncKey)
 
       nets({
-        uri: 'https://pututu.uport.space/api/v2/sns',
+        uri: 'https://pututu.uport.space/api/v2/sns', // TODO - change to .me
         json: { message: JSON.stringify(enc) },
         method: 'POST',
         withCredentials: false,
@@ -254,13 +253,14 @@ const padMessage = (message) => {
 }
 
 const encryptMessage = (message, receiverKey) => {
-  const tmpKey = nacl.box.keyPair().secretKey
+  const tmpKp = nacl.box.keyPair()
   const decodedKey = naclutil.decodeBase64(receiverKey)
   const decodedMsg = naclutil.decodeUTF8(message)
   const nonce = nacl.randomBytes(24)
 
-  const ciphertext = nacl.box(decodedMsg, nonce, decodedKey, tmpKey)
+  const ciphertext = nacl.box(decodedMsg, nonce, decodedKey, tmpKp.secretKey)
   return {
+    fromPub: naclutil.encodeBase64(tmpKp.publicKey),
     nonce: naclutil.encodeBase64(nonce),
     ciphertext: naclutil.encodeBase64(ciphertext)
   }
