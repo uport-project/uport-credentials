@@ -2,6 +2,8 @@ import { createJWT, verifyJWT } from './JWT'
 import { decodeToken } from 'jsontokens'
 import UportLite from 'uport-lite'
 import nets from 'nets'
+import nacl from 'tweetnacl'
+import naclutil from 'tweetnacl-util'
 
 /**
 *    The Credentials class allows you to easily create the signed payloads used in uPort inlcuding
@@ -145,10 +147,13 @@ class Credentials {
   *  Send a push notification to a user, consumes a token which allows you to send push notifications
   *  and a url/uri request you want to send to the user.
   *
-  *  @param    {String}                  token       a push notification token (get a pn token by requesting push permissions in a request)
+  *  @param    {String}                  token              a push notification token (get a pn token by requesting push permissions in a request)
+  *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
+  *  @param    {String}                  payload.url        a uport request url
+  *  @param    {String}                  payload.message    a message to display to the user
   *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
   */
-  push (token, {url}) {
+  push (token, pubEncKey, {url, message}) {
     return new Promise((resolve, reject) => {
       if (!token) {
         return reject(new Error('Missing push notification token'))
@@ -156,10 +161,18 @@ class Credentials {
       if (!url) {
         return reject(new Error('Missing payload url for sending to users device'))
       }
+      if (!pubEncKey) {
+        return reject(new Error('Missing public encryption key of the receiver'))
+      }
+
+      const plaintext = padMessage(JSON.stringify({url, message}))
+      console.log(plaintext)
+
+      const enc = encryptMessage(plaintext, pubEncKey)
 
       nets({
-        uri: 'https://pututu.uport.me/api/v1/sns',
-        json: {url},
+        uri: 'https://pututu.uport.space/api/v2/sns',
+        json: { message: JSON.stringify(enc) },
         method: 'POST',
         withCredentials: false,
         headers: {
@@ -231,6 +244,26 @@ const configNetworks = (nets) => {
     }
   })
   return nets
+}
+
+const padMessage = (message) => {
+  const INTERVAL_LENGTH = 50
+  const padLenght = INTERVAL_LENGTH - message.length % INTERVAL_LENGTH
+
+  return message + ' '.repeat(padLenght)
+}
+
+const encryptMessage = (message, receiverKey) => {
+  const tmpKey = nacl.box.keyPair().secretKey
+  const decodedKey = naclutil.decodeBase64(receiverKey)
+  const decodedMsg = naclutil.decodeUTF8(message)
+  const nonce = nacl.randomBytes(24)
+
+  const ciphertext = nacl.box(decodedMsg, nonce, decodedKey, tmpKey)
+  return {
+    nonce: naclutil.encodeBase64(nonce),
+    ciphertext: naclutil.encodeBase64(ciphertext)
+  }
 }
 
 export default Credentials
