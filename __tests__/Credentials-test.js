@@ -207,8 +207,8 @@ describe('push', () => {
       let encObj = JSON.parse(body.message)
       const box = naclutil.decodeBase64(encObj.ciphertext)
       const nonce = naclutil.decodeBase64(encObj.nonce)
-      const fromPub = naclutil.decodeBase64(encObj.fromPub)
-      const decrypted = nacl.box.open(box, nonce, fromPub, secEncKey)
+      const from = naclutil.decodeBase64(encObj.from)
+      const decrypted = nacl.box.open(box, nonce, from, secEncKey)
       const result = JSON.parse(naclutil.encodeUTF8(decrypted))
 
       return result.url === payload.url && result.message === payload.message

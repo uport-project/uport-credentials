@@ -149,6 +149,7 @@ class Credentials {
   *
   *  @param    {String}                  token              a push notification token (get a pn token by requesting push permissions in a request)
   *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
+  *  @param    {Object}                  payload            push notification payload
   *  @param    {String}                  payload.url        a uport request url
   *  @param    {String}                  payload.message    a message to display to the user
   *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
@@ -245,13 +246,28 @@ const configNetworks = (nets) => {
   return nets
 }
 
+/**
+ *  Adds padding to a string
+ *
+ *  @param      {String}        the message to be padded
+ *  @return     {String}        the padded message
+ *  @private
+ */
 const padMessage = (message) => {
   const INTERVAL_LENGTH = 50
-  const padLenght = INTERVAL_LENGTH - message.length % INTERVAL_LENGTH
+  const padLength = INTERVAL_LENGTH - message.length % INTERVAL_LENGTH
 
-  return message + ' '.repeat(padLenght)
+  return message + ' '.repeat(padLength)
 }
 
+/**
+ *  Encrypts a message
+ *
+ *  @param      {String}        the message to be encrypted
+ *  @param      {String}        the public encryption key of the receiver, encoded as base64
+ *  @return     {String}        the encrypted message, encoded as base64
+ *  @private
+ */
 const encryptMessage = (message, receiverKey) => {
   const tmpKp = nacl.box.keyPair()
   const decodedKey = naclutil.decodeBase64(receiverKey)
@@ -260,7 +276,7 @@ const encryptMessage = (message, receiverKey) => {
 
   const ciphertext = nacl.box(decodedMsg, nonce, decodedKey, tmpKp.secretKey)
   return {
-    fromPub: naclutil.encodeBase64(tmpKp.publicKey),
+    from: naclutil.encodeBase64(tmpKp.publicKey),
     nonce: naclutil.encodeBase64(nonce),
     ciphertext: naclutil.encodeBase64(ciphertext)
   }
