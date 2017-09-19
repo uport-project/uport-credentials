@@ -23,12 +23,14 @@ app.get('/', function (req, res) {
 
   credentials.createRequest({
     verified: ['Custom Attestation'],
-    callbackUrl: 'http://192.168.1.124:8081/callback',
+    callbackUrl: 'http://192.168.1.9:8081/callback',
+    exp: new Date().getTime() + 60000
   }).then( function(requestToken) {
     var uri = 'me.uport:me?requestToken=' + requestToken
     var qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
+    var mobileUrl = 'https://id.uport.me/me?requestToken=' + requestToken
     console.log(uri)
-    res.send('<img src=' + qrurl + '></img>');
+    res.send('<div><img src=' + qrurl + '></img></div><div><a href=' + mobileUrl + '>Click here if on mobile (Not implemented yet!)</a></div>');
   })
 
 })
@@ -39,6 +41,7 @@ app.post('/callback', function (req, res) {
   console.log(jwt)
 
   credentials.receive(jwt).then( function(creds) {
+    console.log(creds)
     if (creds.address == creds.verified[0].sub && 
        creds.verified[0].iss == '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92' &&
        creds.verified[0].claim['Custom Attestation'] === 'Custom Value')

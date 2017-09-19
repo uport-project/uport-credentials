@@ -2,9 +2,9 @@
 
 Here we will demonstrate how to create and sign a custom credential on a server (called the Creator) and present this to a uport identity. The user of the uPort app will add this credential to her list of credentials. Then we'll show how another service (called the Requestor) can request this credential and validate the corresponding JSON Web Token.
 
-## Register Your App 
+## Register Your App
 
-First we wish to create identities for our apps. To do this, __go to the My Apps tab__, or alternatively, [uPort AppManager](https://appmanager.uport.space), then connect with your uPort, and select "New App". This will create a uPort identity for your app, and will display a private key, which you will use on the server to sign credentials. It's important that you save this key!
+First we wish to create identities for our apps. You can skip this step if you're ok with using the default identities that are hardcoded in the tutorial files. To create identities, go to the [uPort AppManager](https://appmanager.uport.me), connect with your uPort, and select "New App". This will create a uPort identity for your app, and will display a private key, which you will use on the server to sign credentials. It's important that you save this key!
 
 Go ahead and create identities for the Creator and Requestor, or if you wish to skip this step we have created identities for these services already, with the private keys and addresses hard coded in the apps.
 
@@ -44,6 +44,15 @@ me.uport:add?attestations=<JSON Web Token>
 
 We present this to the user in the form of a QR code. When you scan this code with your mobile app you should see an alert that you are about to add a credential. It should reference the Creator app as the identity giving you this credential. This will add the credential locally to your phone.
 
+When you're done editing the file you may run the Creator service like so:
+
+```
+> cd tutorial
+> node createcredential.js
+```
+
+If you open your browser to `http://localhost:8081/` you should see the QR code with the credential, which you may scan with the uPort app.
+
 ## Requestor service
 
 The file `requestcredential.js` contains a simple node express server which will request the same credential that the Creator service gave out. The Requestor server will then validate that the identity who is providing the credential is the same identity that received the credential from the Creator service.
@@ -54,25 +63,38 @@ When we load the app using `app.get('/')` we use `createRequest()` in order to r
 
 The `callbackUrl` field specifies where the mobile app user should send the credential, should she agree to share it. If you are running the app on a local network you should put your local IP address here, followed by the route `/callback`. Make sure your mobile device is connected to the same network. If you are running the app on a VPS service like Digital Ocean, make sure to put the correct IP address in and that the right ports are open.
 
+We have an expiry field, denoted `exp`, which denotes how long the request will be valid. In our example we use 60 seconds (60000 milliseconds). This means that if the user waits longer than 60 seconds to provide the response their response will not be accepted as valid.
+
 ```
 credentials.createRequest({
   verified: ['Custom Attestation'],
-  callbackUrl: 'http://192.168.1.34:8081/callback'
+  callbackUrl: 'http://192.168.1.34:8081/callback',
+  exp: new Date().getTime() + 60000
 })
 ```
 
 The `createRequest()` function creates a signed JWT containing the request. The mobile app can then validate that the correct app sent the request.
 
-Once the mobile app user approves the request to share her credential, the `/callback` route is called using `app.post('/callback')`. Here we fetch the response JWT using `req.body.access_token`.
+To interact with the server, run
+
+```
+node requestcredential.js
+```
+
+and go to `http://localhost:8081` in your browser.
+
+When the mobile app user approves the request to share her credential after scanning the code, the `/callback` route is called using `app.post('/callback')`. Here we fetch the response JWT using `req.body.access_token`.
 
 Once we have the JWT we wish to validate it. We use the `receive()` function first. This validates the JWT by checking that the signature matches the public key of the issuer. This validation is done both for the overall JWT and also for the JWTs that are sent in the larger payload.
 
 Next we check that the issuer of the response token (i.e. the user) matches the subject (`sub` field) of the returned credential, that the issuer of the returned credential is the Creator App, and that the credential is of the type `Custom Attestation` with value `Custom Value`.
 
-If everything checks out, you should see the output 
+If everything checks out, you should see the output
 
 ```
 Credential verified.
 ```
 
 in the console. Congratulations, you have verified the credential!
+
+To test out everything, try checking for a different attestation and make sure it fails. Also try waiting longer than 60 seconds before sending the response to see if it fails - it should throw an error in this case.
