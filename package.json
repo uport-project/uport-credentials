@@ -15,7 +15,8 @@
     "build": "yarn build:es5 && yarn test && yarn build:browser",
     "build:docs:html": "./node_modules/.bin/jsdoc src/* README.md -d docs",
     "build:docs:md": "./node_modules/jsdoc-to-markdown/bin/cli.js src/* > DOCS.md",
-    "build:docs": "npm run build:docs:html && npm run build:docs:md"
+    "build:docs": "npm run build:docs:html && npm run build:docs:md",
+    "prepublish": "yarn build"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "license": "MIT",
@@ -34,7 +35,6 @@
     ]
   },
   "devDependencies": {
-    "babel": "^6.5.2",
     "babel-cli": "^6.22.2",
     "babel-jest": "^18.0.0",
     "babel-loader": "^6.2.10",
