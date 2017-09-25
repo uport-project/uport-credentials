@@ -6,7 +6,8 @@
   "files": [
     "lib",
     "dist",
-    "src"
+    "src",
+    "tutorial"
   ],
   "scripts": {
     "test": "jest",
