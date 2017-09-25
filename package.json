@@ -1,12 +1,13 @@
 {
   "name": "uport",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
   "files": [
     "lib",
     "dist",
-    "src"
+    "src",
+    "tutorial"
   ],
   "scripts": {
     "test": "jest",
