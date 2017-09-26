@@ -2,7 +2,7 @@
 
 Here we will demonstrate how to create and sign a custom credential on a server (called the Creator) and present this to a uport identity. The user of the uPort app will add this credential to her list of credentials. Then we'll show how another service (called the Requestor) can request this credential and validate the corresponding JSON Web Token.
 
-## Register Your App
+## Register The App
 
 First we wish to create identities for our apps. You can skip this step if you're ok with using the default identities that are hardcoded in the tutorial files. To create identities, go to the [uPort AppManager](https://appmanager.uport.me), connect with your uPort, and select "New App". This will create a uPort identity for your app, and will display a private key, which you will use on the server to sign credentials. It's important that you save this key!
 
@@ -12,13 +12,13 @@ Go ahead and create identities for the Creator and Requestor, or if you wish to 
 
 In the file `createcredential.js` we have a simple node `express` server. In the setup phase we use the private key we got from the App Manager to create a `SimpleSigner` object. This object is what will be signing the credential.
 
-```
+```js
 var signer = uport.SimpleSigner(<your key here>)
 ```
 
 We then create a `Credentials` object using the signer and the uPort identifier of our app that we got from the App Manager:
 
-```
+```js
 var credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
   address: '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92',
@@ -28,7 +28,7 @@ var credentials = new uport.Credentials({
 
 When we hit the default route using `app.get('/')` we will call `credentials.attest()` in order to sign the credential. For the fields of the credential, the `sub` field is the subject. Set this to the uPort Id of the user that is supposed to receive the credential. For testing purposes this would be the uPort identity shown on the mobile app of the reader. The `exp` field is the expiry of the token, in Unix time. As `claim` field, put your own custom object. We have here `{'Custom Attestation' : 'Custom Value'}` as an example.
 
-```
+```js
 credentials.attest({
   sub: '2oVV33jifY2nPBLowRS8H7Rkh7fCUDN7hNb',
   exp: 1552046024213,
@@ -65,7 +65,7 @@ The `callbackUrl` field specifies where the mobile app user should send the cred
 
 We have an expiry field, denoted `exp`, which denotes how long the request will be valid. In our example we use 60 seconds (60000 milliseconds). This means that if the user waits longer than 60 seconds to provide the response their response will not be accepted as valid.
 
-```
+```js
 credentials.createRequest({
   verified: ['Custom Attestation'],
   callbackUrl: 'http://192.168.1.34:8081/callback',
@@ -77,7 +77,7 @@ The `createRequest()` function creates a signed JWT containing the request. The 
 
 To interact with the server, run
 
-```
+```js
 node requestcredential.js
 ```
 
