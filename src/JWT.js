@@ -1,7 +1,14 @@
-import { createUnsignedToken, TokenVerifier, decodeToken } from 'jsontokens'
+import { TokenVerifier, decodeToken } from 'jsontokens'
 import { isMNID, decode} from 'mnid'
+import base64url from 'base64url'
 
 const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
+
+function encodeSection (data) {
+  return base64url.encode(JSON.stringify(data))
+}
+
+const ENCODED_HEADER = encodeSection(JOSE_HEADER)
 
 /**  @module uport-js/JWT */
 
@@ -21,10 +28,10 @@ const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
 *  @return   {Promise<Object, Error>}               a promise which resolves with a signed JSON Web Token or rejects with an error
 */
 export function createJWT ({address, signer}, payload) {
-  const signingInput = createUnsignedToken(
-    JOSE_HEADER,
-    {iss: address, iat: ( Date.now() / 1000), ...payload }
-  )
+  const signingInput = [ENCODED_HEADER,
+    encodeSection({iss: address, iat: ( Date.now() / 1000), ...payload })
+  ].join('.')
+
   return new Promise((resolve, reject) => {
     if (!signer) return reject(new Error('No Signer functionality has been configured'))
     if (!address) return reject(new Error('No application identity address has been configured'))
