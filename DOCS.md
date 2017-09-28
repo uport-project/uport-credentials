@@ -203,7 +203,7 @@ Create a credential (a signed JSON Web Token)
 | [credential] | <code>Object</code> | a unsigned credential object |
 | credential.sub | <code>String</code> | subject of credential (a uPort address) |
 | credential.claim | <code>String</code> | claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}}) |
-| credential.exp | <code>String</code> | time at which this claim expires and is no longer valid |
+| credential.exp | <code>String</code> | time at which this claim expires and is no longer valid (seconds since epoch) |
 
 **Example**
 ```js

@@ -16,7 +16,7 @@ class Credentials {
    *
    * @example
    * import { Credentials, SimpleSigner } from 'uport'
-   * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
+   * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x0101.... }}
    * const setttings = { networks, address: '5A8bRWU3F7j3REx3vkJ...', signer: new SimpleSigner(process.env.PRIVATE_KEY)}
    * const credentials = new Credentials(settings)
    *
@@ -88,7 +88,7 @@ class Credentials {
     if (params.exp) { //checks for expiration on requests, if none is provided the default is 10 min
       payload.exp = params.exp
     } else {
-      payload.exp = new Date().getTime() + 600000
+      payload.exp = Date().getTime() / 1000 + 600
     }
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
@@ -133,7 +133,7 @@ class Credentials {
             }
           })
         } else {
-          console.log('Challenge was not included in response')
+          throw new Error('Challenge was not included in response')
         }
       } else {
         return processPayload(this.settings)
@@ -194,7 +194,7 @@ class Credentials {
   * @param    {Object}            [credential]           a unsigned credential object
   * @param    {String}            credential.sub         subject of credential (a uPort address)
   * @param    {String}            credential.claim       claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
-  * @param    {String}            credential.exp         time at which this claim expires and is no longer valid
+  * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
   * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
   */
   attest ({sub, claim, exp}) {
