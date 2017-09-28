@@ -149,7 +149,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *
 	   * @example
 	   * import { Credentials, SimpleSigner } from 'uport'
-	   * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
+	   * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x0101.... }}
 	   * const setttings = { networks, address: '5A8bRWU3F7j3REx3vkJ...', signer: new SimpleSigner(process.env.PRIVATE_KEY)}
 	   * const credentials = new Credentials(settings)
 	   *
@@ -291,7 +291,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              }
 	            });
 	          } else {
-	            console.log('Challenge was not included in response');
+	            throw new Error('Challenge was not included in response');
 	          }
 	        } else {
 	          return processPayload(_this.settings);
@@ -453,6 +453,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var ENCODED_HEADER = encodeSection(JOSE_HEADER);
 
+	var LEGACY_MS = 1000000000000;
 	/**  @module uport-js/JWT */
 
 	/**
@@ -521,10 +522,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var publicKey = profile.publicKey.match(/^0x/) ? profile.publicKey.slice(2) : profile.publicKey;
 	      var verifier = new _jsontokens.TokenVerifier('ES256K', publicKey);
 	      if (verifier.verify(jwt)) {
-	        if (payload.iat > Date.now() / 1000) {
+	        if (payload.iat >= LEGACY_MS && payload.iat > Date.now() || payload.iat < LEGACY_MS && payload.iat > Date.now() / 1000) {
 	          return reject(new Error('JWT not valid yet (issued in the future)'));
 	        }
-	        if (payload.exp && payload.exp <= Date.now() / 1000) {
+	        if (payload.exp && payload.exp >= LEGACY_MS && payload.exp <= Date.now() || payload.iat < LEGACY_MS && payload.exp <= Date.now() / 1000) {
 	          return reject(new Error('JWT has expired'));
 	        }
 	        if (payload.aud) {

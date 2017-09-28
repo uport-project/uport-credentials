@@ -29,6 +29,21 @@ Object {
 }
 `;
 
+exports[`test accepts a valid legacy exp 1`] = `
+Object {
+  "exp": 1485321133001,
+  "iat": 1485321133,
+  "iss": "0x001122",
+}
+`;
+
+exports[`test accepts a valid legacy iat 1`] = `
+Object {
+  "iat": 1485321133000,
+  "iss": "0x001122",
+}
+`;
+
 exports[`test creates a JWT with correct format 1`] = `
 Object {
   "header": Object {

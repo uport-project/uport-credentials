@@ -10,6 +10,7 @@ function encodeSection (data) {
 
 const ENCODED_HEADER = encodeSection(JOSE_HEADER)
 
+const LEGACY_MS = 1000000000000
 /**  @module uport-js/JWT */
 
 /**
@@ -71,10 +72,10 @@ export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
       const publicKey = profile.publicKey.match(/^0x/) ? profile.publicKey.slice(2) : profile.publicKey
       const verifier = new TokenVerifier('ES256K', publicKey)
       if (verifier.verify(jwt)) {
-        if (payload.iat > Date.now() / 1000) {
+        if ((payload.iat >=LEGACY_MS && payload.iat > Date.now()) || ( payload.iat < LEGACY_MS && payload.iat > Date.now() / 1000)) {
           return reject(new Error('JWT not valid yet (issued in the future)'))
         }
-        if (payload.exp && payload.exp <= Date.now() / 1000) {
+        if (payload.exp && (payload.exp >=LEGACY_MS && payload.exp <= Date.now()) || (payload.iat < LEGACY_MS && payload.exp <= Date.now() / 1000)) {
           return reject(new Error('JWT has expired'))
         }
         if (payload.aud) {

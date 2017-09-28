@@ -16,7 +16,7 @@ class Credentials {
    *
    * @example
    * import { Credentials, SimpleSigner } from 'uport'
-   * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
+   * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x0101.... }}
    * const setttings = { networks, address: '5A8bRWU3F7j3REx3vkJ...', signer: new SimpleSigner(process.env.PRIVATE_KEY)}
    * const credentials = new Credentials(settings)
    *
@@ -133,7 +133,7 @@ class Credentials {
             }
           })
         } else {
-          console.log('Challenge was not included in response')
+          throw new Error('Challenge was not included in response')
         }
       } else {
         return processPayload(this.settings)

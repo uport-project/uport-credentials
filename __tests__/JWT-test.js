@@ -2,7 +2,8 @@ import { createJWT, verifyJWT } from '../src/JWT'
 import SimpleSigner from '../src/SimpleSigner'
 import { SECP256K1Client, TokenVerifier, decodeToken } from 'jsontokens'
 import MockDate from 'mockdate'
-MockDate.set(1485321133 * 1000)
+const NOW = 1485321133
+MockDate.set(NOW * 1000)
 
 const privateKey = '278a5de700e29faae8e40e366ec5012b5ec63d36ec77e8a2417154cc1d25383f'
 const publicKey = SECP256K1Client.derivePublicKey(privateKey)
@@ -66,24 +67,48 @@ it('rejects a JWT with bad signature', () => {
 })
 
 it('accepts a valid iat', () => {
-  return createJWT({address: '0x001122', signer}, {iat: 1485321133}).then(jwt =>
+  return createJWT({address: '0x001122', signer}, {iat: NOW}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).then(({payload}) =>
       expect(payload).toMatchSnapshot()
     )
   )
 })
 
+it('accepts a valid legacy iat', () => {
+  return createJWT({address: '0x001122', signer}, {iat: NOW * 1000}).then(jwt =>
+    verifyJWT({registry, address: '0x001122'}, jwt).then(({payload}) =>
+      expect(payload).toMatchSnapshot()
+    )
+  )
+})
+
+
 it('rejects an iat in the future', () => {
-  return createJWT({address: '0x001122', signer}, {iat: 1485321133 + 1}).then(jwt =>
+  return createJWT({address: '0x001122', signer}, {iat: NOW + 1}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
       expect(error.message).toEqual('JWT not valid yet (issued in the future)')
     ).then((p) => expect(p).toBeFalsy())
   )
 })
 
+it('rejects a Legacy iat in the future', () => {
+  return createJWT({address: '0x001122', signer}, {iat: NOW * 1000 + 1}).then(jwt =>
+    verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
+      expect(error.message).toEqual('JWT not valid yet (issued in the future)')
+    ).then((p) => expect(p).toBeFalsy())
+  )
+})
 
 it('accepts a valid exp', () => {
-  return createJWT({address: '0x001122', signer}, {exp: 1485321133+1}).then(jwt =>
+  return createJWT({address: '0x001122', signer}, {exp: NOW+1}).then(jwt =>
+    verifyJWT({registry, address: '0x001122'}, jwt).then(({payload}) =>
+      expect(payload).toMatchSnapshot()
+    )
+  )
+})
+
+it('accepts a valid legacy exp', () => {
+  return createJWT({address: '0x001122', signer}, {exp: NOW * 1000 + 1}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).then(({payload}) =>
       expect(payload).toMatchSnapshot()
     )
@@ -91,12 +116,21 @@ it('accepts a valid exp', () => {
 })
 
 it('rejects an expired JWT', () => {
-  return createJWT({address: '0x001122', signer}, {exp: 1485321133 - 1}).then(jwt =>
+  return createJWT({address: '0x001122', signer}, {exp: NOW - 1}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
       expect(error.message).toEqual('JWT has expired')
     ).then((p) => expect(p).toBeFalsy())
   )
 })
+
+it('rejects an expired JWT with legacy exp', () => {
+  return createJWT({address: '0x001122', signer}, {exp: NOW * 1000 - 1}).then(jwt =>
+    verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
+      expect(error.message).toEqual('JWT has expired')
+    ).then((p) => expect(p).toBeFalsy())
+  )
+})
+
 
 it('accepts a valid audience', () => {
   return createJWT({address: '0x001122', signer}, {aud: '0x001122'}).then(jwt =>

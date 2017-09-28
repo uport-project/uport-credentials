@@ -87,6 +87,12 @@ describe('receive', () => {
     })
   }
 
+  function createShareRespMissingRequest (payload = {}) {
+    return uport.createRequest({requested: ['name', 'phone']}).then((jwt) => {
+      return createJWT({address: '0x001122', signer}, {...payload, type: 'shareResp'})
+    })
+  }
+
   function createShareRespWithExpiredRequest (payload = {}) {
     return uport.createRequest({requested: ['name', 'phone'], exp: Date.now() - 1}).then((jwt) => {
       return createJWT({address: '0x001122', signer}, {...payload, type: 'shareResp', req:jwt})
@@ -131,6 +137,10 @@ describe('receive', () => {
 
   it('handles response to expired request', () => {
     return createShareRespWithExpiredRequest().then(jwt => uport.receive(jwt)).catch(error => expect(error.message).toEqual('JWT has expired'))
+  })
+
+  it('handles response with missing challenge', () => {
+    return createShareRespMissingRequest().then(jwt => uport.receive(jwt)).catch(error => expect(error.message).toEqual('Challenge was not included in response'))
   })
 
 /////////////////////////////// no address in uport settings ///////////////////////////////
@@ -238,5 +248,28 @@ describe('registry', () => {
     return new Credentials().lookup('0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c').then(profile =>
       expect(profile.publicKey).toEqual('0x0482780d59037778ea03c7d5169dd7cf47a835cb6d57a606b4e6cf98000a28d20d6d6bfae223cc76fd2f63d8a382a1c054788c4fafb1062ee89e718b96e0896d40')
     )
+  })
+})
+
+describe('configNetworks', () => {
+  it('should accept a valid network setting', () => {
+    const networks = {'0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c' }}
+    const credentials =  new Credentials({networks})
+    expect(credentials.settings.networks).toEqual(networks)
+  })
+
+  it('should require a registry address', () => {
+    const networks = {'0x94365e3b': { rpcUrl: 'https://private.chain/rpc' }}
+    expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
+  })
+
+  it('should require a rpcUrl', () => {
+    const networks = {'0x94365e3b': { registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c' }}
+    expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
+  })
+
+  it('if networks key is passed in it must contain configuration object', () => {
+    const networks = {'0x94365e3b': 'hey'}
+    expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
   })
 })
