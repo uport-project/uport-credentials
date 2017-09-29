@@ -28,7 +28,7 @@ const LEGACY_MS = 1000000000000
 *  @param    {Object}            payload            payload object
 *  @return   {Promise<Object, Error>}               a promise which resolves with a signed JSON Web Token or rejects with an error
 */
-function createJWT ({address, signer}, payload) {
+export function createJWT ({address, signer}, payload) {
   const signingInput = [ENCODED_HEADER,
     encodeSection({iss: address, iat: ( Date.now() / 1000), ...payload })
   ].join('.')
@@ -64,7 +64,7 @@ function createJWT ({address, signer}, payload) {
 *  @param    {String}            callbackUrl        callback url in JWT
 *  @return   {Promise<Object, Error>}               a promise which resolves with a response object or rejects with an error
 */
-function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
+export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
   return new Promise((resolve, reject) => {
     const {payload} = decodeToken(jwt)
     registry(payload.iss).then(profile => {
@@ -105,4 +105,5 @@ function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
     }).catch(reject)
   })
 }
-export { createJWT, verifyJWT }
+
+export default { createJWT, verifyJWT }

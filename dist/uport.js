@@ -419,7 +419,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.verifyJWT = exports.createJWT = undefined;
 
 	var _extends = Object.assign || function (target) {
 	  for (var i = 1; i < arguments.length; i++) {
@@ -430,6 +429,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	  }return target;
 	};
+
+	exports.createJWT = createJWT;
+	exports.verifyJWT = verifyJWT;
 
 	var _jsontokens = __webpack_require__(3);
 
@@ -553,8 +555,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }).catch(reject);
 	  });
 	}
-	exports.createJWT = createJWT;
-	exports.verifyJWT = verifyJWT;
+
+	exports.default = { createJWT: createJWT, verifyJWT: verifyJWT };
 
 /***/ }),
 /* 3 */
