@@ -4,13 +4,15 @@ var uport = require('../lib/index.js');
 var jsontokens = require('jsontokens')
 var bodyParser = require('body-parser')
 
-var signer = uport.SimpleSigner('4d8f5b6ba9298038b6cde46e5fa36d7b7a5846cdcd1c63ad9f5dea4384f9e650')
+var signer = uport.SimpleSigner('5acea265dcbf01355956b36f82793a13caf1be650bb74ca7a40da74b412d44b5')
 
 
 var credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
-  address: '0x982024e3540fb5ba26b7e169dcd98503f10686f5',
+  address: '2opiNrGSxTW6sFo6ervHZnEeEXGNGAoupFN',
   signer: signer
+//  networks: {'0x4': {'registry' : '0x2cc31912b2b0f3075a87b3640923d45a26cef3ee', 'rpcUrl' : 'https://rinkeby.infura.io'}}
+  // Note: we use Rinkeby by default, the above is the explicit format for selecting a network
 })
 
 var app = express();
@@ -21,12 +23,14 @@ app.get('/', function (req, res) {
 
   credentials.createRequest({
     verified: ['Custom Attestation'],
-    callbackUrl: 'http://192.168.1.101:8081/callback'
+    callbackUrl: 'http://192.168.1.9:8081/callback',
+    exp: new Date().getTime() + 60000
   }).then( function(requestToken) {
     var uri = 'me.uport:me?requestToken=' + requestToken
     var qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
+    var mobileUrl = 'https://id.uport.me/me?requestToken=' + requestToken
     console.log(uri)
-    res.send('<img src=' + qrurl + '></img>');
+    res.send('<div><img src=' + qrurl + '></img></div><div><a href=' + mobileUrl + '>Click here if on mobile (Not implemented yet!)</a></div>');
   })
 
 })
@@ -37,8 +41,9 @@ app.post('/callback', function (req, res) {
   console.log(jwt)
 
   credentials.receive(jwt).then( function(creds) {
+    console.log(creds)
     if (creds.address == creds.verified[0].sub && 
-       creds.verified[0].iss == '0x15bcc15904f2317365cdb6beaf473b2315405763' &&
+       creds.verified[0].iss == '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92' &&
        creds.verified[0].claim['Custom Attestation'] === 'Custom Value')
     {
       console.log('Credential verified.');
