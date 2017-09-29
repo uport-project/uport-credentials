@@ -38,7 +38,7 @@ credentials.attest({
 
 The `attest()` function returns a promise that resolves to a JSON Web Token. We're going to present this token to the user through a URL that looks like this:
 
-```
+```js
 me.uport:add?attestations=<JSON Web Token>
 ```
 
@@ -46,7 +46,7 @@ We present this to the user in the form of a QR code. When you scan this code wi
 
 When you're done editing the file you may run the Creator service like so:
 
-```
+```js
 > cd tutorial
 > node createcredential.js
 ```
@@ -91,7 +91,7 @@ Next we check that the issuer of the response token (i.e. the user) matches the 
 
 If everything checks out, you should see the output
 
-```
+```js
 Credential verified.
 ```
 
