@@ -105,3 +105,5 @@ export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
     }).catch(reject)
   })
 }
+
+export default { createJWT, verifyJWT }

@@ -556,6 +556,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	}
 
+	exports.default = { createJWT: createJWT, verifyJWT: verifyJWT };
+
 /***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
