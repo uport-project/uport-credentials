@@ -312,37 +312,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	      *  and a url/uri request you want to send to the user.
 	      *
 	      *  @param    {String}                  token              a push notification token (get a pn token by requesting push permissions in a request)
-	      *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
 	      *  @param    {Object}                  payload            push notification payload
 	      *  @param    {String}                  payload.url        a uport request url
 	      *  @param    {String}                  payload.message    a message to display to the user
+	      *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
 	      *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
 	      */
 
 	  }, {
 	    key: 'push',
-	    value: function push(token, pubEncKey, _ref2) {
-	      var url = _ref2.url,
-	          message = _ref2.message;
-
+	    value: function push(token, pubEncKey, payload) {
+	      var PUTUTU_URL = 'https://pututu.uport.space'; // TODO - change to .me
 	      return new Promise(function (resolve, reject) {
+	        var endpoint = '/api/v2/sns';
 	        if (!token) {
 	          return reject(new Error('Missing push notification token'));
 	        }
-	        if (!url) {
-	          return reject(new Error('Missing payload url for sending to users device'));
+	        //if (!pubEncKey) {
+	        //return reject(new Error('Missing public encryption key of the receiver'))
+	        //}
+	        if (pubEncKey.url) {
+	          console.error('WARNING: Calling push without a public encryption key is deprecated');
+	          endpoint = '/api/v1/sns';
+	          payload = pubEncKey;
+	        } else {
+	          if (!payload.url) {
+	            return reject(new Error('Missing payload url for sending to users device'));
+	          }
+	          var plaintext = padMessage(JSON.stringify(payload));
+	          var enc = encryptMessage(plaintext, pubEncKey);
+	          payload = { message: JSON.stringify(enc) };
 	        }
-	        if (!pubEncKey) {
-	          return reject(new Error('Missing public encryption key of the receiver'));
-	        }
-
-	        var plaintext = padMessage(JSON.stringify({ url: url, message: message }));
-
-	        var enc = encryptMessage(plaintext, pubEncKey);
 
 	        (0, _nets2.default)({
-	          uri: 'https://pututu.uport.space/api/v2/sns', // TODO - change to .me
-	          json: { message: JSON.stringify(enc) },
+	          uri: PUTUTU_URL + endpoint,
+	          json: payload,
 	          method: 'POST',
 	          withCredentials: false,
 	          headers: {
@@ -382,10 +386,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  }, {
 	    key: 'attest',
-	    value: function attest(_ref3) {
-	      var sub = _ref3.sub,
-	          claim = _ref3.claim,
-	          exp = _ref3.exp;
+	    value: function attest(_ref2) {
+	      var sub = _ref2.sub,
+	          claim = _ref2.claim,
+	          exp = _ref2.exp;
 
 	      return (0, _JWT.createJWT)(this.settings, { sub: sub, claim: claim, exp: exp });
 	    }
