@@ -1,6 +1,6 @@
 {
   "name": "uport",
-  "version": "0.6.0-alpha-2",
+  "version": "0.6.0-alpha-3",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
   "files": [
@@ -26,6 +26,8 @@
     "jsontokens": "^0.7.6",
     "mnid": "^0.1.1",
     "nets": "^3.2.0",
+    "tweetnacl": "^1.0.0",
+    "tweetnacl-util": "^0.15.0",
     "uport-lite": "^1.0.0"
   },
   "jest": {
