@@ -216,13 +216,13 @@ describe('push', () => {
     })
     .reply(200, { status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
 
-    return uport.push(PUSHTOKEN, payload, pubEncKey).then(response => {
+    return uport.push(PUSHTOKEN, pubEncKey, payload).then(response => {
       return expect(response).toEqual({ status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
     })
   })
 
   it('handles missing token', () => {
-    return uport.push(null, payload, pubEncKey).catch(error => expect(error.message).toEqual('Missing push notification token'))
+    return uport.push(null, pubEncKey, payload).catch(error => expect(error.message).toEqual('Missing push notification token'))
   })
 
   it('handles missing pubEncKey', () => {
@@ -245,7 +245,7 @@ describe('push', () => {
   })
 
   it('handles missing payload', () => {
-    return uport.push(PUSHTOKEN, {}, pubEncKey).catch(error => expect(error.message).toEqual('Missing payload url for sending to users device'))
+    return uport.push(PUSHTOKEN, pubEncKey, {}).catch(error => expect(error.message).toEqual('Missing payload url for sending to users device'))
   })
 
   it('handles invalid token', () => {
@@ -257,7 +257,7 @@ describe('push', () => {
     .post(API_v2_PATH, () => true)
     .reply(403, 'Not allowed')
 
-    return uport.push(PUSHTOKEN, payload, pubEncKey).catch(error => expect(error.message).toEqual('Error sending push notification to user: Invalid Token'))
+    return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: Invalid Token'))
   })
 
   it('handles random error', () => {
@@ -269,7 +269,7 @@ describe('push', () => {
     .post(API_v2_PATH, () => true)
     .reply(500, 'Server Error')
 
-    return uport.push(PUSHTOKEN, payload, pubEncKey).catch(error => expect(error.message).toEqual('Error sending push notification to user: 500 Server Error'))
+    return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: 500 Server Error'))
   })
 })
 

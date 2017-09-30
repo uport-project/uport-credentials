@@ -154,24 +154,25 @@ class Credentials {
   *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
   *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
   */
-  push (token, {url, message}, pubEncKey) {
+  push (token, pubEncKey, payload) {
     const PUTUTU_URL = 'https://pututu.uport.space' // TODO - change to .me
     return new Promise((resolve, reject) => {
       let endpoint = '/api/v2/sns'
-      let payload
       if (!token) {
         return reject(new Error('Missing push notification token'))
       }
-      if (!url) {
-        return reject(new Error('Missing payload url for sending to users device'))
-      }
-      if (!pubEncKey) {
+      //if (!pubEncKey) {
+        //return reject(new Error('Missing public encryption key of the receiver'))
+      //}
+      if (pubEncKey.url) {
         console.error('WARNING: Calling push without a public encryption key is deprecated')
         endpoint = '/api/v1/sns'
-        payload = {url, message}
-        //return reject(new Error('Missing public encryption key of the receiver'))
+        payload = pubEncKey
       } else {
-        const plaintext = padMessage(JSON.stringify({url, message}))
+        if (!payload.url) {
+          return reject(new Error('Missing payload url for sending to users device'))
+        }
+        const plaintext = padMessage(JSON.stringify(payload))
         const enc = encryptMessage(plaintext, pubEncKey)
         payload = { message: JSON.stringify(enc) }
       }
