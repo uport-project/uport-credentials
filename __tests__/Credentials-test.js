@@ -182,7 +182,8 @@ describe('receive', () => {
 
 describe('push', () => {
   const PUTUTU_URL = 'https://pututu.uport.space' // TODO - change to .me
-  const API_PATH = '/api/v2/sns'
+  const API_v1_PATH = '/api/v1/sns'
+  const API_v2_PATH = '/api/v2/sns'
   const PUSHTOKEN = 'SECRETPUSHTOKEN'
   const payload = { url: 'me.uport:me', message: 'a friendly message' }
   const kp = nacl.box.keyPair()
@@ -203,7 +204,7 @@ describe('push', () => {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
     })
-    .post(API_PATH, (body) => {
+    .post(API_v2_PATH, (body) => {
       let encObj = JSON.parse(body.message)
       const box = naclutil.decodeBase64(encObj.ciphertext)
       const nonce = naclutil.decodeBase64(encObj.nonce)
@@ -215,21 +216,36 @@ describe('push', () => {
     })
     .reply(200, { status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
 
-    return uport.push(PUSHTOKEN, pubEncKey, payload).then(response => {
+    return uport.push(PUSHTOKEN, payload, pubEncKey).then(response => {
       return expect(response).toEqual({ status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
     })
   })
 
   it('handles missing token', () => {
-    return uport.push(null, pubEncKey, payload).catch(error => expect(error.message).toEqual('Missing push notification token'))
+    return uport.push(null, payload, pubEncKey).catch(error => expect(error.message).toEqual('Missing push notification token'))
   })
 
   it('handles missing pubEncKey', () => {
-    return uport.push(PUSHTOKEN, null, payload).catch(error => expect(error.message).toEqual('Missing public encryption key of the receiver'))
+    nock(PUTUTU_URL, {
+      reqheaders: {
+        'authorization': `Bearer ${PUSHTOKEN}`
+      }
+    })
+    .post(API_v1_PATH, (body) => {
+      return body.message === payload.message && body.url === payload.url
+    })
+    .reply(200, { status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
+
+    console.error = jest.fn(msg => {
+      expect(msg).toEqual('WARNING: Calling push without a public encryption key is deprecated')
+    })
+    return uport.push(PUSHTOKEN, payload).then(response => {
+      return expect(response).toEqual({ status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
+    })
   })
 
   it('handles missing payload', () => {
-    return uport.push(PUSHTOKEN, pubEncKey, {}).catch(error => expect(error.message).toEqual('Missing payload url for sending to users device'))
+    return uport.push(PUSHTOKEN, {}, pubEncKey).catch(error => expect(error.message).toEqual('Missing payload url for sending to users device'))
   })
 
   it('handles invalid token', () => {
@@ -238,10 +254,10 @@ describe('push', () => {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
     })
-    .post(API_PATH, () => true)
+    .post(API_v2_PATH, () => true)
     .reply(403, 'Not allowed')
 
-    return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: Invalid Token'))
+    return uport.push(PUSHTOKEN, payload, pubEncKey).catch(error => expect(error.message).toEqual('Error sending push notification to user: Invalid Token'))
   })
 
   it('handles random error', () => {
@@ -250,10 +266,10 @@ describe('push', () => {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
     })
-    .post(API_PATH, () => true)
+    .post(API_v2_PATH, () => true)
     .reply(500, 'Server Error')
 
-    return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: 500 Server Error'))
+    return uport.push(PUSHTOKEN, payload, pubEncKey).catch(error => expect(error.message).toEqual('Error sending push notification to user: 500 Server Error'))
   })
 })
 

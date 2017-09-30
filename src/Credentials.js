@@ -148,14 +148,17 @@ class Credentials {
   *  and a url/uri request you want to send to the user.
   *
   *  @param    {String}                  token              a push notification token (get a pn token by requesting push permissions in a request)
-  *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
   *  @param    {Object}                  payload            push notification payload
   *  @param    {String}                  payload.url        a uport request url
   *  @param    {String}                  payload.message    a message to display to the user
+  *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
   *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
   */
-  push (token, pubEncKey, {url, message}) {
+  push (token, {url, message}, pubEncKey) {
+    const PUTUTU_URL = 'https://pututu.uport.space' // TODO - change to .me
     return new Promise((resolve, reject) => {
+      let endpoint = '/api/v2/sns'
+      let payload
       if (!token) {
         return reject(new Error('Missing push notification token'))
       }
@@ -163,16 +166,19 @@ class Credentials {
         return reject(new Error('Missing payload url for sending to users device'))
       }
       if (!pubEncKey) {
-        return reject(new Error('Missing public encryption key of the receiver'))
+        console.error('WARNING: Calling push without a public encryption key is deprecated')
+        endpoint = '/api/v1/sns'
+        payload = {url, message}
+        //return reject(new Error('Missing public encryption key of the receiver'))
+      } else {
+        const plaintext = padMessage(JSON.stringify({url, message}))
+        const enc = encryptMessage(plaintext, pubEncKey)
+        payload = { message: JSON.stringify(enc) }
       }
 
-      const plaintext = padMessage(JSON.stringify({url, message}))
-
-      const enc = encryptMessage(plaintext, pubEncKey)
-
       nets({
-        uri: 'https://pututu.uport.space/api/v2/sns', // TODO - change to .me
-        json: { message: JSON.stringify(enc) },
+        uri: PUTUTU_URL + endpoint,
+        json: payload,
         method: 'POST',
         withCredentials: false,
         headers: {
