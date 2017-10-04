@@ -241,7 +241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        //checks for expiration on requests, if none is provided the default is 10 min
 	        payload.exp = params.exp;
 	      } else {
-	        payload.exp = Date().getTime() / 1000 + 600;
+	        payload.exp = Date.now() / 1000 + 600;
 	      }
 	      return (0, _JWT.createJWT)(this.settings, _extends({}, payload, { type: 'shareReq' }));
 	    }
