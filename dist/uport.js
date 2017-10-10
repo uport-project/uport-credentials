@@ -241,7 +241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        //checks for expiration on requests, if none is provided the default is 10 min
 	        payload.exp = params.exp;
 	      } else {
-	        payload.exp = Date.now() / 1000 + 600;
+	        payload.exp = Math.floor(Date.now() / 1000) + 600;
 	      }
 	      return (0, _JWT.createJWT)(this.settings, _extends({}, payload, { type: 'shareReq' }));
 	    }
@@ -535,7 +535,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var address = _ref.address,
 	      signer = _ref.signer;
 
-	  var signingInput = [ENCODED_HEADER, encodeSection(_extends({ iss: address, iat: Date.now() / 1000 }, payload))].join('.');
+	  var signingInput = [ENCODED_HEADER, encodeSection(_extends({ iss: address, iat: Math.floor(Date.now() / 1000) }, payload))].join('.');
 
 	  return new Promise(function (resolve, reject) {
 	    if (!signer) return reject(new Error('No Signer functionality has been configured'));
