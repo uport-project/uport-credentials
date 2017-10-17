@@ -36,15 +36,7 @@ class Credentials {
   constructor (settings = {}) {
     this.settings = settings
     this.settings.networks = settings.networks ? configNetworks(settings.networks) : {}
-    if (!this.settings.registry) {
-      const registry = UportLite({networks: this.settings.networks})
-      this.settings.registry = (address) => new Promise((resolve, reject) => {
-        registry(address, (error, profile) => {
-          if (error) return reject(error)
-          resolve(profile)
-        })
-      })
-    }
+    this.settings.registry = settings.registry || UportLite({networks: this.settings.networks})
   }
 
 /**
@@ -235,7 +227,12 @@ class Credentials {
   * @return   {Promise<Object, Error>}                a promise which resolves with parsed profile or rejects with an error
   */
   lookup (address) {
-    return this.settings.registry(address)
+    return new Promise((resolve, reject) => {
+      this.settings.registry(address, (err, res) => {
+        if (err) return reject(err)
+        resolve(res)
+      })
+    })
   }
 }
 

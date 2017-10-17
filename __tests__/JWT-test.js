@@ -10,7 +10,7 @@ const publicKey = SECP256K1Client.derivePublicKey(privateKey)
 const signer = SimpleSigner(privateKey)
 const verifier = new TokenVerifier('ES256K', publicKey)
 const profileA = {publicKey: `0x${publicKey}`, name: 'David Chaum'}
-const registry = (address) => new Promise((resolve, reject) => resolve(address === '0x001122' ? profileA : null))
+const registry = (address, cb) => cb(null, address === '0x001122' ? profileA : null )
 
 it('creates a valid JWT', () => {
   return createJWT({address: '0x001122', signer}, {requested: ['name', 'phone']}).then((jwt) => {

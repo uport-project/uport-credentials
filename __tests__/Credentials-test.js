@@ -13,7 +13,7 @@ const publicKey = SECP256K1Client.derivePublicKey(privateKey)
 const signer = SimpleSigner(privateKey)
 const verifier = new TokenVerifier('ES256K', publicKey)
 const profileA = {publicKey, name: 'David Chaum'}
-const registry = (address) => new Promise((resolve, reject) => resolve(address === '0x001122' ? profileA : null))
+const registry = (address, cb) => cb(null, address === '0x001122' ? profileA : null )
 const uport = new Credentials({signer, address: '0x001122', registry})
 const uport2 = new Credentials({registry})
 
@@ -275,9 +275,9 @@ describe('push', () => {
 
 describe('registry', () => {
   it('has a default registry that looks up profile', () => {
-    return new Credentials().settings.registry('0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c').then(profile =>
+    return new Credentials().settings.registry('0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c', profile => {
       expect(profile.publicKey).toEqual('0x0482780d59037778ea03c7d5169dd7cf47a835cb6d57a606b4e6cf98000a28d20d6d6bfae223cc76fd2f63d8a382a1c054788c4fafb1062ee89e718b96e0896d40')
-    )
+    })
   })
 
   it('has ability to lookup profile', () => {

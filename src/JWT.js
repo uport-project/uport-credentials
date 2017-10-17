@@ -67,42 +67,47 @@ export function createJWT ({address, signer}, payload) {
 export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
   return new Promise((resolve, reject) => {
     const {payload} = decodeToken(jwt)
-    registry(payload.iss).then(profile => {
+    registry(payload.iss, (err, profile) => {
       if (!profile) return reject(new Error('No profile found, unable to verify JWT'))
+      if (err) reject(err)
+      
       const publicKey = profile.publicKey.match(/^0x/) ? profile.publicKey.slice(2) : profile.publicKey
       const verifier = new TokenVerifier('ES256K', publicKey)
-      if (verifier.verify(jwt)) {
-        if ((payload.iat >=LEGACY_MS && payload.iat > Date.now()) || ( payload.iat < LEGACY_MS && payload.iat > Date.now() / 1000)) {
-          return reject(new Error('JWT not valid yet (issued in the future)'))
-        }
-        if (payload.exp && (payload.exp >=LEGACY_MS && payload.exp <= Date.now()) || (payload.iat < LEGACY_MS && payload.exp <= Date.now() / 1000)) {
-          return reject(new Error('JWT has expired'))
-        }
-        if (payload.aud) {
-          if (payload.aud.match(/^0x[0-9a-fA-F]+$/) || isMNID(payload.aud)) {
-            if (!address) {
-              return reject(new Error('JWT audience is required but your app address has not been configured'))
-            }
 
-            const addressHex = isMNID(address) ? decode(address).address : address
-            const audHex = isMNID(payload.aud) ? decode(payload.aud).address : payload.aud
-            if (audHex !== addressHex) {
-              return reject(new Error('JWT audience does not match your address'))
-            }
-          } else {
-            if (!callbackUrl) {
-              return reject(new Error('JWT audience matching your callback url is required but one wasn\'t passed in'))
-            }
-            if (payload.aud !== callbackUrl) {
-              return reject(new Error('JWT audience does not match the callback url'))
+      try {
+        if (verifier.verify(jwt)) {
+          if ((payload.iat >=LEGACY_MS && payload.iat > Date.now()) || ( payload.iat < LEGACY_MS && payload.iat > Date.now() / 1000)) {
+            return reject(new Error('JWT not valid yet (issued in the future)'))
+          }
+          if (payload.exp && (payload.exp >=LEGACY_MS && payload.exp <= Date.now()) || (payload.iat < LEGACY_MS && payload.exp <= Date.now() / 1000)) {
+            return reject(new Error('JWT has expired'))
+          }
+          if (payload.aud) {
+            if (payload.aud.match(/^0x[0-9a-fA-F]+$/) || isMNID(payload.aud)) {
+              if (!address) {
+                return reject(new Error('JWT audience is required but your app address has not been configured'))
+              }
+
+              const addressHex = isMNID(address) ? decode(address).address : address
+              const audHex = isMNID(payload.aud) ? decode(payload.aud).address : payload.aud
+              if (audHex !== addressHex) {
+                return reject(new Error('JWT audience does not match your address'))
+              }
+            } else {
+              if (!callbackUrl) {
+                return reject(new Error('JWT audience matching your callback url is required but one wasn\'t passed in'))
+              }
+              if (payload.aud !== callbackUrl) {
+                return reject(new Error('JWT audience does not match the callback url'))
+              }
             }
           }
+          resolve({payload, profile, jwt})
+        } else {
+          return reject(new Error('Signature invalid for JWT'))
         }
-        resolve({payload, profile, jwt})
-      } else {
-        return reject(new Error('Signature invalid for JWT'))
-      }
-    }).catch(reject)
+      } catch(e) { reject(e) }
+    })
   })
 }
 
