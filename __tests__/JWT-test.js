@@ -2,10 +2,11 @@ import { createJWT, verifyJWT } from '../src/JWT'
 import SimpleSigner from '../src/SimpleSigner'
 import { SECP256K1Client, TokenVerifier, decodeToken } from 'jsontokens'
 import MockDate from 'mockdate'
-MockDate.set(1485321133996)
+const NOW = 1485321133
+MockDate.set(NOW * 1000)
 
 const privateKey = '278a5de700e29faae8e40e366ec5012b5ec63d36ec77e8a2417154cc1d25383f'
-const publicKey = SECP256K1Client.privateKeyToPublicKey(privateKey)
+const publicKey = SECP256K1Client.derivePublicKey(privateKey)
 const signer = SimpleSigner(privateKey)
 const verifier = new TokenVerifier('ES256K', publicKey)
 const profileA = {publicKey: `0x${publicKey}`, name: 'David Chaum'}
@@ -35,7 +36,8 @@ it('throws an error if no address is configured', () => {
   })
 })
 
-const incomingJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1ZXN0ZWQiOlsibmFtZSIsInBob25lIl0sImlzcyI6IjB4MDAxMTIyIiwiaWF0IjoxNDg1MzIxMTMzOTk2fQ.zxGLQKo2WjgefrxEQWfwm_oago8Qr4YctBJoqNAm2XKE-48bADjolSo2T_tED9LnSikxqFIM9gNGpNgcY8JPdg'
+const incomingJwt = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1ZXN0ZWQiOlsibmFtZSIsInBob25lIl0sImlzcyI6IjB4MDAxMTIyIiwiaWF0IjoxNDg1MzIxMTMzfQ.OGgdP_rDix6YRKoSpFVgM_myCTv1ObJE7DaAMG8WIlHulReX8-dr0vqDo7XfQwKGSBqV-MnLg0u7z8J5C2Qgjg'
+
 
 it('verifies the JWT and return correct payload', () => {
   return verifyJWT({registry, address: '0x001122'}, incomingJwt).then(({payload}) => {
@@ -64,8 +66,49 @@ it('rejects a JWT with bad signature', () => {
   ).then((p) => expect(p).toBeFalsy())
 })
 
+it('accepts a valid iat', () => {
+  return createJWT({address: '0x001122', signer}, {iat: NOW}).then(jwt =>
+    verifyJWT({registry, address: '0x001122'}, jwt).then(({payload}) =>
+      expect(payload).toMatchSnapshot()
+    )
+  )
+})
+
+it('accepts a valid legacy iat', () => {
+  return createJWT({address: '0x001122', signer}, {iat: NOW * 1000}).then(jwt =>
+    verifyJWT({registry, address: '0x001122'}, jwt).then(({payload}) =>
+      expect(payload).toMatchSnapshot()
+    )
+  )
+})
+
+
+it('rejects an iat in the future', () => {
+  return createJWT({address: '0x001122', signer}, {iat: NOW + 1}).then(jwt =>
+    verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
+      expect(error.message).toEqual('JWT not valid yet (issued in the future)')
+    ).then((p) => expect(p).toBeFalsy())
+  )
+})
+
+it('rejects a Legacy iat in the future', () => {
+  return createJWT({address: '0x001122', signer}, {iat: NOW * 1000 + 1}).then(jwt =>
+    verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
+      expect(error.message).toEqual('JWT not valid yet (issued in the future)')
+    ).then((p) => expect(p).toBeFalsy())
+  )
+})
+
 it('accepts a valid exp', () => {
-  return createJWT({address: '0x001122', signer}, {exp: 1485321133996+1}).then(jwt =>
+  return createJWT({address: '0x001122', signer}, {exp: NOW+1}).then(jwt =>
+    verifyJWT({registry, address: '0x001122'}, jwt).then(({payload}) =>
+      expect(payload).toMatchSnapshot()
+    )
+  )
+})
+
+it('accepts a valid legacy exp', () => {
+  return createJWT({address: '0x001122', signer}, {exp: NOW * 1000 + 1}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).then(({payload}) =>
       expect(payload).toMatchSnapshot()
     )
@@ -73,12 +116,21 @@ it('accepts a valid exp', () => {
 })
 
 it('rejects an expired JWT', () => {
-  return createJWT({address: '0x001122', signer}, {exp: 1485321133996 - 1}).then(jwt =>
+  return createJWT({address: '0x001122', signer}, {exp: NOW - 1}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
       expect(error.message).toEqual('JWT has expired')
     ).then((p) => expect(p).toBeFalsy())
   )
 })
+
+it('rejects an expired JWT with legacy exp', () => {
+  return createJWT({address: '0x001122', signer}, {exp: NOW * 1000 - 1}).then(jwt =>
+    verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
+      expect(error.message).toEqual('JWT has expired')
+    ).then((p) => expect(p).toBeFalsy())
+  )
+})
+
 
 it('accepts a valid audience', () => {
   return createJWT({address: '0x001122', signer}, {aud: '0x001122'}).then(jwt =>

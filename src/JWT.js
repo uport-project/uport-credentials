@@ -1,8 +1,16 @@
-import { createUnsignedToken, TokenVerifier, decodeToken } from 'jsontokens'
+import { TokenVerifier, decodeToken } from 'jsontokens'
 import { isMNID, decode} from 'mnid'
+import base64url from 'base64url'
 
 const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
 
+function encodeSection (data) {
+  return base64url.encode(JSON.stringify(data))
+}
+
+const ENCODED_HEADER = encodeSection(JOSE_HEADER)
+
+const LEGACY_MS = 1000000000000
 /**  @module uport-js/JWT */
 
 /**
@@ -21,10 +29,10 @@ const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
 *  @return   {Promise<Object, Error>}               a promise which resolves with a signed JSON Web Token or rejects with an error
 */
 export function createJWT ({address, signer}, payload) {
-  const signingInput = createUnsignedToken(
-    JOSE_HEADER,
-    {...payload, iss: address, iat: new Date().getTime()}
-  )
+  const signingInput = [ENCODED_HEADER,
+    encodeSection({iss: address, iat: Math.floor(Date.now() / 1000), ...payload })
+  ].join('.')
+
   return new Promise((resolve, reject) => {
     if (!signer) return reject(new Error('No Signer functionality has been configured'))
     if (!address) return reject(new Error('No application identity address has been configured'))
@@ -64,7 +72,10 @@ export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
       const publicKey = profile.publicKey.match(/^0x/) ? profile.publicKey.slice(2) : profile.publicKey
       const verifier = new TokenVerifier('ES256K', publicKey)
       if (verifier.verify(jwt)) {
-        if (payload.exp && payload.exp <= new Date().getTime()) {
+        if ((payload.iat >=LEGACY_MS && payload.iat > Date.now()) || ( payload.iat < LEGACY_MS && payload.iat > Date.now() / 1000)) {
+          return reject(new Error('JWT not valid yet (issued in the future)'))
+        }
+        if (payload.exp && (payload.exp >=LEGACY_MS && payload.exp <= Date.now()) || (payload.iat < LEGACY_MS && payload.exp <= Date.now() / 1000)) {
           return reject(new Error('JWT has expired'))
         }
         if (payload.aud) {
@@ -94,3 +105,5 @@ export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
     }).catch(reject)
   })
 }
+
+export default { createJWT, verifyJWT }

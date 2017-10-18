@@ -2,6 +2,8 @@ import { createJWT, verifyJWT } from './JWT'
 import { decodeToken } from 'jsontokens'
 import UportLite from 'uport-lite'
 import nets from 'nets'
+import nacl from 'tweetnacl'
+import naclutil from 'tweetnacl-util'
 
 /**
 *    The Credentials class allows you to easily create the signed payloads used in uPort inlcuding
@@ -16,7 +18,7 @@ class Credentials {
    *
    * @example
    * import { Credentials, SimpleSigner } from 'uport'
-   * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
+   * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x0101.... }}
    * const setttings = { networks, address: '5A8bRWU3F7j3REx3vkJ...', signer: new SimpleSigner(process.env.PRIVATE_KEY)}
    * const credentials = new Credentials(settings)
    *
@@ -88,7 +90,7 @@ class Credentials {
     if (params.exp) { //checks for expiration on requests, if none is provided the default is 10 min
       payload.exp = params.exp
     } else {
-      payload.exp = new Date().getTime() + 600000
+      payload.exp = Math.floor(Date.now() / 1000) + 600
     }
     return createJWT(this.settings, {...payload, type: 'shareReq'})
   }
@@ -133,7 +135,7 @@ class Credentials {
             }
           })
         } else {
-          console.log('Challenge was not included in response')
+          throw new Error('Challenge was not included in response')
         }
       } else {
         return processPayload(this.settings)
@@ -145,21 +147,39 @@ class Credentials {
   *  Send a push notification to a user, consumes a token which allows you to send push notifications
   *  and a url/uri request you want to send to the user.
   *
-  *  @param    {String}                  token       a push notification token (get a pn token by requesting push permissions in a request)
+  *  @param    {String}                  token              a push notification token (get a pn token by requesting push permissions in a request)
+  *  @param    {Object}                  payload            push notification payload
+  *  @param    {String}                  payload.url        a uport request url
+  *  @param    {String}                  payload.message    a message to display to the user
+  *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
   *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
   */
-  push (token, {url}) {
+  push (token, pubEncKey, payload) {
+    const PUTUTU_URL = 'https://pututu.uport.space' // TODO - change to .me
     return new Promise((resolve, reject) => {
+      let endpoint = '/api/v2/sns'
       if (!token) {
         return reject(new Error('Missing push notification token'))
       }
-      if (!url) {
-        return reject(new Error('Missing payload url for sending to users device'))
+      //if (!pubEncKey) {
+        //return reject(new Error('Missing public encryption key of the receiver'))
+      //}
+      if (pubEncKey.url) {
+        console.error('WARNING: Calling push without a public encryption key is deprecated')
+        endpoint = '/api/v1/sns'
+        payload = pubEncKey
+      } else {
+        if (!payload.url) {
+          return reject(new Error('Missing payload url for sending to users device'))
+        }
+        const plaintext = padMessage(JSON.stringify(payload))
+        const enc = encryptMessage(plaintext, pubEncKey)
+        payload = { message: JSON.stringify(enc) }
       }
 
       nets({
-        uri: 'https://pututu.uport.me/api/v1/sns',
-        json: {url},
+        uri: PUTUTU_URL + endpoint,
+        json: payload,
         method: 'POST',
         withCredentials: false,
         headers: {
@@ -194,7 +214,7 @@ class Credentials {
   * @param    {Object}            [credential]           a unsigned credential object
   * @param    {String}            credential.sub         subject of credential (a uPort address)
   * @param    {String}            credential.claim       claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
-  * @param    {String}            credential.exp         time at which this claim expires and is no longer valid
+  * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
   * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
   */
   attest ({sub, claim, exp}) {
@@ -231,6 +251,42 @@ const configNetworks = (nets) => {
     }
   })
   return nets
+}
+
+/**
+ *  Adds padding to a string
+ *
+ *  @param      {String}        the message to be padded
+ *  @return     {String}        the padded message
+ *  @private
+ */
+const padMessage = (message) => {
+  const INTERVAL_LENGTH = 50
+  const padLength = INTERVAL_LENGTH - message.length % INTERVAL_LENGTH
+
+  return message + ' '.repeat(padLength)
+}
+
+/**
+ *  Encrypts a message
+ *
+ *  @param      {String}        the message to be encrypted
+ *  @param      {String}        the public encryption key of the receiver, encoded as base64
+ *  @return     {String}        the encrypted message, encoded as base64
+ *  @private
+ */
+const encryptMessage = (message, receiverKey) => {
+  const tmpKp = nacl.box.keyPair()
+  const decodedKey = naclutil.decodeBase64(receiverKey)
+  const decodedMsg = naclutil.decodeUTF8(message)
+  const nonce = nacl.randomBytes(24)
+
+  const ciphertext = nacl.box(decodedMsg, nonce, decodedKey, tmpKp.secretKey)
+  return {
+    from: naclutil.encodeBase64(tmpKp.publicKey),
+    nonce: naclutil.encodeBase64(nonce),
+    ciphertext: naclutil.encodeBase64(ciphertext)
+  }
 }
 
 export default Credentials
