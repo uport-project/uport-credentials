@@ -30,7 +30,7 @@ const LEGACY_MS = 1000000000000
 */
 export function createJWT ({address, signer}, payload) {
   const signingInput = [ENCODED_HEADER,
-    encodeSection({iss: address, iat: ( Date.now() / 1000), ...payload })
+    encodeSection({iss: address, iat: Math.floor(Date.now() / 1000), ...payload })
   ].join('.')
 
   return new Promise((resolve, reject) => {
