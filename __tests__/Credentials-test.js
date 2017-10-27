@@ -138,7 +138,7 @@ describe('receive', () => {
   })
 
   it('handles response to expired request', () => {
-    return createShareRespWithExpiredRequest().then(jwt => uport.receive(jwt)).catch(error => expect(error.message).toEqual('JWT has expired'))
+    return createShareRespWithExpiredRequest().then(jwt => uport.receive(jwt)).catch(error => expect(error.message).toEqual('JWT has expired: exp: 1485321132999 < now: 1485321133'))
   })
 
   it('handles response with missing challenge', () => {

@@ -24,7 +24,7 @@ Object {
 
 exports[`test accepts a valid iat 1`] = `
 Object {
-  "iat": 1485321133,
+  "iat": 1485321193,
   "iss": "0x001122",
 }
 `;
@@ -39,7 +39,7 @@ Object {
 
 exports[`test accepts a valid legacy iat 1`] = `
 Object {
-  "iat": 1485321133000,
+  "iat": 1485321193000,
   "iss": "0x001122",
 }
 `;
