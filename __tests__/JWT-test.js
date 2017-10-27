@@ -1,4 +1,4 @@
-import { createJWT, verifyJWT } from '../src/JWT'
+import { createJWT, verifyJWT, IAT_SKEW } from '../src/JWT'
 import SimpleSigner from '../src/SimpleSigner'
 import { SECP256K1Client, TokenVerifier, decodeToken } from 'jsontokens'
 import MockDate from 'mockdate'
@@ -67,7 +67,7 @@ it('rejects a JWT with bad signature', () => {
 })
 
 it('accepts a valid iat', () => {
-  return createJWT({address: '0x001122', signer}, {iat: NOW}).then(jwt =>
+  return createJWT({address: '0x001122', signer}, {iat: NOW + IAT_SKEW}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).then(({payload}) =>
       expect(payload).toMatchSnapshot()
     )
@@ -75,7 +75,7 @@ it('accepts a valid iat', () => {
 })
 
 it('accepts a valid legacy iat', () => {
-  return createJWT({address: '0x001122', signer}, {iat: NOW * 1000}).then(jwt =>
+  return createJWT({address: '0x001122', signer}, {iat: (NOW + IAT_SKEW) * 1000}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).then(({payload}) =>
       expect(payload).toMatchSnapshot()
     )
@@ -84,17 +84,17 @@ it('accepts a valid legacy iat', () => {
 
 
 it('rejects an iat in the future', () => {
-  return createJWT({address: '0x001122', signer}, {iat: NOW + 1}).then(jwt =>
+  return createJWT({address: '0x001122', signer}, {iat: NOW + IAT_SKEW + 1}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
-      expect(error.message).toEqual('JWT not valid yet (issued in the future)')
+      expect(error.message).toEqual('JWT not valid yet (issued in the future): iat: 1485321194 > now: 1485321133')
     ).then((p) => expect(p).toBeFalsy())
   )
 })
 
 it('rejects a Legacy iat in the future', () => {
-  return createJWT({address: '0x001122', signer}, {iat: NOW * 1000 + 1}).then(jwt =>
+  return createJWT({address: '0x001122', signer}, {iat: (NOW + IAT_SKEW) * 1000 + 1}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
-      expect(error.message).toEqual('JWT not valid yet (issued in the future)')
+      expect(error.message).toEqual('JWT not valid yet (issued in the future): iat: 1485321193001 > now: 1485321133')
     ).then((p) => expect(p).toBeFalsy())
   )
 })
@@ -118,7 +118,7 @@ it('accepts a valid legacy exp', () => {
 it('rejects an expired JWT', () => {
   return createJWT({address: '0x001122', signer}, {exp: NOW - 1}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
-      expect(error.message).toEqual('JWT has expired')
+      expect(error.message).toEqual('JWT has expired: exp: 1485321132 < now: 1485321133')
     ).then((p) => expect(p).toBeFalsy())
   )
 })
@@ -126,7 +126,7 @@ it('rejects an expired JWT', () => {
 it('rejects an expired JWT with legacy exp', () => {
   return createJWT({address: '0x001122', signer}, {exp: NOW * 1000 - 1}).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
-      expect(error.message).toEqual('JWT has expired')
+      expect(error.message).toEqual('JWT has expired: exp: 1485321132999 < now: 1485321133')
     ).then((p) => expect(p).toBeFalsy())
   )
 })
@@ -151,7 +151,7 @@ it('accepts a valid audience using callback_url', () => {
 it('rejects invalid audience', () => {
   return createJWT({address: '0x001122', signer}, {aud: '0x001123' }).then(jwt =>
     verifyJWT({registry, address: '0x001122'}, jwt).catch(error =>
-      expect(error.message).toEqual('JWT audience does not match your address')
+      expect(error.message).toEqual('JWT audience does not match your address: aud: 0x001123 !== yours: 0x001122')
     ).then((p) => expect(p).toBeFalsy())
   )
 })
@@ -159,7 +159,7 @@ it('rejects invalid audience', () => {
 it('rejects an invalid audience using callback_url where callback is wrong', () => {
   return createJWT({ address: '0x001122', signer }, { aud: 'http://pututu.uport.me/unique' }).then(jwt =>
     verifyJWT({ registry }, jwt, 'http://pututu.uport.me/unique/1').catch(error =>
-      expect(error.message).toEqual('JWT audience does not match the callback url')
+      expect(error.message).toEqual('JWT audience does not match the callback url: aud: http://pututu.uport.me/unique !== url: http://pututu.uport.me/unique/1')
     )
   )
 })
