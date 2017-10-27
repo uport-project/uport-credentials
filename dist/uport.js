@@ -479,6 +479,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
+	exports.IAT_SKEW = undefined;
 
 	var _extends = Object.assign || function (target) {
 	  for (var i = 1; i < arguments.length; i++) {
@@ -514,6 +515,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ENCODED_HEADER = encodeSection(JOSE_HEADER);
 
 	var LEGACY_MS = 1000000000000;
+
+	var IAT_SKEW = exports.IAT_SKEW = 60;
+
 	/**  @module uport-js/JWT */
 
 	/**
@@ -582,11 +586,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var publicKey = profile.publicKey.match(/^0x/) ? profile.publicKey.slice(2) : profile.publicKey;
 	      var verifier = new _jsontokens.TokenVerifier('ES256K', publicKey);
 	      if (verifier.verify(jwt)) {
-	        if (payload.iat >= LEGACY_MS && payload.iat > Date.now() || payload.iat < LEGACY_MS && payload.iat > Date.now() / 1000) {
-	          return reject(new Error('JWT not valid yet (issued in the future)'));
+	        if (payload.iat >= LEGACY_MS && payload.iat > Date.now() + IAT_SKEW * 1000 || payload.iat < LEGACY_MS && payload.iat > Date.now() / 1000 + IAT_SKEW) {
+	          return reject(new Error('JWT not valid yet (issued in the future): iat: ' + payload.iat + ' > now: ' + Date.now() / 1000));
 	        }
 	        if (payload.exp && payload.exp >= LEGACY_MS && payload.exp <= Date.now() || payload.iat < LEGACY_MS && payload.exp <= Date.now() / 1000) {
-	          return reject(new Error('JWT has expired'));
+	          return reject(new Error('JWT has expired: exp: ' + payload.exp + ' < now: ' + Date.now() / 1000));
 	        }
 	        if (payload.aud) {
 	          if (payload.aud.match(/^0x[0-9a-fA-F]+$/) || (0, _mnid.isMNID)(payload.aud)) {
@@ -597,14 +601,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var addressHex = (0, _mnid.isMNID)(address) ? (0, _mnid.decode)(address).address : address;
 	            var audHex = (0, _mnid.isMNID)(payload.aud) ? (0, _mnid.decode)(payload.aud).address : payload.aud;
 	            if (audHex !== addressHex) {
-	              return reject(new Error('JWT audience does not match your address'));
+	              return reject(new Error('JWT audience does not match your address: aud: ' + payload.aud + ' !== yours: ' + address));
 	            }
 	          } else {
 	            if (!callbackUrl) {
 	              return reject(new Error('JWT audience matching your callback url is required but one wasn\'t passed in'));
 	            }
 	            if (payload.aud !== callbackUrl) {
-	              return reject(new Error('JWT audience does not match the callback url'));
+	              return reject(new Error('JWT audience does not match the callback url: aud: ' + payload.aud + ' !== url: ' + callbackUrl));
 	            }
 	          }
 	        }
