@@ -127,7 +127,7 @@ class Credentials {
         }
       }
 
-      if(this.settings.address) {
+      if(this.settings.signer) {
         if(payload.req) {
           return verifyJWT(this.settings, payload.req).then((challenge) => {
             if(challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
