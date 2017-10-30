@@ -291,7 +291,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        }
 
-	        if (_this.settings.address) {
+	        if (_this.settings.signer) {
 	          if (payload.req) {
 	            return (0, _JWT.verifyJWT)(_this.settings, payload.req).then(function (challenge) {
 	              if (challenge.payload.iss === _this.settings.address && challenge.payload.type === 'shareReq') {
