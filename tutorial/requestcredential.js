@@ -22,9 +22,9 @@ app.use(bodyParser.json({ type: '*/*' }))
 app.get('/', function (req, res) {
 
   credentials.createRequest({
-    verified: ['Custom Attestation'],
-    callbackUrl: 'http://192.168.1.9:8081/callback',
-    exp: new Date().getTime() + 60000
+    verified: ['My Title'],
+    callbackUrl: 'http://192.168.1.14:8081/callback',
+    exp: new Date().getTime()/1000 + 6000
   }).then( function(requestToken) {
     var uri = 'me.uport:me?requestToken=' + requestToken
     var qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
@@ -44,7 +44,9 @@ app.post('/callback', function (req, res) {
     console.log(creds)
     if (creds.address == creds.verified[0].sub && 
        creds.verified[0].iss == '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92' &&
-       creds.verified[0].claim['Custom Attestation'] === 'Custom Value')
+       creds.verified[0].claim['My Title']['KeyOne'] === 'ValueOne' &&
+       creds.verified[0].claim['My Title']['KeyTwo'] === 'Value2' &&
+       creds.verified[0].claim['My Title']['Last Key'] === 'Last Value')
     {
       console.log('Credential verified.');
     } else {
