@@ -24,7 +24,7 @@ app.get('/', function (req, res) {
   credentials.createRequest({
     verified: ['My Title'],
     callbackUrl: 'http://192.168.1.14:8081/callback',
-    exp: new Date().getTime()/1000 + 6000
+    exp: new Date().getTime()/1000 + 300
   }).then( function(requestToken) {
     var uri = 'me.uport:me?requestToken=' + requestToken
     var qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
