@@ -71,7 +71,7 @@ We have an expiry field, denoted `exp`, which represents the unix epoch when the
 credentials.createRequest({
   verified: [<Title of the credential>],
   callbackUrl: 'http://192.168.1.34:8081/callback',
-  exp: new Date().getTime()/1000 + <expiry time in seconds>
+  exp: Math.floor(new Date().getTime()/1000) + <expiry time in seconds>
 })
 ```
 
