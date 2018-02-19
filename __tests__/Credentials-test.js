@@ -36,6 +36,18 @@ describe('createRequest', () => {
     })
   })
 
+  it('has correct payload in JWT requesting a specific accountType', () => {
+    return uport.createRequest({accountType: 'devicekey'}).then((jwt) => {
+      return expect(decodeToken(jwt)).toMatchSnapshot()
+    })
+  })
+
+  it('has correct payload in JWT requesting a bad accountType', () => {
+    return uport.createRequest({accountType: 'bad_account_type'}).then((jwt) => {
+      return expect(decodeToken(jwt)).toMatchSnapshot()
+    })
+  })
+
   it('ignores unsupported request parameters', () => {
     return uport.createRequest({signing: true, sellSoul: true}).then((jwt) => {
       return expect(decodeToken(jwt)).toMatchSnapshot()
