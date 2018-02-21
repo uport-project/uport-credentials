@@ -284,6 +284,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	          if (payload.nad) {
 	            credentials.networkAddress = payload.nad;
 	          }
+	          if (payload.dad) {
+	            credentials.deviceKey = payload.dad;
+	          }
 	          if (payload.verified) {
 	            return Promise.all(payload.verified.map(function (token) {
 	              return (0, _JWT.verifyJWT)(settings, token);
