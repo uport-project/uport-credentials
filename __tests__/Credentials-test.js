@@ -143,6 +143,12 @@ describe('receive', () => {
     )
   })
 
+  it('returns profile with device key claims', () => {
+    return createShareResp({dad: '0xdeviceKey'}).then(jwt => uport.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
   it('returns pushToken if available', () => {
     return createShareResp({capabilities: ['PUSHTOKEN']}).then(jwt => uport.receive(jwt)).then(profile =>
       expect(profile.pushToken).toEqual('PUSHTOKEN')

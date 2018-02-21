@@ -125,6 +125,9 @@ class Credentials {
         if (payload.nad) {
           credentials.networkAddress = payload.nad
         }
+        if (payload.dad) {
+          credentials.deviceKey = payload.dad
+        }
         if (payload.verified) {
           return Promise.all(payload.verified.map(token => verifyJWT(settings, token))).then(verified => {
             return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
