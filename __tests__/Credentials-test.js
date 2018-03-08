@@ -81,13 +81,13 @@ describe('createRequest', () => {
 
 describe('createAttestationRequest', () => {
   it('creates a valid JWT for a request', () => {
-    return uport.createAttestationRequest({claim: { test: {prop1: 1, prop2: 2}}}).then((jwt) => {
+    return uport.createAttestationRequest([{claim: { test: {prop1: 1, prop2: 2}}}], 'did:uport:223ab45').then((jwt) => {
       return expect(verifier.verify(jwt)).toBeTruthy()
     })
   })
 
   it('has correct payload in JWT for a request', () => {
-    return uport.createAttestationRequest({claim: { test: {prop1: 1, prop2: 2}}}).then((jwt) => {
+    return uport.createAttestationRequest([{claim: { test: {prop1: 1, prop2: 2}}}], 'did:uport:223ab45').then((jwt) => {
       return expect(decodeToken(jwt)).toMatchSnapshot()
     })
   })

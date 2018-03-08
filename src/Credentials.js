@@ -119,11 +119,12 @@ class Credentials {
  *    ...
  *  })
  *
- *  @param    {Array}              unsignedClaims      an array of unsigned claims which you want the user to attest
- *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
+ *  @param    {Array}              unsignedClaims       an array of unsigned claims which you want the user to attest
+ *  @param    {String}             sub                  the DID of the identity you want to sign the attestation
+ *  @return   {Promise<Object, Error>}                  a promise which resolves with a signed JSON Web Token or rejects with an error
  */
-  createAttestationRequest(unsignedClaims) {
-    return createJWT(this.settings, {unsignedClaims, type: 'attReq'})
+  createAttestationRequest(unsignedClaims, sub) {
+    return createJWT(this.settings, {unsignedClaims, sub, type: 'attReq'})
   }
 
 /**
