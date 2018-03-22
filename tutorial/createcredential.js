@@ -17,7 +17,7 @@ var credentials = new uport.Credentials({
 
 app.get('/', function (req, res) {
   credentials.attest({
-    sub: '2p13BzDJcWpUhSaHVhfaJ1UaWB7P6WnfSXK',
+    sub: '2omWsSGspY7zhxaG6uHyoGtcYxoGeeohQXz',
     exp: 1552046024,
     claim: {'My Title' : {'KeyOne' : 'ValueOne', 'KeyTwo' : 'Value2', 'Last Key' : 'Last Value'} }
     // Note, the above is a complex claim. Also supported are simple claims:
@@ -25,9 +25,9 @@ app.get('/', function (req, res) {
   }).then(function (att) {
     console.log(att)
     console.log(jsontokens.decodeToken(att))
-    var uri = 'me.uport:add?attestations=' + att
+    var uri = 'me.uport:add?attestations=' + att + '%26callback_type=post'
     var qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
-    var mobileUrl = 'https://id.uport.me/add?attestations=' + att
+    var mobileUrl = 'https://id.uport.me/add?attestations=' + att + '&callback_type=post'
     console.log(uri)
     res.send('<div><img src=' + qrurl + '></img></div><div><a href=' + mobileUrl + '>Click here if on mobile</a></div>')
   })
