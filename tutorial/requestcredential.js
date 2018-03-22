@@ -23,14 +23,14 @@ app.get('/', function (req, res) {
 
   credentials.createRequest({
     verified: ['My Title'],
-    callbackUrl: 'http://192.168.1.14:8081/callback',
+    callbackUrl: 'http://192.168.44.162:8081/callback',
     exp: Math.floor(new Date().getTime()/1000) + 300
   }).then( function(requestToken) {
-    var uri = 'me.uport:me?requestToken=' + requestToken
+    var uri = 'me.uport:me?requestToken=' + requestToken + '%26callback_type=post'
     var qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
-    var mobileUrl = 'https://id.uport.me/me?requestToken=' + requestToken
+    var mobileUrl = 'https://id.uport.me/me?requestToken=' + requestToken + '&callback_type=post'
     console.log(uri)
-    res.send('<div><img src=' + qrurl + '></img></div><div><a href=' + mobileUrl + '>Click here if on mobile (Not implemented yet!)</a></div>');
+    res.send('<div><img src=' + qrurl + '></img></div><div><a href=' + mobileUrl + '>Click here if on mobile</a></div>');
   })
 
 })

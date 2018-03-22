@@ -30,7 +30,7 @@ When we hit the default route using `app.get('/')` we will call `credentials.att
 
 ```js
 credentials.attest({
-  sub: '<uport Id of mobile app>',
+  sub: '<uport Id of identity in mobile app>',
   exp: 1552046024,
   claim: {'My Title' : {'KeyOne' : 'ValueOne', 'KeyTwo' : 'Value2', 'Last Key' : 'Last Value'}}
 })
@@ -39,7 +39,7 @@ credentials.attest({
 The `attest()` function returns a promise that resolves to a JSON Web Token. We're going to present this token to the user through a URL that looks like this:
 
 ```js
-me.uport:add?attestations=<JSON Web Token>
+me.uport:add?attestations=<JSON Web Token>&callback_type=post
 ```
 
 We present this to the user in the form of a QR code. When you scan this code with your mobile app you should see an alert that you are about to add a credential. It should reference the Creator app as the identity giving you this credential. This will add the credential locally to your phone.
