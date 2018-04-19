@@ -170,7 +170,6 @@ connect.showRequest(attestation) // no response is needed for an attestation
 If you requested a push notification token in the above selective disclosure step you can also send attestations directly to your users app in real time.
 
 ```javascript
-// Coming soon, not yet implemented
 credentials.push(pushToken, `me.uport:add?attestation=${attestationjwt}`, message).then(response => {
 
 })
