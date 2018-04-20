@@ -106,7 +106,7 @@ class Credentials {
  *  Creates a signed request for the user to attest a list of claims.
  *
  *  @example
- *  const unsignedClaims = [{
+ *  const unsignedClaim = {
  *    claim: {
  *      "Citizen of city X": {
  *        "Allowed to vote": true,
@@ -114,17 +114,17 @@ class Credentials {
  *      }
  *    },
  *    sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
- *  }]
- *  credentials.createAttestationRequest(unsignedClaims).then(jwt => {
+ *  }
+ *  credentials.createVerificationRequest(unsignedClaim).then(jwt => {
  *    ...
  *  })
  *
- *  @param    {Array}              unsignedClaims       an array of unsigned claims which you want the user to attest
+ *  @param    {Object}              unsignedClaim       an object that is an unsigned claim which you want the user to attest
  *  @param    {String}             sub                  the DID of the identity you want to sign the attestation
  *  @return   {Promise<Object, Error>}                  a promise which resolves with a signed JSON Web Token or rejects with an error
  */
-  createAttestationRequest(unsignedClaims, sub) {
-    return createJWT(this.settings, {unsignedClaims, sub, type: 'attReq'})
+  createVerificationRequest(unsignedClaim, sub) {
+    return createJWT(this.settings, {unsignedClaim, sub, type: 'verReq'})
   }
 
 /**
