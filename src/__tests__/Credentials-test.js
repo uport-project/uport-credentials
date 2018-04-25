@@ -220,7 +220,7 @@ describe('receive', () => {
     const profile = uport.receive(jwt)
     expect(profile).toMatchSnapshot()
   })
-
+ 
   it('returns profile with only public claims', async () => {
     const jwt = await createShareResp()
     const profile = uport.receive(jwt)
