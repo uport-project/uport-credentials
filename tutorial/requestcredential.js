@@ -14,7 +14,7 @@ app.use(bodyParser.json({ type: '*/*' }))
 
 app.get('/', function (req, res) {
 
-  credentials.createRequest({
+  credentials.requestDisclosure({
     verified: ['My Title'],
     callbackUrl: 'http://192.168.44.162:8081/callback',
     exp: Math.floor(new Date().getTime()/1000) + 300
@@ -33,7 +33,7 @@ app.post('/callback', function (req, res) {
   var jwt = req.body.access_token
   console.log(jwt)
 
-  credentials.receive(jwt).then( function(creds) {
+  credentials.authenticate(jwt).then( function(creds) {
     console.log(creds)
     if (creds.address == creds.verified[0].sub && 
        creds.verified[0].iss == '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92' &&
