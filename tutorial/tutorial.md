@@ -10,19 +10,14 @@ Go ahead and create identities for the Creator and Requestor, or if you wish to 
 
 ## Creator service
 
-In the file `createcredential.js` we have a simple node `express` server. In the setup phase we use the private key we got from the App Manager to create a `SimpleSigner` object. This object is what will be signing the credential.
+In the file `createcredential.js` we have a simple node `express` server. In the setup phase we use the private key we got from the App Manager to create a `SimpleSigner` object.
 
-```js
-var signer = uport.SimpleSigner(<your key here>)
-```
-
-We then create a `Credentials` object using the signer and the uPort identifier of our app that we got from the App Manager (or the default identity):
+We then create a `Credentials` object using the privatreKey and the uPort identifier of our app that we got from the App Manager (or the default identity):
 
 ```js
 var credentials = new uport.Credentials({
-  appName: 'Credential Tutorial',
-  address: '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92',
-  signer: signer
+  did: 'did:ethr:0xbc3ae59bc76f894822622cdef7a2018dbe353840',
+  privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
 })
 ```
 
@@ -53,7 +48,7 @@ When you're done editing the file you may run the Creator service like so:
 > node createcredential.js
 ```
 
-If you open your browser to `http://localhost:8081/` you should see the QR code with the credential, which you may scan with the uPort app.
+If you open your browser to `http://localhost:8088/` you should see the QR code with the credential, which you may scan with the uPort app.
 
 ## Requestor service
 
@@ -83,7 +78,7 @@ To interact with the server, run
 node requestcredential.js
 ```
 
-and go to `http://localhost:8081` in your browser.
+and go to `http://localhost:8088` in your browser.
 
 When the mobile app user approves the request to share her credential after scanning the code, the `/callback` route is called using `app.post('/callback')`. Here we fetch the response JWT using `req.body.access_token`.
 
