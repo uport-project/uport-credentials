@@ -1,9 +1,11 @@
-import { createJWT, verifyJWT } from './JWT'
-import { decodeToken } from 'jsontokens'
+import { createJWT, verifyJWT, SimpleSigner } from 'did-jwt'
 import UportLite from 'uport-lite'
 import nets from 'nets'
 import nacl from 'tweetnacl'
 import naclutil from 'tweetnacl-util'
+const MNID = require('mnid')
+import UportDIDResolver from 'uport-did-resolver'
+import EthrDIDResolver from 'ethr-did-resolver'
 
 /**
 *    The Credentials class allows you to easily create the signed payloads used in uPort inlcuding
@@ -16,35 +18,72 @@ class Credentials {
   /**
    * Instantiates a new uPort Credentials object
    *
-   * @example
-   * import { Credentials, SimpleSigner } from 'uport'
-   * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x0101.... }}
-   * const setttings = { networks, address: '5A8bRWU3F7j3REx3vkJ...', signer: new SimpleSigner(process.env.PRIVATE_KEY)}
-   * const credentials = new Credentials(settings)
-   *
+   * The following example is just for testing purposes. You should never store a private key in source code.
+   * 
    * @example
    * import { Credentials } from 'uport'
-   * const credentials = new Credentials()
+   * const credentials = new Credentials({
+   *   did: 'did:ethr:0xbc3ae59bc76f894822622cdef7a2018dbe353840',
+   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
+   * })
+   *
+   * It is recommended to store the address and private key in environment variables for your server application
+   * 
+   * @example
+   * import { Credentials, SimpleSigner } from 'uport'
+   * const credentials = new Credentials({
+   *   did: process.env.APPLICATION_DID,
+   *   signer: SimpleSigner(process.env.PRIVATE_KEY)
+   * })
+   * 
+   * Instead of a private key you can pass in a [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions) to 
+   * present UX or call a HSM.
+   
+   * @example
+   * import { Credentials } from 'uport'
+   * 
+   * function mySigner (data) {
+   *   return new Promise((resolve, reject) => {
+   *     const signature = /// sign it
+   *     resolve(signature)
+   *   })
+   * }
+   * 
+   * const credentials = new Credentials({
+   *   did: process.env.APPLICATION_DID,
+   *   signer: mySigner
+   * })
    *
    * @param       {Object}            [settings]             setttings
-   * @param       {Object}            settings.networks      networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
-   * @param       {UportLite}         settings.registry      a registry object from UportLite
-   * @param       {SimpleSigner}      settings.signer        a signer object, see SimpleSigner.js
-   * @param       {Address}           settings.address       your uPort address (may be the address of your application's uPort identity)
+   * @param       {DID}               settings.did           Application [DID](https://w3c-ccg.github.io/did-spec/#decentralized-identifiers-dids) (unique identifier) for your application
+   * @param       {String}            settings.privateKey    A hex encoded 32 byte private key
+   * @param       {SimpleSigner}      settings.signer        a signer object, see [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions)
+   * @param       {Object}            settings.ethrConfig    Configuration object for ethr did resolver. See [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver)
+   * @param       {Address}           settings.address       DEPRECATED your uPort address (may be the address of your application's uPort identity)
+   * @param       {Object}            settings.networks      DEPRECATED networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
+   * @param       {UportLite}         settings.registry      DEPRECATED a registry object from UportLite
    * @return      {Credentials}                              self
    */
-  constructor (settings = {}) {
-    this.settings = settings
-    this.settings.networks = settings.networks ? configNetworks(settings.networks) : {}
-    if (!this.settings.registry) {
-      const registry = UportLite({networks: this.settings.networks})
-      this.settings.registry = (address) => new Promise((resolve, reject) => {
-        registry(address, (error, profile) => {
-          if (error) return reject(error)
-          resolve(profile)
-        })
-      })
+  constructor ({did, address, privateKey, signer, networks, registry, ethrConfig}) {
+    if (signer) {
+      this.signer = signer
+    } else if (privateKey) {
+      this.signer = SimpleSigner(privateKey)
     }
+    if (did) {
+      this.did = did
+    } else if (address) {
+      if (MNID.isMNID(address)) {
+        this.did = `did:uport:${address}`
+      }
+      if (address.match('^0x[0-9a-fA-F]{40}$')) {
+        this.did = `did:ethr:${address}`
+      }
+    }
+    this.signJWT = (payload) => createJWT(payload, {issuer: this.did, signer: this.signer, alg: 'ES256K-R'})
+
+    UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
+    EthrDIDResolver(ethrConfig || {})
   }
 
 /**
@@ -99,7 +138,7 @@ class Credentials {
     } else {
       payload.exp = Math.floor(Date.now() / 1000) + 600
     }
-    return createJWT(this.settings, {...payload, type: 'shareReq'})
+    return this.signJWT({...payload, type: 'shareReq'})
   }
 
 /**
@@ -117,40 +156,38 @@ class Credentials {
   *  @param    {String}                  [callbackUrl=null]    callbackUrl
   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
   */
-  receive (token, callbackUrl = null) {
-    return verifyJWT(this.settings, token, callbackUrl).then(({payload, profile}) => {
+  async receive (token, callbackUrl = null) {
+    const audience = {audience: this.did, callbackUrl}
+    const {payload, doc} = await verifyJWT(token, audience)
 
-      function processPayload(settings) {
-        const credentials = {...profile, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
-        if (payload.nad) {
-          credentials.networkAddress = payload.nad
-        }
-        if (payload.dad) {
-          credentials.deviceKey = payload.dad
-        }
-        if (payload.verified) {
-          return Promise.all(payload.verified.map(token => verifyJWT(settings, token))).then(verified => {
-            return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
-          })
-        } else {
-          return credentials
-        }
+    async function processPayload () {
+      const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
+      if (payload.nad) {
+        credentials.networkAddress = payload.nad
       }
+      if (payload.dad) {
+        credentials.deviceKey = payload.dad
+      }
+      if (payload.verified) {
+        const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, audience)))
+        return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
+      } else {
+        return credentials
+      }
+    }
 
-      if(this.settings.signer) {
-        if(payload.req) {
-          return verifyJWT(this.settings, payload.req).then((challenge) => {
-            if(challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
-              return processPayload(this.settings)
-            }
-          })
-        } else {
-          throw new Error('Challenge was not included in response')
+    if(this.signer) {
+      if(payload.req) {
+        const challenge = await verifyJWT(payload.req)
+        if(challenge.payload.iss === this.did && challenge.payload.type === 'shareReq') {
+          return processPayload()
         }
       } else {
-        return processPayload(this.settings)
+        throw new Error('Challenge was not included in response')
       }
-    })
+    } else {
+      return processPayload()
+    }
   }
 
 /**
@@ -228,25 +265,25 @@ class Credentials {
   * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
   */
   attest ({sub, claim, exp}) {
-    return createJWT(this.settings, {sub: sub, claim, exp})
+    return this.signJWT({sub: sub, claim, exp})
   }
 
-/**
-  *  Look up a profile in the registry for a given uPort address. Address must be MNID encoded.
-  *
-  *  @example
-  *  credentials.lookup('5A8bRWU3F7j3REx3vkJ...').then(profile => {
-  *     const name = profile.name
-  *     const pubkey = profile.pubkey
-  *     ...
-  *   })
-  *
-  * @param    {String}            address             a MNID encoded address
-  * @return   {Promise<Object, Error>}                a promise which resolves with parsed profile or rejects with an error
-  */
-  lookup (address) {
-    return this.settings.registry(address)
-  }
+// /**
+//   *  Look up a profile in the registry for a given uPort address. Address must be MNID encoded.
+//   *
+//   *  @example
+//   *  credentials.lookup('5A8bRWU3F7j3REx3vkJ...').then(profile => {
+//   *     const name = profile.name
+//   *     const pubkey = profile.pubkey
+//   *     ...
+//   *   })
+//   *
+//   * @param    {String}            address             a MNID encoded address
+//   * @return   {Promise<Object, Error>}                a promise which resolves with parsed profile or rejects with an error
+//   */
+//   lookup (address) {
+//     return this.settings.registry(address)
+//   }
 }
 
 const configNetworks = (nets) => {
