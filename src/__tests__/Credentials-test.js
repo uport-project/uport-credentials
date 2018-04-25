@@ -29,7 +29,6 @@ describe('configuration', () => {
     describe('mnid `address` configured', () => {
       expect(new Credentials({address: mnid}).did).toEqual(`did:uport:${mnid}`)
     })
-
   })
   // describe('registry', () => {
   //   it('has a default registry that looks up profile', () => {
@@ -68,6 +67,27 @@ describe('configuration', () => {
       expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
     })
   })
+})
+
+describe('signJWT', () => {
+  describe('uport method', () => {
+    it('uses ES256K algorithm', async () => {
+      const credentials = new Credentials({address: mnid, privateKey})
+      const jwt = await credentials.signJWT({hello: 1})
+      const { header } = decodeJWT(jwt)
+      expect(header.alg).toEqual('ES256K')  
+    })
+  })
+
+  describe('ethr method', () => {
+    it('uses ES256K-R algorithm', async () => {
+      const credentials = new Credentials({did, privateKey})
+      const jwt = await credentials.signJWT({hello: 1})
+      const { header } = decodeJWT(jwt)
+      expect(header.alg).toEqual('ES256K-R')  
+    })
+  })
+
 })
 
 describe('createRequest', () => {
