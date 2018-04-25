@@ -25,6 +25,17 @@ In your application you must first configure your Uport object.
 ```javascript
 import { Credentials } from 'uport'
 
+// For new ethereum based addresses
+const credentials = new Credentials({
+  appName: 'App Name',
+  did: 'did:ethr:0x....',
+  privateKey: process.env.PRIVATE_KEY
+})
+
+// You can create a new identity
+
+console.log(Credentials.createIdentity())
+
 // For legacy application identity created on App Manager
 const credentials = new Credentials({
   appName: 'App Name',
@@ -32,12 +43,6 @@ const credentials = new Credentials({
   privateKey: process.env.PRIVATE_KEY
 })
 
-// For new ethereum based addresses
-const credentials = new Credentials({
-  appName: 'App Name',
-  did: 'did:ethr:0x....',
-  privateKey: process.env.PRIVATE_KEY
-})
 
 ```
 

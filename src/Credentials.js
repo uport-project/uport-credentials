@@ -6,7 +6,9 @@ import naclutil from 'tweetnacl-util'
 const MNID = require('mnid')
 import UportDIDResolver from 'uport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
-
+import { toEthereumAddress } from 'did-jwt/lib/Digest'
+import { ec as EC } from 'elliptic'
+const secp256k1 = new EC('secp256k1')
 /**
 *    The Credentials class allows you to easily create the signed payloads used in uPort inlcuding
 *    credentials and signed mobile app requests (ex. selective disclosure requests
@@ -19,6 +21,15 @@ class Credentials {
    * Instantiates a new uPort Credentials object
    *
    * The following example is just for testing purposes. You should never store a private key in source code.
+   * 
+   * @example
+   * import { Credentials } from 'uport'
+   * const credentials = new Credentials({
+   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
+   * })
+   *
+   * The above example derives the public key used to generate the did, so only a private key is needed. 
+   * Generating a public key from a private key is slow. It is recommended to configure the `did` option as well.
    * 
    * @example
    * import { Credentials } from 'uport'
@@ -69,6 +80,7 @@ class Credentials {
       this.signer = signer
     } else if (privateKey) {
       this.signer = SimpleSigner(privateKey)
+      
     }
     if (did) {
       this.did = did
@@ -79,12 +91,28 @@ class Credentials {
       if (address.match('^0x[0-9a-fA-F]{40}$')) {
         this.did = `did:ethr:${address}`
       }
+    } else if (privateKey) {
+      const kp = secp256k1.keyFromPrivate(privateKey)
+      const address = toEthereumAddress(kp.getPublic('hex'))
+      this.did = `did:ethr:${address}`
     }
 
     this.signJWT = (payload, expiresIn) => createJWT(payload, {issuer: this.did, signer: this.signer, alg: this.did.match('^did:uport:') ? 'ES256K' : 'ES256K-R', expiresIn })
 
     UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
     EthrDIDResolver(ethrConfig || {})
+  }
+
+  /**
+   * generate a DID and private key
+   */
+  static createIdentity () {
+    const kp = secp256k1.genKeyPair()
+    const publicKey = kp.getPublic('hex')
+    const privateKey = kp.getPrivate('hex')
+    const address = toEthereumAddress(publicKey)
+    const did = `did:ethr:${address}`
+    return {did, privateKey}
   }
 
 /**

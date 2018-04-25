@@ -38,7 +38,8 @@
     "collectCoverage": true,
     "unmockedModulePathPatterns": [
       "<rootDir>/node_modules/nock"
-    ]
+    ],
+    "testEnvironment": "node"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

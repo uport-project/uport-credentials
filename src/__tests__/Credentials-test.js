@@ -48,14 +48,20 @@ describe('configuration', () => {
     describe('`did` configured', () => {
       expect(new Credentials({did}).did).toEqual(did)
     })
+
     describe('ethereum `address` configured', () => {
       expect(new Credentials({address}).did).toEqual(did)
+    })
+
+    describe('`privateKey` configured', () => {
+      expect(new Credentials({privateKey}).did).toEqual(did)
     })
 
     describe('mnid `address` configured', () => {
       expect(new Credentials({address: mnid}).did).toEqual(`did:uport:${mnid}`)
     })
   })
+  
   // describe('registry', () => {
   //   it('has a default registry that looks up profile', () => {
   //     return new Credentials().settings.registry('0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c').then(profile =>
@@ -92,6 +98,14 @@ describe('configuration', () => {
       const networks = {'0x94365e3b': 'hey'}
       expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
     })
+  })
+})
+
+describe('createIdentity()', () => {
+  it('creates Identity', () => {
+    const {did, privateKey} = Credentials.createIdentity()
+    expect(did).toMatch(/^did:ethr:0x[0-9a-fA-F]{40}$/)
+    expect(privateKey).toMatch(/^[0-9a-fA-F]{64}$/)
   })
 })
 
