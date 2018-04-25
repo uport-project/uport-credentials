@@ -64,7 +64,7 @@ class Credentials {
    * @param       {UportLite}         settings.registry      DEPRECATED a registry object from UportLite
    * @return      {Credentials}                              self
    */
-  constructor ({did, address, privateKey, signer, networks, registry, ethrConfig}) {
+  constructor ({did, address, privateKey, signer, networks, registry, ethrConfig} = {}) {
     if (signer) {
       this.signer = signer
     } else if (privateKey) {
@@ -81,28 +81,22 @@ class Credentials {
       }
     }
 
-    this.signJWT = (payload) => createJWT(payload, {issuer: this.did, signer: this.signer, alg: this.did.match('^did:uport:') ? 'ES256K' : 'ES256K-R' })
+    this.signJWT = (payload, expiresIn) => createJWT(payload, {issuer: this.did, signer: this.signer, alg: this.did.match('^did:uport:') ? 'ES256K' : 'ES256K-R', expiresIn })
 
     UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
     EthrDIDResolver(ethrConfig || {})
   }
 
 /**
- *  Creates a signed request token (JWT) given a request params object.
+ *  Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/specs/blob/develop/messages/sharereq.md)
  *
  *  @example
  *  const req = { requested: ['name', 'country'],
  *                callbackUrl: 'https://myserver.com',
  *                notifications: true }
- *  credentials.createRequest(req).then(jwt => {
+ *  credentials.requestDisclosure(req).then(jwt => {
  *      ...
  *  })
-
-
- requested: ['name','phone','identity_no'],
-    callbackUrl: 'https://....' // URL to send the response of the request to
-    notifications: true
-
  *
  *  @param    {Object}             [params={}]           request params object
  *  @param    {Array}              params.requested      an array of attributes for which you are requesting credentials to be shared for
@@ -111,9 +105,10 @@ class Credentials {
  *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
  *  @param    {String}             params.network_id     network id of Ethereum chain of identity eg. 0x4 for rinkeby
  *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", "devicekey" or "none"
+ *  @param    {Number}             expiresIn             Seconds until expiry
  *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
  */
-  createRequest (params = {}) {
+  requestDisclosure (params = {}, expiresIn = 600) {
     const payload = {}
     if (params.requested) {
       payload.requested = params.requested
@@ -134,15 +129,114 @@ class Credentials {
           && ['general', 'segregated', 'keypair', 'devicekey', 'none'].indexOf(params.accountType) >= 0) {
       payload.act = params.accountType
     }
-    if (params.exp) { //checks for expiration on requests, if none is provided the default is 10 min
+    if (params.exp) {
       payload.exp = params.exp
-    } else {
-      payload.exp = Math.floor(Date.now() / 1000) + 600
     }
-    return this.signJWT({...payload, type: 'shareReq'})
+    return this.signJWT({...payload, type: 'shareReq'}, params.exp ? undefined : expiresIn)
+  }
+/**
+ *  Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/specs/blob/develop/messages/sharereq.md)
+ *
+ *  @example
+ *  const req = { requested: ['name', 'country'],
+ *                callbackUrl: 'https://myserver.com',
+ *                notifications: true }
+ *  credentials.createRequest(req).then(jwt => {
+ *      ...
+ *  })
+ *
+ *  @param    {Object}             [params={}]           request params object
+ *  @param    {Array}              params.requested      an array of attributes for which you are requesting credentials to be shared for
+ *  @param    {Array}              params.verified       an array of attributes for which you are requesting verified credentials to be shared for
+ *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
+ *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
+ *  @param    {String}             params.network_id     network id of Ethereum chain of identity eg. 0x4 for rinkeby
+ *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", "devicekey" or "none"
+ *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
+ * @deprecated
+ */
+
+  createRequest (params = {}) {
+    return this.requestDisclosure(params)
   }
 
 /**
+ * Creates a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
+ * 
+ * This can either be used to share information about the signing identity or as the response to a 
+ * [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md), where it can be used to authenticate the identity.
+ *
+ *  @example
+ *  credentials.disclose({own: {name: 'Lourdes Valentina Gomez'}}).then(jwt => {
+ *      ...
+ *  })
+ *
+ *  @param    {Object}             [params={}]           request params object
+ *  @param    {JWT}                params.req            A selective disclosure Request JWT if this is returned as part of an authentication flow
+ *  @param    {Object}             params.own            An object of self attested claims about the signer (eg. name etc)
+ *  @param    {Array}              params.verified       An array of attestation JWT's to include
+ *  @param    {MNID}               params.nad            An ethereum address encoded as an [MNID](https://github.com/uport-project/mnid)
+ *  @param    {Array}              params.capabilities   An array of capability JWT's to include
+ *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
+ */
+async disclose (payload = {}, expiresIn = 600 ) {
+  if (payload.req) {
+    const verified = await verifyJWT(payload.req)
+    if (verified.issuer) {
+      payload.aud = verified.issuer
+    }
+  }
+  return this.signJWT({...payload, type: 'shareResp'}, expiresIn)
+}
+
+async processDisclosurePayload ({doc, payload}) {
+  const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
+  if (payload.nad) {
+    credentials.networkAddress = payload.nad
+  }
+  if (payload.dad) {
+    credentials.deviceKey = payload.dad
+  }
+  if (payload.verified) {
+    const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.did})))
+    return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
+  } else {
+    return credentials
+  }
+}
+
+/**
+  *  Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from mobile 
+  *  app as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md). 
+  *  
+  *  It Verifies and parses the given response token and verifies the challenge response flow.
+  *
+  *  @example
+  *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
+  *  credentials.authenticate(resToken).then(res => {
+  *      const credentials = res.verified
+  *       const name =  res.name
+  *      ...
+  *  })
+  *
+  *  @param    {String}                  token                 a response token
+  *  @param    {String}                  [callbackUrl=null]    callbackUrl
+  *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
+  */
+  async authenticate (token, callbackUrl = null) {
+    const { payload, doc } = await verifyJWT(token, {audience: this.did, callbackUrl, auth: true})
+
+    if(payload.req) {
+      const challenge = await verifyJWT(payload.req)
+      if(challenge.payload.iss === this.did && challenge.payload.type === 'shareReq') {
+        return this.processDisclosurePayload({payload, doc})
+      }
+    } else {
+      throw new Error('Challenge was not included in response')
+    }
+  }
+
+  /**
   *  Receive signed response token from mobile app. Verifies and parses the given response token.
   *
   *  @example
@@ -156,40 +250,33 @@ class Credentials {
   *  @param    {String}                  token                 a response token
   *  @param    {String}                  [callbackUrl=null]    callbackUrl
   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
+  *  @deprecated
   */
-  async receive (token, callbackUrl = null) {
-    const audience = {audience: this.did, callbackUrl}
-    const {payload, doc} = await verifyJWT(token, audience)
-
-    async function processPayload () {
-      const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
-      if (payload.nad) {
-        credentials.networkAddress = payload.nad
-      }
-      if (payload.dad) {
-        credentials.deviceKey = payload.dad
-      }
-      if (payload.verified) {
-        const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, audience)))
-        return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
-      } else {
-        return credentials
-      }
-    }
-
-    if(this.signer) {
-      if(payload.req) {
-        const challenge = await verifyJWT(payload.req)
-        if(challenge.payload.iss === this.did && challenge.payload.type === 'shareReq') {
-          return processPayload()
-        }
-      } else {
-        throw new Error('Challenge was not included in response')
-      }
-    } else {
-      return processPayload()
-    }
+  receive (token, callbackUrl = null) {
+    return this.authenticate(token, callbackUrl)
   }
+
+  /**
+  *  Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md). 
+  * 
+  *  The main difference between this and `authenticate()` is that it does not verify the challenge. This can be used to verify user profiles that have been shared 
+  *  through other methods such as QR codes and messages.
+  *
+  *  @example
+  *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
+  *  credentials.verifyProfile(resToken).then(profile => {
+  *      const credentials = profile.verified
+         const name =  profile.name
+  *      ...
+  *  })
+  *
+  *  @param    {String}                  token                 a response token
+  *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
+  */
+ async verifyProfile (token) {
+  const { payload, doc } = await verifyJWT(token, {audience: this.did})
+  return this.processDisclosurePayload({ payload, doc })
+}
 
 /**
   *  Send a push notification to a user, consumes a token which allows you to send push notifications

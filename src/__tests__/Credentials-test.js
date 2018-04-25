@@ -4,6 +4,8 @@ import nacl from 'tweetnacl'
 import naclutil from 'tweetnacl-util'
 import nock from 'nock'
 import MockDate from 'mockdate'
+import { registerMethod } from 'did-resolver'
+
 MockDate.set(1485321133 * 1000)
 
 const privateKey = '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
@@ -12,9 +14,33 @@ const address = '0xbc3ae59bc76f894822622cdef7a2018dbe353840'
 const did = `did:ethr:${address}`
 const mnid = '2nQtiQG6Cgm1GYTBaaKAgr76uY7iSexUkqX'
 
+const claim = {sub: '0x112233', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133 + 1}
+
 const uport = new Credentials({privateKey, did})
 const uport2 = new Credentials({})
 
+function mockresolver (profile) {
+  registerMethod('ethr', async (id, parsed) => {
+    const doc = {
+      '@context': 'https://w3id.org/did/v1',
+      id,
+      publicKey: [{
+        id: `${id}#owner`,
+        type: 'Secp256k1VerificationKey2018',
+        owner: id,
+        ethereumAddress: parsed.id
+      }],
+      authentication: [{
+        type: 'Secp256k1SignatureAuthentication2018',
+        publicKey: `${id}#owner`
+      }]
+    }
+    if (profile) {
+      doc.uportProfile = profile
+    }
+    return doc
+  })
+}
 
 describe('configuration', () => {
 
@@ -90,9 +116,10 @@ describe('signJWT', () => {
 
 })
 
-describe('createRequest', () => {
+describe('requestDisclosure()', () => {
+  beforeAll(() => mockresolver())
   async function createAndVerify (params={}) {
-    const jwt = await uport.createRequest(params)
+    const jwt = await uport.requestDisclosure(params)
     return await verifyJWT(jwt)
   }
   it('creates a valid JWT for a request', async () => {
@@ -146,7 +173,27 @@ describe('createRequest', () => {
   })
 })
 
-describe('attest', () => {
+describe('disclose()', () => {
+  beforeAll(() => mockresolver())
+  async function createAndVerify (params={}) {
+    const jwt = await uport.disclose(params)
+    return await verifyJWT(jwt, {audience: did})
+  }
+
+  it('creates a valid JWT for a disclosure', async () => {
+    const response = await createAndVerify({own: {name: 'Bob'}})
+    return expect(response).toMatchSnapshot()
+  })
+
+  it('creates a valid JWT for a disclosure', async () => {
+    const req = await uport.requestDisclosure()
+    const response = await createAndVerify({req})
+    return expect(response).toMatchSnapshot()
+  })
+})
+
+describe('attest()', () => {
+  beforeAll(() => mockresolver())
   it('has correct payload in JWT for an attestation', () => {
     return uport.attest({sub: '0x112233', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133 + 1}).then((jwt) => {
       return expect(verifyJWT(jwt)).toMatchSnapshot()
@@ -154,112 +201,100 @@ describe('attest', () => {
   })
 })
 
-describe('receive', () => {
-  function createShareResp (payload = {}) {
-    return uport.createRequest({requested: ['name', 'phone']}).then((jwt) => {
-      return createJWT({...payload, type: 'shareResp', req:jwt}, {issuer: did, signer, alg: 'ES256K-R'})
-    })
+describe('authenticate()', () => {
+  beforeAll(() => mockresolver({
+    name: 'Super Developer',
+    country: 'NI'
+  }))
+
+  async function createShareResp (payload = {}) {
+    const req = await uport.requestDisclosure({requested: ['name', 'phone']})
+    return uport.disclose({...payload, req})
   }
 
-  function createShareRespMissingRequest (payload = {}) {
-    return uport.createRequest({requested: ['name', 'phone']}).then((jwt) => {
-      return createJWT({...payload, type: 'shareResp'}, {issuer: did, signer, alg: 'ES256K-R'})
-    })
-  }
-
-  function createShareRespWithExpiredRequest (payload = {}) {
-    return uport.createRequest({requested: ['name', 'phone'], exp: Date.now() - 1}).then((jwt) => {
-      return createJWT({...payload, type: 'shareResp', req:jwt}, {issuer: did, signer, alg: 'ES256K-R'})
-    })
-  }
-
-  function createShareRespWithVerifiedCredential (payload = {}, verifiedClaim = {sub: '0x112233', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133 + 1}) {
-    return uport.attest(verifiedClaim).then(jwt => {
-      return createShareResp({...payload, verified: [jwt]})
-    })
+  async function createShareRespWithVerifiedCredential (payload = {}) {
+    const req = await uport.requestDisclosure({requested: ['name', 'phone']})
+    const attestation = await uport.attest(claim)
+    return uport.disclose({...payload, verified: [attestation], req})
   }
 
   it('returns profile mixing public and private claims', async () => {
     const jwt = await createShareResp({own: {name: 'Davie', phone: '+15555551234'}})
-    const profile = uport.receive(jwt)
+    const profile = await uport.authenticate(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile mixing public and private claims and verified credentials', async () => {
     const jwt = await createShareRespWithVerifiedCredential({own: {name: 'Davie', phone: '+15555551234'}})
-    const profile = uport.receive(jwt)
+    const profile = await uport.authenticate(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with only public claims', async () => {
     const jwt = await createShareResp()
-    const profile = uport.receive(jwt)
+    const profile = await uport.authenticate(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with private chain network id claims', async () => {
     const jwt = await createShareResp({nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'})
-    const profile = uport.receive(jwt)
+    const profile = await uport.authenticate(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with device key claims', async () => {
     const jwt = await createShareResp({dad: '0xdeviceKey'})
-    const profile = uport.receive(jwt)
+    const profile = await uport.authenticate(jwt)
     expect(profile).toMatchSnapshot()
   })
   
   it('returns pushToken if available', async () => {
     const jwt = await createShareResp({capabilities: ['PUSHTOKEN']})
-    const profile = uport.receive(jwt)
+    const profile = await uport.authenticate(jwt)
     expect(profile).toMatchSnapshot()
   })
   
-  it('handles response to expired request', async () => {
-    const jwt = await createShareRespWithExpiredRequest()
-    const profile = uport.receive(jwt)
-    expect(profile).toMatchSnapshot()
-  })
-
   it('handles response with missing challenge', async () => {
-    const jwt = await createShareRespMissingRequest()
-    const profile = uport.receive(jwt)
-    expect(profile).toMatchSnapshot()
+    const jwt = await uport.disclose({own: {name: 'bob'}})
+    expect(uport.authenticate(jwt)).rejects.toMatchSnapshot()
   })
+})
 
-/////////////////////////////// no address in uport settings ///////////////////////////////
-
+describe('verifyProfile()', () => {
+  beforeAll(() => mockresolver({
+    name: 'Bob Smith',
+    country: 'NI'
+  }))
   it('returns profile mixing public and private claims', async () => {
-    const jwt = await createShareResp({own: {name: 'Davie', phone: '+15555551234'}})
-    const profile = uport.receive(jwt)
+    const jwt = await uport.disclose({own: {name: 'Davie', phone: '+15555551234'}})
+    const profile = await uport.verifyProfile(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile mixing public and private claims and verified credentials', async () => {
-    const jwt = await createShareRespWithVerifiedCredential({own: {name: 'Davie', phone: '+15555551234'}})
-    const profile = uport.receive(jwt)
+    const attestation = await uport.attest(claim)
+    const jwt = await uport.disclose({own: {name: 'Davie', phone: '+15555551234'}, verified: [attestation]})
+    const profile = await uport.verifyProfile(jwt)
     expect(profile).toMatchSnapshot()
   })
  
   it('returns profile with only public claims', async () => {
-    const jwt = await createShareResp()
-    const profile = uport.receive(jwt)
+    const jwt = await uport.disclose()
+    const profile = await uport.verifyProfile(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with private chain network id claims', async () => {
-    const jwt = await createShareResp({nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'})
-    const profile = uport.receive(jwt)
+    const jwt = await uport.disclose({nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'})
+    const profile = await uport.verifyProfile(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns pushToken if available', async () => {
-    const jwt = await createShareResp({capabilities: ['PUSHTOKEN']})
-    const profile = uport.receive(jwt)
+    const jwt = await uport.disclose({capabilities: ['PUSHTOKEN']})
+    const profile = await uport.verifyProfile(jwt)
     expect(profile).toMatchSnapshot()
   })
-
-/////////////////////////////// no address in uport settings///////////////////////////////
 })
 
 describe('push', () => {
@@ -271,6 +306,14 @@ describe('push', () => {
   const kp = nacl.box.keyPair()
   const pubEncKey = naclutil.encodeBase64(kp.publicKey)
   const secEncKey = kp.secretKey
+
+  beforeEach(() => {
+    nock.disableNetConnect()
+  })
+
+  afterEach(() => {
+    nock.enableNetConnect()
+  })
 
   it('pushes url to pututu', () => {
     nock(PUTUTU_URL, {
