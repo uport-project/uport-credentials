@@ -21,6 +21,6 @@ dependencies:
 
 test:
   override:
-    - yarn test -u
+    - yarn test:ci
   post:
     - bash <(curl -s https://codecov.io/bash)    
