@@ -62,20 +62,17 @@ describe('configuration', () => {
     })
   })
   
-  // describe('registry', () => {
-  //   it('has a default registry that looks up profile', () => {
-  //     return new Credentials().settings.registry('0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c').then(profile =>
-  //       expect(profile.publicKey).toEqual('0x0482780d59037778ea03c7d5169dd7cf47a835cb6d57a606b4e6cf98000a28d20d6d6bfae223cc76fd2f63d8a382a1c054788c4fafb1062ee89e718b96e0896d40')
-  //     )
-  //   })
-  
-  //   it('has ability to lookup profile', () => {
-  //     return new Credentials().lookup('0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c').then(profile =>
-  //       expect(profile.publicKey).toEqual('0x0482780d59037778ea03c7d5169dd7cf47a835cb6d57a606b4e6cf98000a28d20d6d6bfae223cc76fd2f63d8a382a1c054788c4fafb1062ee89e718b96e0896d40')
-  //     )
-  //   })
-  // })
-  
+  describe('sets signer', () => {
+    describe('always uses signer if passed in', () => {
+      const signer = SimpleSigner(privateKey)
+      expect(new Credentials({signer, privateKey}).signer).toEqual(signer)
+    })
+
+    describe('sets signer if privateKey is passed in', () => {
+      expect(new Credentials({privateKey}).signer).toBeDefined()
+    })
+  })
+
   describe('configNetworks', () => {
     it('should accept a valid network setting', () => {
       const networks = {'0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c' }}
@@ -151,15 +148,21 @@ describe('requestDisclosure()', () => {
     return expect(response).toMatchSnapshot()
   })
 
-  it('has correct payload in JWT requesting a specific accountType', async () => {
-    const response = await createAndVerify({accountType: 'devicekey'})
+  it('has correct payload in JWT requesting a specific network_id', async () => {
+    const response = await createAndVerify({network_id: '0x4'})
     return expect(response).toMatchSnapshot()
   })
 
-  it('has correct payload in JWT requesting a bad accountType', async () => {
-    const response = await createAndVerify({accountType: 'bad_account_type'})
-    return expect(response).toMatchSnapshot()
-  })
+  for (let accountType of ['general', 'segregated', 'keypair', 'devicekey', 'none']) {
+    it(`has correct payload in JWT requesting accountType of ${accountType}`, async () => {
+      const response = await createAndVerify({accountType})
+      return expect(response).toMatchSnapshot()
+    })  
+  }
+
+  it(`has correct payload in JWT requesting unsupported accountType`, async () => {
+    expect(createAndVerify({accountType: 'gold'})).rejects.toMatchSnapshot()
+  })  
 
   it('ignores unsupported request parameters', async () => {
     const response = await createAndVerify({signing: true, sellSoul: true})
@@ -183,6 +186,18 @@ describe('requestDisclosure()', () => {
 
   it('has correct payload in JWT for a request for push notifications', async () => {
     const response = await createAndVerify({requested: ['name', 'phone'], notifications: true})
+    return expect(response).toMatchSnapshot()
+  })
+})
+
+describe('LEGACY createRequest()', () => {
+  beforeAll(() => mockresolver())
+  async function createAndVerify (params={}) {
+    const jwt = await uport.createRequest(params)
+    return await verifyJWT(jwt)
+  }
+  it('creates a valid JWT for a request', async () => {
+    const response = await createAndVerify({requested: ['name', 'phone']})
     return expect(response).toMatchSnapshot()
   })
 })
@@ -307,6 +322,19 @@ describe('verifyProfile()', () => {
   it('returns pushToken if available', async () => {
     const jwt = await uport.disclose({capabilities: ['PUSHTOKEN']})
     const profile = await uport.verifyProfile(jwt)
+    expect(profile).toMatchSnapshot()
+  })
+})
+
+describe('LEGACY receive()', () => {
+  beforeAll(() => mockresolver({
+    name: 'Bob Smith',
+    country: 'NI'
+  }))
+  it('returns profile mixing public and private claims', async () => {
+    const req = await uport.requestDisclosure({requested: ['name', 'phone']})
+    const jwt = await uport.disclose({own: {name: 'Davie', phone: '+15555551234'}, req})
+    const profile = await uport.receive(jwt)
     expect(profile).toMatchSnapshot()
   })
 })

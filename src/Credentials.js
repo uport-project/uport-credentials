@@ -153,9 +153,12 @@ class Credentials {
     if (params.network_id) {
       payload.net = params.network_id
     }
-    if (params.accountType 
-          && ['general', 'segregated', 'keypair', 'devicekey', 'none'].indexOf(params.accountType) >= 0) {
-      payload.act = params.accountType
+    if (params.accountType) {
+      if (['general', 'segregated', 'keypair', 'devicekey', 'none'].indexOf(params.accountType) >= 0) {
+        payload.act = params.accountType
+      } else {
+        return Promise.reject(new Error(`Unsupported accountType ${params.accountType}`))
+      }
     }
     if (params.exp) {
       payload.exp = params.exp
