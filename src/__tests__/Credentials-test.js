@@ -1,8 +1,5 @@
 import Credentials from '../Credentials'
 import { SimpleSigner, createJWT, verifyJWT, decodeJWT } from 'did-jwt'
-import nacl from 'tweetnacl'
-import naclutil from 'tweetnacl-util'
-import nock from 'nock'
 import MockDate from 'mockdate'
 import { registerMethod } from 'did-resolver'
 
@@ -336,98 +333,5 @@ describe('LEGACY receive()', () => {
     const jwt = await uport.disclose({own: {name: 'Davie', phone: '+15555551234'}, req})
     const profile = await uport.receive(jwt)
     expect(profile).toMatchSnapshot()
-  })
-})
-
-describe('push', () => {
-  const PUTUTU_URL = 'https://pututu.uport.space' // TODO - change to .me
-  const API_v1_PATH = '/api/v1/sns'
-  const API_v2_PATH = '/api/v2/sns'
-  const PUSHTOKEN = 'SECRETPUSHTOKEN'
-  const payload = { url: 'me.uport:me', message: 'a friendly message' }
-  const kp = nacl.box.keyPair()
-  const pubEncKey = naclutil.encodeBase64(kp.publicKey)
-  const secEncKey = kp.secretKey
-
-  beforeEach(() => {
-    nock.disableNetConnect()
-  })
-
-  afterEach(() => {
-    nock.enableNetConnect()
-  })
-
-  it('pushes url to pututu', () => {
-    nock(PUTUTU_URL, {
-      reqheaders: {
-        'authorization': `Bearer ${PUSHTOKEN}`
-      }
-    })
-    .post(API_v2_PATH, (body) => {
-      let encObj = JSON.parse(body.message)
-      const box = naclutil.decodeBase64(encObj.ciphertext)
-      const nonce = naclutil.decodeBase64(encObj.nonce)
-      const from = naclutil.decodeBase64(encObj.from)
-      const decrypted = nacl.box.open(box, nonce, from, secEncKey)
-      const result = JSON.parse(naclutil.encodeUTF8(decrypted))
-
-      return result.url === payload.url && result.message === payload.message
-    })
-    .reply(200, { status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
-
-    return uport.push(PUSHTOKEN, pubEncKey, payload).then(response => {
-      return expect(response).toEqual({ status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
-    })
-  })
-
-  it('handles missing token', () => {
-    return uport.push(null, pubEncKey, payload).catch(error => expect(error.message).toEqual('Missing push notification token'))
-  })
-
-  it('handles missing pubEncKey', () => {
-    nock(PUTUTU_URL, {
-      reqheaders: {
-        'authorization': `Bearer ${PUSHTOKEN}`
-      }
-    })
-    .post(API_v1_PATH, (body) => {
-      return body.message === payload.message && body.url === payload.url
-    })
-    .reply(200, { status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
-
-    console.error = jest.fn(msg => {
-      expect(msg).toEqual('WARNING: Calling push without a public encryption key is deprecated')
-    })
-    return uport.push(PUSHTOKEN, payload).then(response => {
-      return expect(response).toEqual({ status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
-    })
-  })
-
-  it('handles missing payload', () => {
-    return uport.push(PUSHTOKEN, pubEncKey, {}).catch(error => expect(error.message).toEqual('Missing payload url for sending to users device'))
-  })
-
-  it('handles invalid token', () => {
-    nock(PUTUTU_URL, {
-      reqheaders: {
-        'authorization': `Bearer ${PUSHTOKEN}`
-      }
-    })
-    .post(API_v2_PATH, () => true)
-    .reply(403, 'Not allowed')
-
-    return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: Invalid Token'))
-  })
-
-  it('handles random error', () => {
-    nock(PUTUTU_URL, {
-      reqheaders: {
-        'authorization': `Bearer ${PUSHTOKEN}`
-      }
-    })
-    .post(API_v2_PATH, () => true)
-    .reply(500, 'Server Error')
-
-    return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: 500 Server Error'))
   })
 })
