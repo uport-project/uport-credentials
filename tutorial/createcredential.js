@@ -1,30 +1,25 @@
 
 var express = require('express');
 var uport = require('../lib/index.js');
-var jsontokens = require('jsontokens')
+var decodeJWT = require('did-jwt').decodeJWT
 
 var app = express();
-var signer = uport.SimpleSigner('28cefd149967e661b38495d2b5ab3964ffa0055912512d7125896646102c025b')
-
 
 var credentials = new uport.Credentials({
-  appName: 'Credential Tutorial',
-  address: '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92',
-  signer: signer
-  //networks: {'0x4': {'registry' : '0x2cc31912b2b0f3075a87b3640923d45a26cef3ee', 'rpcUrl' : 'https://rinkeby.infura.io'}}
-  // Note: we use Rinkeby by default, the above is the explicit format for selecting a network
+  did: 'did:ethr:0xbc3ae59bc76f894822622cdef7a2018dbe353840',
+  privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
 })
 
 app.get('/', function (req, res) {
   credentials.attest({
-    sub: '2omWsSGspY7zhxaG6uHyoGtcYxoGeeohQXz',
+    sub: 'did:uport:2omWsSGspY7zhxaG6uHyoGtcYxoGeeohQXz',
     exp: 1552046024,
     claim: {'My Title' : {'KeyOne' : 'ValueOne', 'KeyTwo' : 'Value2', 'Last Key' : 'Last Value'} }
     // Note, the above is a complex claim. Also supported are simple claims:
     // claim: {'Key' : 'Value'}
   }).then(function (att) {
     console.log(att)
-    console.log(jsontokens.decodeToken(att))
+    console.log(decodeJWT(att))
     var uri = 'me.uport:add?attestations=' + att + '%26callback_type=post'
     var qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
     var mobileUrl = 'https://id.uport.me/add?attestations=' + att + '&callback_type=post'
@@ -33,6 +28,6 @@ app.get('/', function (req, res) {
   })
 })
 
-var server = app.listen(8081, function () {
+var server = app.listen(8088, function () {
   console.log("Tutorial app running...")
 })

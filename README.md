@@ -38,30 +38,28 @@ For details on uPort's underlying architecture, read our [spec repo](https://git
 In your application you must first configure your uPort object.
 
 ```javascript
-import { Credentials, SimpleSigner } from 'uport'
+import { Credentials } from 'uport'
 
-const signer = SimpleSigner(process.env.PRIVATE_KEY)
+// For new ethereum based addresses
+const credentials = new Credentials({
+  appName: 'App Name',
+  did: 'did:ethr:0x....',
+  privateKey: process.env.PRIVATE_KEY
+})
+
+// You can create a new identity
+
+console.log(Credentials.createIdentity())
+
+// For legacy application identity created on App Manager
 const credentials = new Credentials({
   appName: 'App Name',
   address: 'MNID Encoded uPort Address For Your App',
-  signer: signer,
-  networks: networks
+  privateKey: process.env.PRIVATE_KEY
 })
+
+
 ```
-
-Going forward all uPort application ID addresses must be [MNID encoded](https://github.com/uport-project/mnid). MNID will encode the network with the address. Use of hex encoded addresses is deprecated. Using a hex encoded address will indicated you are on ropsten using our deprecated registry, if you require this use case then continue to pass a hex encoded address. If you are on ropsten but using our latest registry, pass a MNID encoded address with ropsten.
-
-The networks object includes a set of networks for which JWTs will be verified over. JWT verification includes an on-chain lookup for the public key mapped to the issuers identity, the MIND encoding of the issuer's address defines the network and registry to use for lookup. If you are interested in verifying JWTs over additional networks, pass in a network configs object, defined as follows:
-
-```javascript
- const networks = { id: '0x2a' :
-                      { registry: '0x5f8e9351dc2d238fb878b6ae43aa740d62fc9758',
-                        rpcUrl: 'https://kovan.infura.io' },
-                   id: ....   : { ... }
-                 }
-```
-
-Look in [uport-lite](https://github.com/uport-project/uport-lite) for the default networks and registries which will be queried for JWT verification.
 
 ## Requesting information from your users
 
@@ -70,7 +68,7 @@ To request information from your user you create a Selective Disclosure Request 
 The most basic request to get a users public uport identity details:
 
 ```javascript
-credentials.createRequest().then(requestToken => {
+credentials.requestDisclosure().then(requestToken => {
   // send requestToken to browser
 })
 ```
@@ -78,7 +76,7 @@ credentials.createRequest().then(requestToken => {
 You can ask for specific private data like this:
 
 ```javascript
-credentials.createRequest({
+credentials.requestDisclosure({
     requested: ['name','phone','identity_no'],
     callbackUrl: 'https://....' // URL to send the response of the request to
   }.then(requestToken => {
@@ -89,28 +87,18 @@ credentials.createRequest({
 If you need to know the users address on a specific ethereum network, specify it's `network_id` (currently defaults to ropsten `0x3`). In this case be aware that the `address` returned will be the address on the public network (currently ropsten) for the users profile. The requested network address will be in the `networkAddress` field and will be MNID encoded.
 
 ```javascript
-credentials.createRequest({network_id: '0x4'}).then(requestToken => {
+credentials.requestDisclosure({network_id: '0x4'}).then(requestToken => {
   // send requestToken to browser
-})
-```
-
-In your front end use [uport-connect](https://github.com/uport-project/uport-connect) to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
-
-```javascript
-const connect = new uportconnect.Connect('app name')
-connect.showRequest(requestToken).then(response => {
-  // send response back to server
 })
 ```
 
 Back in your server code you receive the token:
 
 ```javascript
-credentials.receive(responseToken).then(profile => {
+credentials.authenticate(responseToken).then(profile => {
   // Store user profile
 })
 ```
-For more information about the contents of the profile object see the uport-persona documentation.
 
 ### Stateless Challenge/Response
 
@@ -205,13 +193,3 @@ connect.sendTransaction(txRequest).then(txResponse => {
 
 Back in your server code you receive the `txResponse`. This is a standard ethereum transaction object that you can verify.
 
-## Creating Custom Signers for integrating with HSM
-
-You can easily create custom signers that integrates into your existing signing infrastructure.
-
-```javascript
-function sign(data, callback) {
-    const signature = '' // send your data to your back end signer and return DER signed data
-    callback(null, signature)
-}
-```

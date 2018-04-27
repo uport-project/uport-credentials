@@ -1,18 +1,11 @@
 
 var express = require('express');
 var uport = require('../lib/index.js');
-var jsontokens = require('jsontokens')
 var bodyParser = require('body-parser')
 
-var signer = uport.SimpleSigner('5acea265dcbf01355956b36f82793a13caf1be650bb74ca7a40da74b412d44b5')
-
-
 var credentials = new uport.Credentials({
-  appName: 'Credential Tutorial',
-  address: '2opiNrGSxTW6sFo6ervHZnEeEXGNGAoupFN',
-  signer: signer
-//  networks: {'0x4': {'registry' : '0x2cc31912b2b0f3075a87b3640923d45a26cef3ee', 'rpcUrl' : 'https://rinkeby.infura.io'}}
-  // Note: we use Rinkeby by default, the above is the explicit format for selecting a network
+  did: 'did:ethr:0xbc3ae59bc76f894822622cdef7a2018dbe353840',
+  privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
 })
 
 var app = express();
@@ -21,7 +14,7 @@ app.use(bodyParser.json({ type: '*/*' }))
 
 app.get('/', function (req, res) {
 
-  credentials.createRequest({
+  credentials.requestDisclosure({
     verified: ['My Title'],
     callbackUrl: 'http://192.168.44.162:8081/callback',
     exp: Math.floor(new Date().getTime()/1000) + 300
@@ -40,7 +33,7 @@ app.post('/callback', function (req, res) {
   var jwt = req.body.access_token
   console.log(jwt)
 
-  credentials.receive(jwt).then( function(creds) {
+  credentials.authenticate(jwt).then( function(creds) {
     console.log(creds)
     if (creds.address == creds.verified[0].sub && 
        creds.verified[0].iss == '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92' &&
@@ -56,7 +49,7 @@ app.post('/callback', function (req, res) {
 
 })
 
-var server = app.listen(8081, function () {
+var server = app.listen(8088, function () {
   
   console.log("Tutorial app running...")
 })

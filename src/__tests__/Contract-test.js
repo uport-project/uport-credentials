@@ -1,4 +1,4 @@
-import {Contract, ContractFactory } from '../src/Contract'
+import {Contract, ContractFactory } from '../Contract'
 
 
 const address = '0x41566e3a081f5032bdcad470adb797635ddfe1f0'
