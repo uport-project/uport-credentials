@@ -1,8 +1,5 @@
 import { createJWT, verifyJWT, SimpleSigner } from 'did-jwt'
 import UportLite from 'uport-lite'
-import nets from 'nets'
-import nacl from 'tweetnacl'
-import naclutil from 'tweetnacl-util'
 const MNID = require('mnid')
 import UportDIDResolver from 'uport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
@@ -310,57 +307,6 @@ async processDisclosurePayload ({doc, payload}) {
 }
 
 /**
-  *  Send a push notification to a user, consumes a token which allows you to send push notifications
-  *  and a url/uri request you want to send to the user.
-  *
-  *  @param    {String}                  token              a push notification token (get a pn token by requesting push permissions in a request)
-  *  @param    {Object}                  payload            push notification payload
-  *  @param    {String}                  payload.url        a uport request url
-  *  @param    {String}                  payload.message    a message to display to the user
-  *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
-  *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
-  */
-  push (token, pubEncKey, payload) {
-    return new Promise((resolve, reject) => {
-      if (!token) {
-        reject(new Error('Missing push notification token'))
-      }
-      if (!pubEncKey || pubEncKey.url) {
-        reject(new Error('Missing public encryption key of the receiver'))
-      }
-      if (!payload || !payload.url) {
-        reject(new Error('Missing payload url for sending to users device'))
-      }
-      const iss = decodeJWT(token).payload.iss
-      const PUTUTU_URL = 'https://api.uport.me'
-      let endpoint = '/pututu/sns'
-      const plaintext = padMessage(JSON.stringify(payload))
-      const enc = encryptMessage(plaintext, pubEncKey)
-      payload = { message: JSON.stringify(enc) }
-
-      nets({
-        uri: PUTUTU_URL + endpoint,
-        json: payload,
-        method: 'POST',
-        withCredentials: false,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      },
-      (error, res, body) => {
-        if (error) return reject(error)
-        if (res.statusCode === 200) {
-          resolve(body)
-        }
-        if (res.statusCode === 403) {
-          return reject(new Error('Error sending push notification to user: Invalid Token'))
-        }
-        reject(new Error(`Error sending push notification to user: ${res.statusCode} ${body.toString()}`))
-      })
-    })
-  }
-
-/**
   *  Create a credential (a signed JSON Web Token)
   *
   *  @example
@@ -414,40 +360,5 @@ const configNetworks = (nets) => {
   return nets
 }
 
-/**
- *  Adds padding to a string
- *
- *  @param      {String}        the message to be padded
- *  @return     {String}        the padded message
- *  @private
- */
-const padMessage = (message) => {
-  const INTERVAL_LENGTH = 50
-  const padLength = INTERVAL_LENGTH - message.length % INTERVAL_LENGTH
-
-  return message + ' '.repeat(padLength)
-}
-
-/**
- *  Encrypts a message
- *
- *  @param      {String}        the message to be encrypted
- *  @param      {String}        the public encryption key of the receiver, encoded as base64
- *  @return     {String}        the encrypted message, encoded as base64
- *  @private
- */
-const encryptMessage = (message, receiverKey) => {
-  const tmpKp = nacl.box.keyPair()
-  const decodedKey = naclutil.decodeBase64(receiverKey)
-  const decodedMsg = naclutil.decodeUTF8(message)
-  const nonce = nacl.randomBytes(24)
-
-  const ciphertext = nacl.box(decodedMsg, nonce, decodedKey, tmpKp.secretKey)
-  return {
-    from: naclutil.encodeBase64(tmpKp.publicKey),
-    nonce: naclutil.encodeBase64(nonce),
-    ciphertext: naclutil.encodeBase64(ciphertext)
-  }
-}
 
 export default Credentials
