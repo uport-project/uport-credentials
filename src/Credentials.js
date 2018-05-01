@@ -90,7 +90,7 @@ class Credentials {
     if (params.network_id) {
       payload.net = params.network_id
     }
-    if (params.accountType 
+    if (params.accountType
           && ['general', 'segregated', 'keypair', 'devicekey', 'none'].indexOf(params.accountType) >= 0) {
       payload.act = params.accountType
     }
@@ -100,6 +100,31 @@ class Credentials {
       payload.exp = Math.floor(Date.now() / 1000) + 600
     }
     return createJWT(this.settings, {...payload, type: 'shareReq'})
+  }
+
+/**
+ *  Creates a signed request for the user to attest a list of claims.
+ *
+ *  @example
+ *  const unsignedClaim = {
+ *    claim: {
+ *      "Citizen of city X": {
+ *        "Allowed to vote": true,
+ *        "Document": "QmZZBBKPS2NWc6PMZbUk9zUHCo1SHKzQPPX4ndfwaYzmPW"
+ *      }
+ *    },
+ *    sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
+ *  }
+ *  credentials.createVerificationRequest(unsignedClaim).then(jwt => {
+ *    ...
+ *  })
+ *
+ *  @param    {Object}              unsignedClaim       an object that is an unsigned claim which you want the user to attest
+ *  @param    {String}             sub                  the DID of the identity you want to sign the attestation
+ *  @return   {Promise<Object, Error>}                  a promise which resolves with a signed JSON Web Token or rejects with an error
+ */
+  createVerificationRequest(unsignedClaim, sub) {
+    return createJWT(this.settings, {unsignedClaim, sub, type: 'verReq'})
   }
 
 /**

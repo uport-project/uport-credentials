@@ -79,6 +79,20 @@ describe('createRequest', () => {
   })
 })
 
+describe('createVerificationRequest', () => {
+  it('creates a valid JWT for a request', () => {
+    return uport.createVerificationRequest({claim: { test: {prop1: 1, prop2: 2}}}, 'did:uport:223ab45').then((jwt) => {
+      return expect(verifier.verify(jwt)).toBeTruthy()
+    })
+  })
+
+  it('has correct payload in JWT for a request', () => {
+    return uport.createVerificationRequest({claim: { test: {prop1: 1, prop2: 2}}}, 'did:uport:223ab45').then((jwt) => {
+      return expect(decodeToken(jwt)).toMatchSnapshot()
+    })
+  })
+})
+
 describe('attest', () => {
   it('creates a valid JWT for an attestation', () => {
     return uport.attest({sub: '0x112233', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133 + 1}).then((jwt) => {
