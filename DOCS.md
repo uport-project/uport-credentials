@@ -91,6 +91,7 @@ The Credentials class allows you to easily create the signed payloads used in uP
 * [Credentials](#Credentials)
     * [new Credentials([settings])](#new_Credentials_new)
     * [.createRequest([params])](#Credentials+createRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+    * [.createVerificationRequest(unsignedClaim, sub)](#Credentials+createVerificationRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
     * [.receive(token, [callbackUrl])](#Credentials+receive) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
     * [.push(token, payload, pubEncKey)](#Credentials+push) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
     * [.attest([credential])](#Credentials+attest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
@@ -153,6 +154,36 @@ const req = { requested: ['name', 'country'],
  requested: ['name','phone','identity_no'],
     callbackUrl: 'https://....' // URL to send the response of the request to
     notifications: true
+
+ 
+```
+<a name="Credentials+createVerificationRequest"></a>
+
+### credentials.createVerificationRequest(unsignedClaim, sub) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+Creates a signed request for the user to attest a list of claims.
+
+**Kind**: instance method of <code>[Credentials](#Credentials)</code>  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or rejects with an error  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| unsignedClaim | <code>Object</code> | an object that is an unsigned claim which you want the user to attest |
+| sub | <code>String</code> | the DID of the identity you want to sign the attestation |
+
+**Example**  
+```js
+const unsignedClaim = {
+   claim: {
+     "Citizen of city X": {
+       "Allowed to vote": true,
+       "Document": "QmZZBBKPS2NWc6PMZbUk9zUHCo1SHKzQPPX4ndfwaYzmPW"
+     }
+   },
+   sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
+ }
+ credentials.createVerificationRequest(unsignedClaim).then(jwt => {
+   ...
+ })
 
  
 ```
