@@ -2,6 +2,7 @@ import { createJWT, verifyJWT, SimpleSigner } from 'did-jwt'
 import UportLite from 'uport-lite'
 const MNID = require('mnid')
 import UportDIDResolver from 'uport-did-resolver'
+import MuportDIDResolver from 'muport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
 import { toEthereumAddress } from 'did-jwt/lib/Digest'
 import { ec as EC } from 'elliptic'
@@ -18,16 +19,16 @@ class Credentials {
    * Instantiates a new uPort Credentials object
    *
    * The following example is just for testing purposes. You should never store a private key in source code.
-   * 
+   *
    * @example
    * import { Credentials } from 'uport'
    * const credentials = new Credentials({
    *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
    * })
    *
-   * The above example derives the public key used to generate the did, so only a private key is needed. 
+   * The above example derives the public key used to generate the did, so only a private key is needed.
    * Generating a public key from a private key is slow. It is recommended to configure the `did` option as well.
-   * 
+   *
    * @example
    * import { Credentials } from 'uport'
    * const credentials = new Credentials({
@@ -36,27 +37,27 @@ class Credentials {
    * })
    *
    * It is recommended to store the address and private key in environment variables for your server application
-   * 
+   *
    * @example
    * import { Credentials, SimpleSigner } from 'uport'
    * const credentials = new Credentials({
    *   did: process.env.APPLICATION_DID,
    *   signer: SimpleSigner(process.env.PRIVATE_KEY)
    * })
-   * 
-   * Instead of a private key you can pass in a [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions) to 
+   *
+   * Instead of a private key you can pass in a [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions) to
    * present UX or call a HSM.
-   
+
    * @example
    * import { Credentials } from 'uport'
-   * 
+   *
    * function mySigner (data) {
    *   return new Promise((resolve, reject) => {
    *     const signature = /// sign it
    *     resolve(signature)
    *   })
    * }
-   * 
+   *
    * const credentials = new Credentials({
    *   did: process.env.APPLICATION_DID,
    *   signer: mySigner
@@ -67,17 +68,18 @@ class Credentials {
    * @param       {String}            settings.privateKey    A hex encoded 32 byte private key
    * @param       {SimpleSigner}      settings.signer        a signer object, see [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions)
    * @param       {Object}            settings.ethrConfig    Configuration object for ethr did resolver. See [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver)
+   * @param       {Object}            settings.muportConfig  Configuration object for muport did resolver. See [muport-did-resolver](https://github.com/uport-project/muport-did-resolver)
    * @param       {Address}           settings.address       DEPRECATED your uPort address (may be the address of your application's uPort identity)
    * @param       {Object}            settings.networks      DEPRECATED networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
    * @param       {UportLite}         settings.registry      DEPRECATED a registry object from UportLite
    * @return      {Credentials}                              self
    */
-  constructor ({did, address, privateKey, signer, networks, registry, ethrConfig} = {}) {
+  constructor ({did, address, privateKey, signer, networks, registry, ethrConfig, muportConfig} = {}) {
     if (signer) {
       this.signer = signer
     } else if (privateKey) {
       this.signer = SimpleSigner(privateKey)
-      
+
     }
     if (did) {
       this.did = did
@@ -98,6 +100,7 @@ class Credentials {
 
     UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
     EthrDIDResolver(ethrConfig || {})
+    MuportDIDResolver(muportConfig || {})
   }
 
   /**
@@ -190,8 +193,8 @@ class Credentials {
 
 /**
  * Creates a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
- * 
- * This can either be used to share information about the signing identity or as the response to a 
+ *
+ * This can either be used to share information about the signing identity or as the response to a
  * [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md), where it can be used to authenticate the identity.
  *
  *  @example
@@ -234,9 +237,9 @@ async processDisclosurePayload ({doc, payload}) {
 }
 
 /**
-  *  Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from mobile 
-  *  app as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md). 
-  *  
+  *  Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from mobile
+  *  app as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
+  *
   *  It Verifies and parses the given response token and verifies the challenge response flow.
   *
   *  @example
@@ -310,9 +313,9 @@ async processDisclosurePayload ({doc, payload}) {
   }
 
   /**
-  *  Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md). 
-  * 
-  *  The main difference between this and `authenticate()` is that it does not verify the challenge. This can be used to verify user profiles that have been shared 
+  *  Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
+  *
+  *  The main difference between this and `authenticate()` is that it does not verify the challenge. This can be used to verify user profiles that have been shared
   *  through other methods such as QR codes and messages.
   *
   *  @example
