@@ -16,7 +16,7 @@
     "build:browser": "./node_modules/.bin/webpack --config webpack.config.js",
     "build": "yarn build:es5 && yarn test:ci && yarn build:browser",
     "build:docs:html": "./node_modules/.bin/jsdoc src/* README.md -d docs",
-    "build:docs:md": "./node_modules/jsdoc-to-markdown/bin/cli.js src/* > DOCS.md",
+    "build:docs:md": "./node_modules/jsdoc-to-markdown/bin/cli.js src/* --template template.hbs -c js2doc.conf > docs/reference/index.md; echo",
     "build:docs": "npm run build:docs:html && npm run build:docs:md",
     "prepublish": "yarn build"
   },
