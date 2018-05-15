@@ -1,7 +1,6 @@
-
 var express = require('express');
-var uport = require('../lib/index.js');
-var decodeJWT = require('did-jwt').decodeJWT
+var uport = require('uport');
+var decodeJWT = require('did-jwt').decodeJWT;
 
 var app = express();
 
@@ -12,7 +11,7 @@ var credentials = new uport.Credentials({
 
 app.get('/', function (req, res) {
   credentials.attest({
-    sub: 'did:uport:2omWsSGspY7zhxaG6uHyoGtcYxoGeeohQXz',
+    sub: 'did:uport:2orwKquTNVjJJvxjRnUY3sVKCNqoNEow1pW',  //replace this with your MNID identifier
     exp: 1552046024,
     claim: {'My Title' : {'KeyOne' : 'ValueOne', 'KeyTwo' : 'Value2', 'Last Key' : 'Last Value'} }
     // Note, the above is a complex claim. Also supported are simple claims:
@@ -28,6 +27,9 @@ app.get('/', function (req, res) {
   })
 })
 
-var server = app.listen(8088, function () {
-  console.log("Tutorial app running...")
+var server = app.listen(8081, function () {
+  console.log("\n\nCredential Creation service up and running!");
+  console.log("Open your browser to http://localhost:8081 to test the service. \n");
+  console.log("Watch this console for results from the service. \n")
+  console.log("Service Output: \n")
 })
