@@ -1,0 +1,16 @@
+{
+  "name": "simple-credentials-tutorial",
+  "version": "1.0.0",
+  "description": "Simple tutorial for creating and requesting credentials",
+  "main": "requestcredential.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Zach Ferland, Christian Lundkvist, Levi Strope",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "express": "^4.16.3",
+    "jsontokens": "^0.7.7",
+    "uport": "latest"
+  }
+}
