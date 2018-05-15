@@ -1,5 +1,5 @@
 ---
-title: "Uport-JS Server-side Credentials Example"
+title: "Uport-JS Server-side How-to"
 index: 1
 category: "tutorials"
 type: "content"
@@ -15,7 +15,7 @@ Here we will demonstrate how to create and sign a custom credential on a server 
 1. The code for this tutorial can be found in the [Uport-JS examples.](github.com/uport-project/uport-js/blob/develop/examples/simple-credential-tutorial/).  Use this to follow the tutorial.
 1. A publicly available IP address to deploy the service too.  An HTTP tunneling service, such as [Ngrok](https://ngrok.com) can be used.
 
-## 1. Register an App
+## Register an App
 
 We have created application identities and hard-coded them in the [examples](github.com/uport-project/uport-js/blob/develop/examples/simple-credential-tutorial) for convenience and educational purposes.  If you wish to expand upon these examples please utilize our [Application Manager](https://appmanager.uport.me) or [Uport JS Client](https://github.com/uport-project/uport-js-client) to create a new application identity and replace the signing key and MNID in the examples with your own.
 
@@ -32,11 +32,11 @@ This will create a uPort identity for your app and display a private key.  This 
 
 Now that you have the application identity sorted, lets step into the code.
 
-## 2. Setup a Requestor Service
+## Setup a Requestor Service
 
-If you haven't yet, clone the Uport-JS [repository](github.com/uport-project/uport-js) and from the root of the project change directory to `examples/simple-credential-tutorial`, then `npm install` to ensure required dependencies are present.
+If you haven't yet, clone the Uport-JS [repository](github.com/uport-project/uport-js) and from the root of the project change directory to *examples/simple-credential-tutorial*, then `npm install` to ensure required dependencies are present.
 
-The file `requestcredential.js` contains a service that will request the MNID identifier of the mobile application.  This identifier will be used throughout the tutorial.
+The file *requestcredential.js* contains a service that will request the MNID identifier of the mobile application.  This identifier will be used throughout the tutorial.
 
 With a private key obtained from creating an application identity, use it to create a `SimpleSigner` object. This object returns a function that is configured to sign data, in this case it will used to sign the JWT.
 
@@ -92,15 +92,15 @@ Decoded JWT:
   '@type': 'Person',
   publicKey: '0x04e543f2b14163a814e732a220613ad4a189ed7a74398ca74ecafb3913c7ceed1e861101ba522a5bda2c341bc604b738d4f9a36e13cac6a54ecc9caab74dd29947',
   publicEncKey: 'UThhBIP5XWo6r/oZhBsrTIwc2ZOSGCcfBcRhIuB4GEA=',
-  address: '2orwKquTNVjJJvxjRnUY3sVKCNqoNEow1pW',
+  address: '2orwKquTNVjJJvxjRnUxY3sVKCNqoNEow1pW',
   networkAddress: '2orwKquTNVjJJvxjRnUY3sVKCNqoNEow1pW' }
 ```
 
 Save the value of the `address` key for the next two examples.  This is your MNID.
 
-## 3. Setup a Creator Service
+## Setup a Creator Service
 
-Inspecting the file `createcredential.js` there is a minimal `express` server setup to run on port `8081` and code that is configured with a default signing identity.  The example will run as-is, however for the purposes of this example we are assuming an application identity was created and you have your own private key to use.  You should use the same information from step one.
+Inspecting the file *createcredential.js* there is a minimal express server setup to run on port `8081` and code that is configured with a default signing identity.  The example will run as-is, however for the purposes of this example we are assuming an application identity was created and you have your own private key to use.  You should use the same information from step one.
 
 With a private key obtained from creating an application identity, use it to create a `SimpleSigner` object. This object returns a function that is configured to sign data, in this case it will used to sign the credential.
 
@@ -165,9 +165,9 @@ If you open your browser to `http://localhost:8081/` you should see the QR code 
   signature: '4a5_4l0QOUEjt5dEAUpdU17S6pYNY28xlaA9TJbPOB2AWQ0338MvReWwp_sN20HS02wVOuWkxjpmFrxN3ySFkA' }
 ```
 
-## 4. Setup a Verification service
+## Setup a Verification service
 
-The file `verifycredential.js` contains a simple node express server which will request the same credential that the Creator service gave out. The Requestor server will then validate that the identity who is providing the credential is the same identity that received the credential from the Creator service.
+The file *verifycredential.js* contains a simple node express server which will request the same credential that the Creator service gave out. The Requestor server will then validate that the identity who is providing the credential is the same identity that received the credential from the Creator service.
 
 As with the Creator service we start by setting up the Signer using the private key from the App Manager, and the `Credentials` object using the uPort identifier of our Requestor app. We also set up `bodyParser` so that we can parse the JWT that we will get back from the user.
 
