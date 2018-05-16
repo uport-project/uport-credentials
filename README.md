@@ -81,7 +81,7 @@ You can ask for specific private data like this:
 credentials.createRequest({
     requested: ['name','phone','identity_no'],
     callbackUrl: 'https://....' // URL to send the response of the request to
-  }.then(requestToken => {
+  }).then(requestToken => {
   // send requestToken to browser
   })
 ```
