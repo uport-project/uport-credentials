@@ -335,3 +335,38 @@ describe('LEGACY receive()', () => {
     expect(profile).toMatchSnapshot()
   })
 })
+
+describe('txRequest()', () => {
+  beforeAll(() => mockresolver())
+
+  const abi = [{"constant":false,"inputs":[{"name":"status","type":"string"}],"name":"updateStatus","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"addr","type":"address"}],"name":"getStatus","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"}]
+  const address = '0x70A804cCE17149deB6030039798701a38667ca3B'
+  const statusContract = uport.contract(abi).at(address)
+
+  it('creates a valid JWT for a request', async () => {
+    const jwt = await statusContract.updateStatus('hello')
+    const verified = await verifyJWT(jwt)
+    expect(verified.payload).toMatchSnapshot()
+  })
+
+  it('encodes readable function calls including given args in function key of jwt', async () => {
+    const jwt = await statusContract.updateStatus('hello')
+    const verified = await verifyJWT(jwt)
+    expect(verified.payload.fn).toEqual("updateStatus(string 'hello')")
+  })
+
+  it('adds to key as contract address to jwt', async () => {
+    const jwt = await statusContract.updateStatus('hello')
+    const verified = await verifyJWT(jwt)
+    expect(verified.payload.to).toEqual(address)
+  })
+
+  it('adds additional request options passed to jwt', async () => {
+      const network_id =  '0x4'
+      const callbackUrl = 'mydomain'
+      const jwt = await statusContract.updateStatus('hello', {network_id, callbackUrl })
+      const verified = await verifyJWT(jwt)
+      expect(verified.payload.net).toEqual(network_id)
+      expect(verified.payload.callback).toEqual(callbackUrl)
+  })
+})
