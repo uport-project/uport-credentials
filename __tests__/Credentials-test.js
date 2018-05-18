@@ -257,27 +257,9 @@ describe('push', () => {
     return uport.push(null, pubEncKey, payload).catch(error => expect(error.message).toEqual('Missing push notification token'))
   })
 
-  it('handles missing pubEncKey', () => {
-    nock(PUTUTU_URL, {
-      reqheaders: {
-        'authorization': `Bearer ${PUSHTOKEN}`
-      }
-    })
-    .post(API_v1_PATH, (body) => {
-      return body.message === payload.message && body.url === payload.url
-    })
-    .reply(200, { status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
-
-    console.error = jest.fn(msg => {
-      expect(msg).toEqual('WARNING: Calling push without a public encryption key is deprecated')
-    })
-    return uport.push(PUSHTOKEN, payload).then(response => {
-      return expect(response).toEqual({ status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
-    })
-  })
-
-  it('handles missing payload', () => {
-    return uport.push(PUSHTOKEN, pubEncKey, {}).catch(error => expect(error.message).toEqual('Missing payload url for sending to users device'))
+  it('handles missing payload', async () => {
+    await uport.push(PUSHTOKEN, pubEncKey).catch(error => expect(error.message).toEqual('Missing payload url for sending to users device'))
+    await uport.push(PUSHTOKEN, pubEncKey, {}).catch(error => expect(error.message).toEqual('Missing payload url for sending to users device'))
   })
 
   it('handles invalid token', () => {

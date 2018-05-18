@@ -183,10 +183,10 @@ class Credentials {
   *  and a url/uri request you want to send to the user.
   *
   *  @param    {String}                  token              a push notification token (get a pn token by requesting push permissions in a request)
+  *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
   *  @param    {Object}                  payload            push notification payload
   *  @param    {String}                  payload.url        a uport request url
   *  @param    {String}                  payload.message    a message to display to the user
-  *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
   *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
   */
   push (token, pubEncKey, payload) {
@@ -196,21 +196,15 @@ class Credentials {
       if (!token) {
         return reject(new Error('Missing push notification token'))
       }
-      //if (!pubEncKey) {
-        //return reject(new Error('Missing public encryption key of the receiver'))
-      //}
-      if (pubEncKey.url) {
-        console.error('WARNING: Calling push without a public encryption key is deprecated')
-        endpoint = '/api/v1/sns'
-        payload = pubEncKey
-      } else {
-        if (!payload.url) {
-          return reject(new Error('Missing payload url for sending to users device'))
-        }
-        const plaintext = padMessage(JSON.stringify(payload))
-        const enc = encryptMessage(plaintext, pubEncKey)
-        payload = { message: JSON.stringify(enc) }
+      if (!pubEncKey) {
+        return reject(new Error('Missing public encryption key of the receiver'))
       }
+      if (!payload || !payload.url) {
+        return reject(new Error('Missing payload url for sending to users device'))
+      }
+      const plaintext = padMessage(JSON.stringify(payload))
+      const enc = encryptMessage(plaintext, pubEncKey)
+      payload = { message: JSON.stringify(enc) }
 
       nets({
         uri: PUTUTU_URL + endpoint,
