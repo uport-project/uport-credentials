@@ -58,7 +58,7 @@ describe('configuration', () => {
       expect(new Credentials({address: mnid}).did).toEqual(`did:uport:${mnid}`)
     })
   })
-  
+
   describe('sets signer', () => {
     describe('always uses signer if passed in', () => {
       const signer = SimpleSigner(privateKey)
@@ -77,17 +77,17 @@ describe('configuration', () => {
       // What is the opposite of toThrow()??
       expect(true).toBeTruthy()
     })
-  
+
     it('should require a registry address', () => {
       const networks = {'0x94365e3b': { rpcUrl: 'https://private.chain/rpc' }}
       expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
     })
-  
+
     it('should require a rpcUrl', () => {
       const networks = {'0x94365e3b': { registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c' }}
       expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
     })
-  
+
     it('if networks key is passed in it must contain configuration object', () => {
       const networks = {'0x94365e3b': 'hey'}
       expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
@@ -109,7 +109,7 @@ describe('signJWT', () => {
       const credentials = new Credentials({address: mnid, privateKey})
       const jwt = await credentials.signJWT({hello: 1})
       const { header } = decodeJWT(jwt)
-      expect(header.alg).toEqual('ES256K')  
+      expect(header.alg).toEqual('ES256K')
     })
   })
 
@@ -118,7 +118,7 @@ describe('signJWT', () => {
       const credentials = new Credentials({did, privateKey})
       const jwt = await credentials.signJWT({hello: 1})
       const { header } = decodeJWT(jwt)
-      expect(header.alg).toEqual('ES256K-R')  
+      expect(header.alg).toEqual('ES256K-R')
     })
   })
 
@@ -154,12 +154,12 @@ describe('requestDisclosure()', () => {
     it(`has correct payload in JWT requesting accountType of ${accountType}`, async () => {
       const response = await createAndVerify({accountType})
       return expect(response).toMatchSnapshot()
-    })  
+    })
   }
 
   it(`has correct payload in JWT requesting unsupported accountType`, async () => {
     expect(createAndVerify({accountType: 'gold'})).rejects.toMatchSnapshot()
-  })  
+  })
 
   it('ignores unsupported request parameters', async () => {
     const response = await createAndVerify({signing: true, sellSoul: true})
@@ -280,13 +280,13 @@ describe('authenticate()', () => {
     const profile = await uport.authenticate(jwt)
     expect(profile).toMatchSnapshot()
   })
-  
+
   it('returns pushToken if available', async () => {
     const jwt = await createShareResp({capabilities: ['PUSHTOKEN']})
     const profile = await uport.authenticate(jwt)
     expect(profile).toMatchSnapshot()
   })
-  
+
   it('handles response with missing challenge', async () => {
     const jwt = await uport.disclose({own: {name: 'bob'}})
     expect(uport.authenticate(jwt)).rejects.toMatchSnapshot()
@@ -310,7 +310,7 @@ describe('verifyProfile()', () => {
     const profile = await uport.verifyProfile(jwt)
     expect(profile).toMatchSnapshot()
   })
- 
+
   it('returns profile with only public claims', async () => {
     const jwt = await uport.disclose()
     const profile = await uport.verifyProfile(jwt)
@@ -340,5 +340,40 @@ describe('LEGACY receive()', () => {
     const jwt = await uport.disclose({own: {name: 'Davie', phone: '+15555551234'}, req})
     const profile = await uport.receive(jwt)
     expect(profile).toMatchSnapshot()
+  })
+})
+
+describe('txRequest()', () => {
+  beforeAll(() => mockresolver())
+
+  const abi = [{"constant":false,"inputs":[{"name":"status","type":"string"}],"name":"updateStatus","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"addr","type":"address"}],"name":"getStatus","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"}]
+  const address = '0x70A804cCE17149deB6030039798701a38667ca3B'
+  const statusContract = uport.contract(abi).at(address)
+
+  it('creates a valid JWT for a request', async () => {
+    const jwt = await statusContract.updateStatus('hello')
+    const verified = await verifyJWT(jwt)
+    expect(verified.payload).toMatchSnapshot()
+  })
+
+  it('encodes readable function calls including given args in function key of jwt', async () => {
+    const jwt = await statusContract.updateStatus('hello')
+    const verified = await verifyJWT(jwt)
+    expect(verified.payload.fn).toEqual("updateStatus(string 'hello')")
+  })
+
+  it('adds to key as contract address to jwt', async () => {
+    const jwt = await statusContract.updateStatus('hello')
+    const verified = await verifyJWT(jwt)
+    expect(verified.payload.to).toEqual(address)
+  })
+
+  it('adds additional request options passed to jwt', async () => {
+      const network_id =  '0x4'
+      const callbackUrl = 'mydomain'
+      const jwt = await statusContract.updateStatus('hello', {network_id, callbackUrl })
+      const verified = await verifyJWT(jwt)
+      expect(verified.payload.net).toEqual(network_id)
+      expect(verified.payload.callback).toEqual(callbackUrl)
   })
 })

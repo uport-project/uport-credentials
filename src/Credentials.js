@@ -6,6 +6,7 @@ import MuportDIDResolver from 'muport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
 import { toEthereumAddress } from 'did-jwt/lib/Digest'
 import { ec as EC } from 'elliptic'
+import { ContractFactory } from './Contract.js'
 const secp256k1 = new EC('secp256k1')
 /**
 *    The Credentials class allows you to easily create the signed payloads used in uPort inlcuding
@@ -332,7 +333,7 @@ async processDisclosurePayload ({doc, payload}) {
  async verifyProfile (token) {
   const { payload, doc } = await verifyJWT(token, {audience: this.did})
   return this.processDisclosurePayload({ payload, doc })
-}
+ }
 
 /**
   *  Create a credential (a signed JSON Web Token)
@@ -354,6 +355,49 @@ async processDisclosurePayload ({doc, payload}) {
   */
   attest ({sub, claim, exp}) {
     return this.signJWT({sub: sub, claim, exp})
+  }
+
+  /**
+  *  Builds and returns a contract object which can be used to interact with
+  *  a given contract. Similar to web3.eth.contract but with promises. Once specifying .at(address)
+  *  you can call the contract functions with this object. Each call will create a request.
+  *
+  *  @param    {Object}       abi                                   contract ABI
+  *  @return   {Object}                                             contract object
+  */
+  contract (abi) {
+    const txObjHandler = (txObj, opts) => {
+      txObj.fn = txObj.function
+      delete txObj['function']
+      return this.txRequest(txObj, opts)
+    }
+    return ContractFactory(txObjHandler.bind(this))(abi)
+  }
+
+  /**
+   *  Given a transaction object, similarly defined as the web3 transaction object,
+   *  it creates a JWT transaction request and appends addtional request options.
+   *
+   *  @example
+   *  const txobject = {
+   *    to: '0xc3245e75d3ecd1e81a9bfb6558b6dafe71e9f347',
+   *    value: '0.1',
+   *    fn: "setStatus(string 'hello', bytes32 '0xc3245e75d3ecd1e81a9bfb6558b6dafe71e9f347')",
+   *  }
+   *  connect.txRequest(txObject, {callbackUrl: 'http://mycb.domain'}).then(jwt => {
+   *    ...
+   *  })
+   *
+   *  @param    {Object}    txObj
+   *  @param    {String}    [id='addressReq']    string to identify request, later used to get response
+   *  @return   {String}                         a transaction request jwt
+   */
+  txRequest(txObj, { callbackUrl, exp = 600, network_id, label } = {}) {
+    const payload = {}
+    if (callbackUrl) payload.callback = callbackUrl
+    if (network_id) payload.net = network_id
+    if (label) payload.label = label
+    return this.signJWT({...payload, ...txObj, type: 'ethtx'}, exp )
   }
 
 // /**
