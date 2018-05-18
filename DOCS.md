@@ -93,7 +93,7 @@ The Credentials class allows you to easily create the signed payloads used in uP
     * [.createRequest([params])](#Credentials+createRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
     * [.createVerificationRequest(unsignedClaim, sub)](#Credentials+createVerificationRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
     * [.receive(token, [callbackUrl])](#Credentials+receive) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-    * [.push(token, payload, pubEncKey)](#Credentials+push) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+    * [.push(token, pubEncKey, payload)](#Credentials+push) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
     * [.attest([credential])](#Credentials+attest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
     * [.lookup(address)](#Credentials+lookup) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
 
@@ -213,7 +213,7 @@ const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
 ```
 <a name="Credentials+push"></a>
 
-### credentials.push(token, payload, pubEncKey) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+### credentials.push(token, pubEncKey, payload) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
 Send a push notification to a user, consumes a token which allows you to send push notifications
  and a url/uri request you want to send to the user.
 
@@ -223,10 +223,10 @@ Send a push notification to a user, consumes a token which allows you to send pu
 | Param | Type | Description |
 | --- | --- | --- |
 | token | <code>String</code> | a push notification token (get a pn token by requesting push permissions in a request) |
+| pubEncKey | <code>String</code> | the public encryption key of the receiver, encoded as a base64 string |
 | payload | <code>Object</code> | push notification payload |
 | payload.url | <code>String</code> | a uport request url |
 | payload.message | <code>String</code> | a message to display to the user |
-| pubEncKey | <code>String</code> | the public encryption key of the receiver, encoded as a base64 string |
 
 <a name="Credentials+attest"></a>
 
