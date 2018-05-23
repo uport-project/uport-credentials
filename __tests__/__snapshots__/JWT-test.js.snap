@@ -1,4 +1,6 @@
-exports[`test accepts a valid audience 1`] = `
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`accepts a valid audience 1`] = `
 Object {
   "aud": "0x001122",
   "iat": 1485321133,
@@ -6,7 +8,7 @@ Object {
 }
 `;
 
-exports[`test accepts a valid audience using callback_url 1`] = `
+exports[`accepts a valid audience using callback_url 1`] = `
 Object {
   "aud": "http://pututu.uport.me/unique",
   "iat": 1485321133,
@@ -14,7 +16,7 @@ Object {
 }
 `;
 
-exports[`test accepts a valid exp 1`] = `
+exports[`accepts a valid exp 1`] = `
 Object {
   "exp": 1485321134,
   "iat": 1485321133,
@@ -22,14 +24,14 @@ Object {
 }
 `;
 
-exports[`test accepts a valid iat 1`] = `
+exports[`accepts a valid iat 1`] = `
 Object {
   "iat": 1485321193,
   "iss": "0x001122",
 }
 `;
 
-exports[`test accepts a valid legacy exp 1`] = `
+exports[`accepts a valid legacy exp 1`] = `
 Object {
   "exp": 1485321133001,
   "iat": 1485321133,
@@ -37,14 +39,14 @@ Object {
 }
 `;
 
-exports[`test accepts a valid legacy iat 1`] = `
+exports[`accepts a valid legacy iat 1`] = `
 Object {
   "iat": 1485321193000,
   "iss": "0x001122",
 }
 `;
 
-exports[`test creates a JWT with correct format 1`] = `
+exports[`creates a JWT with correct format 1`] = `
 Object {
   "header": Object {
     "alg": "ES256K",
@@ -62,7 +64,7 @@ Object {
 }
 `;
 
-exports[`test verifies the JWT and return correct payload 1`] = `
+exports[`verifies the JWT and return correct payload 1`] = `
 Object {
   "iat": 1485321133,
   "iss": "0x001122",
