@@ -1,11 +1,10 @@
-
 var express = require('express');
-var uport = require('../lib/index.js');
+var uport = require('uport');
 var jsontokens = require('jsontokens')
 var bodyParser = require('body-parser')
 
-var signer = uport.SimpleSigner('5acea265dcbf01355956b36f82793a13caf1be650bb74ca7a40da74b412d44b5')
-
+var signer = uport.SimpleSigner('5acea265dcbf01355956b36f82793a13caf1be650bb74ca7a40da74b412d44b5');
+var endpoint = "https://015d00f4.ngrok.io";  // replace this with a public IP or HTTP tunnel
 
 var credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
@@ -20,10 +19,8 @@ var app = express();
 app.use(bodyParser.json({ type: '*/*' }))
 
 app.get('/', function (req, res) {
-
   credentials.createRequest({
-    verified: ['My Title'],
-    callbackUrl: 'http://192.168.44.162:8081/callback',
+    callbackUrl: `${endpoint}/callback`,
     exp: Math.floor(new Date().getTime()/1000) + 300
   }).then( function(requestToken) {
     var uri = 'me.uport:me?requestToken=' + requestToken + '%26callback_type=post'
@@ -36,27 +33,19 @@ app.get('/', function (req, res) {
 })
 
 app.post('/callback', function (req, res) {
-
   var jwt = req.body.access_token
-  console.log(jwt)
+  console.log("\n\nJWT (access token): \n");
+  console.log(jwt);
 
   credentials.receive(jwt).then( function(creds) {
-    console.log(creds)
-    if (creds.address == creds.verified[0].sub && 
-       creds.verified[0].iss == '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92' &&
-       creds.verified[0].claim['My Title']['KeyOne'] === 'ValueOne' &&
-       creds.verified[0].claim['My Title']['KeyTwo'] === 'Value2' &&
-       creds.verified[0].claim['My Title']['Last Key'] === 'Last Value')
-    {
-      console.log('Credential verified.');
-    } else {
-      console.log('Verification failed.');
-    }
+    console.log("\n\nDecoded JWT: \n");
+    console.log(creds);
   })
-
 })
 
 var server = app.listen(8081, function () {
-  
-  console.log("Tutorial app running...")
+  console.log("\n\nCredential Requestor service up and running!");
+  console.log(`Open your browser to ${endpoint} to test the service. \n`);
+  console.log("Watch this console for results from the service. \n")
+  console.log("Service Output: \n")
 })
