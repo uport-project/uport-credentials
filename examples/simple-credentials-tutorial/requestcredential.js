@@ -1,12 +1,12 @@
-var express = require('express');
-var uport = require('uport');
-var jsontokens = require('jsontokens')
-var bodyParser = require('body-parser')
+const express = require('express');
+const uport = require('uport');
+const jsontokens = require('jsontokens')
+const bodyParser = require('body-parser')
 
-var signer = uport.SimpleSigner('5acea265dcbf01355956b36f82793a13caf1be650bb74ca7a40da74b412d44b5');
-var endpoint = "https://015d00f4.ngrok.io";  // replace this with a public IP or HTTP tunnel
+const signer = uport.SimpleSigner('5acea265dcbf01355956b36f82793a13caf1be650bb74ca7a40da74b412d44b5');
+const endpoint = "https://dc44d6ae.ngrok.io";  // replace this with a public IP or HTTP tunnel
 
-var credentials = new uport.Credentials({
+const credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
   address: '2opiNrGSxTW6sFo6ervHZnEeEXGNGAoupFN',
   signer: signer
@@ -14,7 +14,7 @@ var credentials = new uport.Credentials({
   // Note: we use Rinkeby by default, the above is the explicit format for selecting a network
 })
 
-var app = express();
+const app = express();
 
 app.use(bodyParser.json({ type: '*/*' }))
 
@@ -23,9 +23,9 @@ app.get('/', function (req, res) {
     callbackUrl: `${endpoint}/callback`,
     exp: Math.floor(new Date().getTime()/1000) + 300
   }).then( function(requestToken) {
-    var uri = 'me.uport:me?requestToken=' + requestToken + '%26callback_type=post'
-    var qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
-    var mobileUrl = 'https://id.uport.me/me?requestToken=' + requestToken + '&callback_type=post'
+    let uri = 'me.uport:me?requestToken=' + requestToken + '%26callback_type=post'
+    let qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
+    let mobileUrl = 'https://id.uport.me/me?requestToken=' + requestToken + '&callback_type=post'
     console.log(uri)
     res.send('<div><img src=' + qrurl + '></img></div><div><a href=' + mobileUrl + '>Click here if on mobile</a></div>');
   })
@@ -33,7 +33,7 @@ app.get('/', function (req, res) {
 })
 
 app.post('/callback', function (req, res) {
-  var jwt = req.body.access_token
+  let jwt = req.body.access_token
   console.log("\n\nJWT (access token): \n");
   console.log(jwt);
 
@@ -43,7 +43,7 @@ app.post('/callback', function (req, res) {
   })
 })
 
-var server = app.listen(8081, function () {
+let server = app.listen(8081, function () {
   console.log("\n\nCredential Requestor service up and running!");
   console.log(`Open your browser to ${endpoint} to test the service. \n`);
   console.log("Watch this console for results from the service. \n")

@@ -13,13 +13,13 @@ Go ahead and create identities for the Creator and Requestor, or if you wish to 
 In the file `createcredential.js` we have a simple node `express` server. In the setup phase we use the private key we got from the App Manager to create a `SimpleSigner` object. This object is what will be signing the credential.
 
 ```js
-var signer = uport.SimpleSigner(<your key here>)
+let signer = uport.SimpleSigner(<your key here>)
 ```
 
 We then create a `Credentials` object using the signer and the uPort identifier of our app that we got from the App Manager (or the default identity):
 
 ```js
-var credentials = new uport.Credentials({
+let credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
   address: '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92',
   signer: signer

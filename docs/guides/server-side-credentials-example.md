@@ -1,5 +1,5 @@
 ---
-title: "Uport-JS Server-side How-to"
+title: "Uport-JS Server How-to"
 index: 1
 category: "tutorials"
 type: "content"
@@ -13,7 +13,7 @@ Here we will demonstrate how to create and sign a custom credential on a server 
 ### Prerequisites:
 
 1. The code for this tutorial can be found in the [Uport-JS examples.](github.com/uport-project/uport-js/blob/develop/examples/simple-credential-tutorial/).  Use this to follow the tutorial.
-1. A publicly available IP address to deploy the service too.  An HTTP tunneling service, such as [Ngrok](https://ngrok.com) can be used.
+1. A publicly available IP address to deploy the service to.  An HTTP tunneling service, such as [Ngrok](https://ngrok.com) can be used.
 
 ## Register an App
 
@@ -43,14 +43,14 @@ With a private key obtained from creating an application identity, use it to cre
 This example service also requires a public IP.  Update the variable assignment to `endpoint` to reference a public IP or HTTP tunnel using a service like [Ngrok](https://ngrok.com).
 
 ```js
-var signer = uport.SimpleSigner(<your key here>)
-var endpoint = <replace this with a public IP or HTTP tunnel>
+let signer = uport.SimpleSigner(<your key here>)
+let endpoint = <replace this with a public IP or HTTP tunnel>
 ```
 
 Then create a `Credentials` object using the signer and the MNID identifier of the application identity (or use the default identity):
 
 ```js
-var credentials = new uport.Credentials({
+const credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
   address: '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92',    // MNID of the application identity
   signer: signer                                     // Signer object created with the private signing key
@@ -64,7 +64,7 @@ When a client makes a request of the default route the service will call `creden
 ```js
 credentials.createRequest({
     requested: ['name', 'avatar', 'phone', 'country'],
-    callbackUrl: "<public address>/callback",            // publicly available address for the callback
+    callbackUrl: "<public address>/callback",            // publicly available IP address for the callback
     exp: Math.floor(new Date().getTime()/1000) + 300     // expiration for the request
   }).then( function(response) {
     // see step 4...
@@ -105,13 +105,13 @@ Inspecting the file *createcredential.js* there is a minimal express server setu
 With a private key obtained from creating an application identity, use it to create a `SimpleSigner` object. This object returns a function that is configured to sign data, in this case it will used to sign the credential.
 
 ```js
-var signer = uport.SimpleSigner(<your key here>)
+let signer = uport.SimpleSigner(<your key here>)
 ```
 
 Then create a `Credentials` object using the signer and the MNID identifier of the application identity (or use the default identity):
 
 ```js
-var credentials = new uport.Credentials({
+let credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
   address: '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92',    // MNID of the application identity
   signer: signer                                     // Signer object created with the private signing key

@@ -1,12 +1,12 @@
-var express = require('express');
-var uport = require('uport');
-var jsontokens = require('jsontokens')
+const express = require('express');
+const uport = require('uport');
+const jsontokens = require('jsontokens')
 
-var app = express();
-var signer = uport.SimpleSigner('28cefd149967e661b38495d2b5ab3964ffa0055912512d7125896646102c025b')
+const app = express();
+const signer = uport.SimpleSigner('28cefd149967e661b38495d2b5ab3964ffa0055912512d7125896646102c025b')
 
 
-var credentials = new uport.Credentials({
+const credentials = new uport.Credentials({
   appName: 'Credential Tutorial',
   address: '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92',
   signer: signer
@@ -24,15 +24,15 @@ app.get('/', function (req, res) {
   }).then(function (att) {
     console.log(att)
     console.log(jsontokens.decodeToken(att))
-    var uri = 'me.uport:add?attestations=' + att + '%26callback_type=post'
-    var qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
-    var mobileUrl = 'https://id.uport.me/add?attestations=' + att + '&callback_type=post'
+    let uri = 'me.uport:add?attestations=' + att + '%26callback_type=post'
+    let qrurl = 'http://chart.apis.google.com/chart?cht=qr&chs=400x400&chl=' + uri
+    let mobileUrl = 'https://id.uport.me/add?attestations=' + att + '&callback_type=post'
     console.log(uri)
     res.send('<div><img src=' + qrurl + '></img></div><div><a href=' + mobileUrl + '>Click here if on mobile</a></div>')
   })
 })
 
-var server = app.listen(8081, function () {
+let server = app.listen(8081, function () {
   console.log("\n\nCredential Creation service up and running!");
   console.log("Open your browser to http://localhost:8081 to test the service. \n");
   console.log("Watch this console for results from the service. \n")
