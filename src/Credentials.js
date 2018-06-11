@@ -285,12 +285,14 @@ async processDisclosurePayload ({doc, payload}) {
  *    ...
  *  })
  *
- *  @param    {Object}              unsignedClaim       an object that is an unsigned claim which you want the user to attest
- *  @param    {String}             sub                  the DID of the identity you want to sign the attestation
- *  @return   {Promise<Object, Error>}                  a promise which resolves with a signed JSON Web Token or rejects with an error
+ *  @param    {Object}      unsignedClaim     an object that is an unsigned claim which you want the user to attest
+ *  @param    {String}      aud               the DID of the identity you want to sign the attestation
+ *  @param    {String}      sub               the DID which the unsigned claim is about
+ *  @param    {String}      callbackUrl       the url which you want to receive the response of this request
+ *  @return   {Promise<Object, Error>}        a promise which resolves with a signed JSON Web Token or rejects with an error
  */
-  createVerificationRequest(unsignedClaim, sub) {
-    return this.signJWT({unsignedClaim, sub, type: 'verReq'})
+  createVerificationRequest(unsignedClaim, sub, callbackUrl, aud) {
+    return this.signJWT({unsignedClaim, sub, aud, callback: callbackUrl, type: 'verReq'})
   }
 
 /**
