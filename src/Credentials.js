@@ -269,6 +269,33 @@ async processDisclosurePayload ({doc, payload}) {
   }
 
   /**
+ *  Creates a signed request for the user to attest a list of claims.
+ *
+ *  @example
+ *  const unsignedClaim = {
+ *    claim: {
+ *      "Citizen of city X": {
+ *        "Allowed to vote": true,
+ *        "Document": "QmZZBBKPS2NWc6PMZbUk9zUHCo1SHKzQPPX4ndfwaYzmPW"
+ *      }
+ *    },
+ *    sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
+ *  }
+ *  credentials.createVerificationRequest(unsignedClaim).then(jwt => {
+ *    ...
+ *  })
+ *
+ *  @param    {Object}      unsignedClaim     an object that is an unsigned claim which you want the user to attest
+ *  @param    {String}      aud               the DID of the identity you want to sign the attestation
+ *  @param    {String}      sub               the DID which the unsigned claim is about
+ *  @param    {String}      callbackUrl       the url which you want to receive the response of this request
+ *  @return   {Promise<Object, Error>}        a promise which resolves with a signed JSON Web Token or rejects with an error
+ */
+  createVerificationRequest(unsignedClaim, sub, callbackUrl, aud) {
+    return this.signJWT({unsignedClaim, sub, aud, callback: callbackUrl, type: 'verReq'})
+  }
+
+/**
   *  Receive signed response token from mobile app. Verifies and parses the given response token.
   *
   *  @example
