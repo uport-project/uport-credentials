@@ -209,6 +209,7 @@ class Credentials {
 *  @return   {Promise<Object, Error>}                     a promise which resolves with successful status or rejects with an error
 */
 push (token, pubEncKey, payload) {
+  // TODO remove url once
   return transport.push.send(token, pubEncKey)(payload.url, {message: payload.message})
 }
 
@@ -254,6 +255,7 @@ async processDisclosurePayload ({doc, payload}) {
   try {
     if (doc.publicKey[0].publicKeyHex) credentials.publicKey = '0x' + doc.publicKey[0].publicKeyHex
     if (doc.publicKey[1].publicKeyBase64) credentials.publicEncKey = doc.publicKey[1].publicKeyBase64
+    if (!doc.publicKey[1].publicKeyBase64 & !!payload.publicEncKey) credentials.publicEncKey = payload.publicEncKey
   } catch (err) {}
 
   if (payload.verified) {
