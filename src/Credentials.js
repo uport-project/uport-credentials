@@ -209,8 +209,9 @@ class Credentials {
 *  @return   {Promise<Object, Error>}                     a promise which resolves with successful status or rejects with an error
 */
 push (token, pubEncKey, payload) {
-  // TODO remove url once
-  return transport.push.send(token, pubEncKey)(payload.url, {message: payload.message})
+  const iss = decodeJWT(token).payload.iss
+  const pushUrl = iss.match(/did/) ? 'https://api.uport.me/pututu/sns' : 'https://pututu.uport.space/api/v2/sns'
+  return transport.push.send(token, pubEncKey, pushUrl)(payload.url, {message: payload.message})
 }
 
 /**
