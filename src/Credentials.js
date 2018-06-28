@@ -244,7 +244,7 @@ async disclose (payload = {}, expiresIn = 600 ) {
 }
 
 async processDisclosurePayload ({doc, payload}) {
-  const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
+  const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.nad, did: payload.iss}
   if (payload.nad) {
     credentials.networkAddress = payload.nad
   }
@@ -256,8 +256,9 @@ async processDisclosurePayload ({doc, payload}) {
   try {
     if (doc.publicKey[0].publicKeyHex) credentials.publicKey = '0x' + doc.publicKey[0].publicKeyHex
     if (doc.publicKey[1].publicKeyBase64) credentials.publicEncKey = doc.publicKey[1].publicKeyBase64
-    if (!doc.publicKey[1].publicKeyBase64 & !!payload.publicEncKey) credentials.publicEncKey = payload.publicEncKey
   } catch (err) {}
+
+  if (!credentials.publicEncKey) credentials.publicEncKey = payload.publicEncKey
 
   if (payload.verified) {
     const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.givenDID ? this.did : this.address})))
