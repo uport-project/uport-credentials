@@ -1,7 +1,7 @@
 import {Contract, ContractFactory } from '../src/Contract'
 
 
-const address = '0x41566e3a081f5032bdcad470adb797635ddfe1f0'
+const address = '2nQtiQG6Cgm1GYTBaaKAgr76uY7iSexUkqX'
 const abiToken = [
   {
     "constant": true,
@@ -318,7 +318,13 @@ describe('Contract', () => {
 
   it('returns a well formed uri on contract function calls', () => {
     const uri = tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)
-    expect(uri).toEqual("me.uport:0x41566e3a081f5032bdcad470adb797635ddfe1f0?function=transfer(address 0x41566e3a081f5032bdcad470adb797635ddfe1f0, uint256 10)")
+    expect(uri).toEqual("https://id.uport.me/2nQtiQG6Cgm1GYTBaaKAgr76uY7iSexUkqX?function=transfer(address%200x41566e3a081f5032bdcad470adb797635ddfe1f0%2C%20uint256%2010)")
+  });
+
+  it('it add addtional params to request when passed as last arg', () => {
+    const params = {callbackUrl: 'http://myswebsite.com', type: 'post'}
+    const uri = tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10, params)
+    expect(uri).toEqual("https://id.uport.me/2nQtiQG6Cgm1GYTBaaKAgr76uY7iSexUkqX?function=transfer(address%200x41566e3a081f5032bdcad470adb797635ddfe1f0%2C%20uint256%2010)&callback_url=http%3A%2F%2Fmyswebsite.com&type=post")
   });
 });
 
