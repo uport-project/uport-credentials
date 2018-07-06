@@ -1,5 +1,5 @@
-# uport-js
-**Required Upgrade to v0.6.3 to support new uPort Clients - [View Details](https://github.com/uport-project/uport-js/releases/tag/v0.6.3)**
+# uport-credentials
+
 ## Integrate uPort in your javascript application
 
 uPort provides a simple way for your users to login to your website and provide private credentials such as identity information and contact details to you.
@@ -10,15 +10,9 @@ Uport.js provides a simple way for you to integrate uport.js into your javascrip
 
 We have an easy to use browser library [uport-connect](https://github.com/uport-project/uport-connect) which can help you do so.
 
-## Setup your uPort application identity
-
-First make sure you have your uPort app installed and you've setup your own uPort identity.
-
 ### What is a uPort identity?
 
 An identity in uPort is really just someone or something that can sign data or transactions and also receive signed data about itself.
-
-An identity has an identifier in the form of an [MNID](https://github.com/uport-project/mnid), a signing key, and a public key stored on the [uPort Registry](https://github.com/uport-project/uport-registry).
 
 An identity can:
 
@@ -38,7 +32,7 @@ For details on uPort's underlying architecture, read our [spec repo](https://git
 In your application you must first configure your uPort object.
 
 ```javascript
-import { Credentials } from 'uport'
+import { Credentials } from 'uport-credentials'
 
 // For new ethereum based addresses
 const credentials = new Credentials({
@@ -175,7 +169,7 @@ Ethereum smart contracts live on the blockchain and at a certain address. The ap
 Our Contract class will let you create a javascript object modelling the SmartContract allowing you to create uport uri's that you can send to the user.
 
 ```javascript
-import { Contract } from 'uport'
+import { Contract } from 'uport-credentials'
 const abi = // import from json or have directly in code
 const contract = Contract(abi).at(contractAddress)
 // creates a request for the user to call the transfer() function on the smart contract
@@ -192,4 +186,3 @@ connect.sendTransaction(txRequest).then(txResponse => {
 ```
 
 Back in your server code you receive the `txResponse`. This is a standard ethereum transaction object that you can verify.
-
