@@ -4,6 +4,8 @@ import { ec as EC } from 'elliptic'
 const secp256k1 = new EC('secp256k1')
 
 import UportDIDResolver from 'uport-did-resolver'
+import MuportDIDResolver from 'muport-did-resolver'
+import EthrDIDResolver from 'ethr-did-resolver'
 
 import UportLite from 'uport-lite'
 import nets from 'nets'
@@ -69,6 +71,8 @@ class Credentials {
       })
     }
     UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
+    EthrDIDResolver(ethrConfig || {})
+    MuportDIDResolver(muportConfig || {})
   }
 
 /**
@@ -123,7 +127,6 @@ class Credentials {
     if (params.exp) { // checks for expiration on requests, if none is provided the default is 10 min
       payload.exp = params.exp
     }
-
     return this.createJWT({address: this.settings.address, signer: this.settings.signer}, {...payload, type: 'shareReq'})
     //return this.signJWT({...payload, type: 'shareReq'}, params.exp ? undefined : expiresIn)
   }
