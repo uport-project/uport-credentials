@@ -263,7 +263,9 @@ class Credentials {
   *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
   */
   push (token, pubEncKey, payload) {
-    const PUTUTU_URL = 'https://pututu.uport.space' // TODO - change to .me
+    const iss = decodeJWT(token).payload.iss
+    const PUTUTU_URL = iss.match(/did/) ? 'https://api.uport.me/pututu/sns' : 'https://pututu.uport.space/api/v2/sns'
+
     return new Promise((resolve, reject) => {
       let endpoint = '/api/v2/sns'
       if (!token) {
