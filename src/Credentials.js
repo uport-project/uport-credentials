@@ -1,5 +1,4 @@
-import { createJWT, verifyJWT } from './JWT'
-import { SimpleSigner, decodeJWT } from 'did-jwt'
+import { SimpleSigner, decodeJWT, createJWT, verifyJWT } from 'did-jwt'
 
 const MNID = require('mnid')
 import { toEthereumAddress } from 'did-jwt/lib/Digest'
@@ -62,21 +61,22 @@ class Credentials {
         this.settings.did = did
         this.settings.givenDID = true
       } else {
-        console.log('Only MNID app identities are accepted')
+        throw new Error('Only MNID app identities accepted')
       }
     } else if (address) {
       if (MNID.isMNID(address)) {
         this.settings.address = address
         // this.address = address
         this.settings.did = `did:uport:${address}`
+      } else {
+        throw new Error('Only MNID app identities accepted')
       }
     } else if (privateKey) {
       const kp = secp256k1.keyFromPrivate(privateKey)
       const address = toEthereumAddress(kp.getPublic('hex'))
       this.settings.did = `did:uport:${address}`
     }
-
-    this.signJWT = (payload, expiresIn) => createJWT(payload, { issuer: this.givenDID ? this.did : this.address, signer: this.signer, alg: this.did.match('^did:uport:') ? 'ES256K' : 'ES256K-R', expiresIn })
+    this.signJWT = (payload, expiresIn) => createJWT(payload, { issuer: this.settings.givenDID ? this.settings.did : this.settings.address, signer: this.settings.signer, alg: this.settings.did.match('^did:uport:') ? 'ES256K' : 'ES256K-R', expiresIn })
 
     // backwards compatibility
     this.settings.networks = networks ? configNetworks(networks) : {}
@@ -89,7 +89,6 @@ class Credentials {
         })
       })
     }
-
     UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
     MuportDIDResolver(muportConfig || {})
   }
@@ -147,8 +146,8 @@ class Credentials {
       payload.exp = params.exp
     }
 
-    return createJWT(this.settings, {...payload, type: 'shareReq'})
-    // return this.signJWT({...payload, type: 'shareReq'}, params.exp ? undefined : expiresIn)
+    return this.createJWT({address: this.settings.did, signer: this.settings.signer}, {...payload, type: 'shareReq'})
+    //return this.signJWT({...payload, type: 'shareReq'}, params.exp ? undefined : expiresIn)
   }
 
 /**
@@ -173,7 +172,7 @@ class Credentials {
  *  @return   {Promise<Object, Error>}                  a promise which resolves with a signed JSON Web Token or rejects with an error
  */
   createVerificationRequest (unsignedClaim, sub) {
-    return createJWT(this.settings, {unsignedClaim, sub, type: 'verReq'})
+    return this.createJWT({address: this.settings.did, signer: this.settings.signer}, {unsignedClaim, sub, type: 'verReq'})
   }
 
 /**
@@ -213,7 +212,7 @@ class Credentials {
     if (!credentials.publicEncKey) credentials.publicEncKey = payload.publicEncKey
 
     if (payload.verified) {
-      const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.givenDID ? this.did : this.address})))
+      const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.settings.givenDID ? this.settings.did : this.settings.address})))
       return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
     } else {
       return credentials
@@ -239,11 +238,11 @@ class Credentials {
   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
   */
   async authenticate (token, callbackUrl = null) {
-    const { payload, doc } = await verifyJWT(token, {audience: this.givenDID ? this.did : this.address, callbackUrl, auth: true})
+    const { payload, doc } = await verifyJWT(token, {audience: this.settings.givenDID ? this.settings.did : this.settings.address, callbackUrl, auth: true})
 
     if (payload.req) {
       const challenge = await verifyJWT(payload.req)
-      if (challenge.payload.iss === this.did && challenge.payload.type === 'shareReq') {
+      if (challenge.payload.iss === this.settings.did && challenge.payload.type === 'shareReq') {
         return this.processDisclosurePayload({payload, doc})
       }
     } else {
@@ -328,7 +327,7 @@ class Credentials {
   * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
   */
   attest ({sub, claim, exp}) {
-    return createJWT(this.settings, {sub: sub, claim, exp})
+    return this.createJWT({address: this.settings.did, signer: this.settings.signer}, {sub: sub, claim, exp})
   }
 
 /**
@@ -346,6 +345,16 @@ class Credentials {
   */
   lookup (address) {
     return this.settings.registry(address)
+  }
+
+  createJWT ({address, signer}, payload) {
+    return createJWT(
+      payload, { issuer: address,
+        signer: signer})
+  }
+
+  verifyJWT ({registry, address}, jwt, callbackUrl = null) {
+    return verifyJWT(jwt, {audience: address, callbackUrl: callbackUrl})
   }
 }
 
