@@ -13,11 +13,11 @@ const did = `did:ethr:${mnid}`
 
 const claim = {sub: '0x112233', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133 + 1}
 
-const uport = new Credentials({privateKey, did})
+const uport = new Credentials({signer: signer, address: mnid})
 const uport2 = new Credentials({})
 
 function mockresolver (profile) {
-  registerMethod('ethr', async (id, parsed) => {
+  registerMethod('uport', async (id, parsed) => {
     const doc = {
       '@context': 'https://w3id.org/did/v1',
       id,
@@ -42,16 +42,8 @@ function mockresolver (profile) {
 describe('configuration', () => {
 
   describe('sets did', () => {
-    describe('`did` configured', () => {
-      expect(new Credentials({did}).settings.did).toEqual(did)
-    })
-
     describe('ethereum `address` configured', () => {
       expect(new Credentials({address})).toThrowError()
-    })
-
-    describe('`privateKey` configured', () => {
-      expect(new Credentials({privateKey}).settings.did).toEqual(did)
     })
 
     describe('mnid `address` configured', () => {
@@ -62,11 +54,7 @@ describe('configuration', () => {
   describe('sets signer', () => {
     describe('always uses signer if passed in', () => {
       const signer = SimpleSigner(privateKey)
-      expect(new Credentials({signer, privateKey}).signer).toEqual(signer)
-    })
-
-    describe('sets signer if privateKey is passed in', () => {
-      expect(new Credentials({privateKey}).signer).toBeDefined()
+      expect(new Credentials({signer, mnid}).settings.signer).toEqual(signer)
     })
   })
 
@@ -98,19 +86,10 @@ describe('configuration', () => {
 describe('signJWT', () => {
   describe('uport method', () => {
     it('uses ES256K algorithm', async () => {
-      const credentials = new Credentials({address: mnid, privateKey})
+      const credentials = new Credentials({address: mnid, signer: signer})
       const jwt = await credentials.signJWT({hello: 1})
       const { header } = decodeJWT(jwt)
       expect(header.alg).toEqual('ES256K')
-    })
-  })
-
-  describe('ethr method', () => {
-    it('uses ES256K-R algorithm', async () => {
-      const credentials = new Credentials({did, privateKey})
-      const jwt = await credentials.signJWT({hello: 1})
-      const { header } = decodeJWT(jwt)
-      expect(header.alg).toEqual('ES256K-R')
     })
   })
 
