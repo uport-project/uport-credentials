@@ -9,7 +9,6 @@ const secp256k1 = new EC('secp256k1')
 
 import UportDIDResolver from 'uport-did-resolver'
 import MuportDIDResolver from 'muport-did-resolver'
-import EthrDIDResolver from 'ethr-did-resolver'
 
 import UportLite from 'uport-lite'
 import nets from 'nets'
@@ -119,7 +118,7 @@ class Credentials {
  *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", "devicekey" or "none"
  *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
  */
-  createRequest (params = {}) {
+  createRequest (params = {}, expiresIn = 600) {
     const payload = {}
     if (params.requested) {
       payload.requested = params.requested
@@ -136,15 +135,20 @@ class Credentials {
     if (params.network_id) {
       payload.net = params.network_id
     }
-    if (params.accountType && ['general', 'segregated', 'keypair', 'devicekey', 'none'].indexOf(params.accountType) >= 0) {
-      payload.act = params.accountType
+    if (params.accountType) {
+      if (['general', 'segregated', 'keypair', 'devicekey', 'none'].indexOf(params.accountType) >= 0) {
+        payload.act = params.accountType
+      } else {
+        return Promise.reject(new Error(`Unsupported accountType ${params.accountType}`))
+      }
     }
+
     if (params.exp) { // checks for expiration on requests, if none is provided the default is 10 min
       payload.exp = params.exp
-    } else {
-      payload.exp = Math.floor(Date.now() / 1000) + 600
     }
+
     return createJWT(this.settings, {...payload, type: 'shareReq'})
+    // return this.signJWT({...payload, type: 'shareReq'}, params.exp ? undefined : expiresIn)
   }
 
 /**
@@ -188,38 +192,63 @@ class Credentials {
   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
   */
   receive (token, callbackUrl = null) {
-    return verifyJWT(this.settings, token, callbackUrl).then(({payload, profile}) => {
-      function processPayload (settings) {
-        const credentials = {...profile, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
-        if (payload.nad) {
-          credentials.networkAddress = payload.nad
-        }
-        if (payload.dad) {
-          credentials.deviceKey = payload.dad
-        }
-        if (payload.verified) {
-          return Promise.all(payload.verified.map(token => verifyJWT(settings, token))).then(verified => {
-            return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
-          })
-        } else {
-          return credentials
-        }
-      }
+    return this.authenticate(token, callbackUrl)
+  }
 
-      if (this.settings.signer) {
-        if (payload.req) {
-          return verifyJWT(this.settings, payload.req).then((challenge) => {
-            if (challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
-              return processPayload(this.settings)
-            }
-          })
-        } else {
-          throw new Error('Challenge was not included in response')
-        }
-      } else {
-        return processPayload(this.settings)
+  async processDisclosurePayload ({doc, payload}) {
+    const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.nad, did: payload.iss}
+    if (payload.nad) {
+      credentials.networkAddress = payload.nad
+    }
+    if (payload.dad) {
+      credentials.deviceKey = payload.dad
+    }
+
+    // Backwards support
+    try {
+      if (doc.publicKey[0].publicKeyHex) credentials.publicKey = '0x' + doc.publicKey[0].publicKeyHex
+      if (doc.publicKey[1].publicKeyBase64) credentials.publicEncKey = doc.publicKey[1].publicKeyBase64
+    } catch (err) {}
+
+    if (!credentials.publicEncKey) credentials.publicEncKey = payload.publicEncKey
+
+    if (payload.verified) {
+      const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.givenDID ? this.did : this.address})))
+      return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
+    } else {
+      return credentials
+    }
+  }
+
+  /**
+  *  Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from mobile
+  *  app as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
+  *
+  *  It Verifies and parses the given response token and verifies the challenge response flow.
+  *
+  *  @example
+  *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
+  *  credentials.authenticate(resToken).then(res => {
+  *      const credentials = res.verified
+  *       const name =  res.name
+  *      ...
+  *  })
+  *
+  *  @param    {String}                  token                 a response token
+  *  @param    {String}                  [callbackUrl=null]    callbackUrl
+  *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
+  */
+  async authenticate (token, callbackUrl = null) {
+    const { payload, doc } = await verifyJWT(token, {audience: this.givenDID ? this.did : this.address, callbackUrl, auth: true})
+
+    if (payload.req) {
+      const challenge = await verifyJWT(payload.req)
+      if (challenge.payload.iss === this.did && challenge.payload.type === 'shareReq') {
+        return this.processDisclosurePayload({payload, doc})
       }
-    })
+    } else {
+      throw new Error('Challenge was not included in response')
+    }
   }
 
 /**
