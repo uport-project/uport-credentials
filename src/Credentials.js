@@ -1,5 +1,16 @@
 import { createJWT, verifyJWT } from './JWT'
-import { decodeToken } from 'jsontokens'
+import { SimpleSigner, decodeJWT } from 'did-jwt'
+
+const MNID = require('mnid')
+import { toEthereumAddress } from 'did-jwt/lib/Digest'
+
+import { ec as EC } from 'elliptic'
+const secp256k1 = new EC('secp256k1')
+
+import UportDIDResolver from 'uport-did-resolver'
+import MuportDIDResolver from 'muport-did-resolver'
+import EthrDIDResolver from 'ethr-did-resolver'
+
 import UportLite from 'uport-lite'
 import nets from 'nets'
 import nacl from 'tweetnacl'
@@ -33,9 +44,43 @@ class Credentials {
    * @param       {Address}           settings.address       your uPort address (may be the address of your application's uPort identity)
    * @return      {Credentials}                              self
    */
-  constructor (settings = {}) {
-    this.settings = settings
-    this.settings.networks = settings.networks ? configNetworks(settings.networks) : {}
+  constructor ({networks, registry, signer, address, did, privateKey, ethrConfig, muportConfig} = {}) {
+    this.settings = {}
+    if (signer) {
+      this.settings.signer = signer
+      // this.signer = signer
+    } else if (privateKey) {
+      this.settings.signer = SimpleSigner(privateKey)
+      // this.signer = SimpleSigner(privateKey)
+    }
+
+    this.settings.givenDID = false
+
+    if (did) {
+      const parts = did.split(':')
+      if (MNID.isMNID(parts[2])) {
+        this.settings.address = parts[2]
+        this.settings.did = did
+        this.settings.givenDID = true
+      } else {
+        console.log('Only MNID app identities are accepted')
+      }
+    } else if (address) {
+      if (MNID.isMNID(address)) {
+        this.settings.address = address
+        // this.address = address
+        this.settings.did = `did:uport:${address}`
+      }
+    } else if (privateKey) {
+      const kp = secp256k1.keyFromPrivate(privateKey)
+      const address = toEthereumAddress(kp.getPublic('hex'))
+      this.settings.did = `did:uport:${address}`
+    }
+
+    this.signJWT = (payload, expiresIn) => createJWT(payload, { issuer: this.givenDID ? this.did : this.address, signer: this.signer, alg: this.did.match('^did:uport:') ? 'ES256K' : 'ES256K-R', expiresIn })
+
+    // backwards compatibility
+    this.settings.networks = networks ? configNetworks(networks) : {}
     if (!this.settings.registry) {
       const registry = UportLite({networks: this.settings.networks})
       this.settings.registry = (address) => new Promise((resolve, reject) => {
@@ -45,6 +90,9 @@ class Credentials {
         })
       })
     }
+
+    UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
+    MuportDIDResolver(muportConfig || {})
   }
 
 /**
@@ -57,8 +105,6 @@ class Credentials {
  *  credentials.createRequest(req).then(jwt => {
  *      ...
  *  })
-
-
  requested: ['name','phone','identity_no'],
     callbackUrl: 'https://....' // URL to send the response of the request to
     notifications: true
@@ -90,11 +136,10 @@ class Credentials {
     if (params.network_id) {
       payload.net = params.network_id
     }
-    if (params.accountType
-          && ['general', 'segregated', 'keypair', 'devicekey', 'none'].indexOf(params.accountType) >= 0) {
+    if (params.accountType && ['general', 'segregated', 'keypair', 'devicekey', 'none'].indexOf(params.accountType) >= 0) {
       payload.act = params.accountType
     }
-    if (params.exp) { //checks for expiration on requests, if none is provided the default is 10 min
+    if (params.exp) { // checks for expiration on requests, if none is provided the default is 10 min
       payload.exp = params.exp
     } else {
       payload.exp = Math.floor(Date.now() / 1000) + 600
@@ -123,7 +168,7 @@ class Credentials {
  *  @param    {String}             sub                  the DID of the identity you want to sign the attestation
  *  @return   {Promise<Object, Error>}                  a promise which resolves with a signed JSON Web Token or rejects with an error
  */
-  createVerificationRequest(unsignedClaim, sub) {
+  createVerificationRequest (unsignedClaim, sub) {
     return createJWT(this.settings, {unsignedClaim, sub, type: 'verReq'})
   }
 
@@ -144,8 +189,7 @@ class Credentials {
   */
   receive (token, callbackUrl = null) {
     return verifyJWT(this.settings, token, callbackUrl).then(({payload, profile}) => {
-
-      function processPayload(settings) {
+      function processPayload (settings) {
         const credentials = {...profile, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
         if (payload.nad) {
           credentials.networkAddress = payload.nad
@@ -162,10 +206,10 @@ class Credentials {
         }
       }
 
-      if(this.settings.signer) {
-        if(payload.req) {
+      if (this.settings.signer) {
+        if (payload.req) {
           return verifyJWT(this.settings, payload.req).then((challenge) => {
-            if(challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
+            if (challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
               return processPayload(this.settings)
             }
           })
@@ -196,9 +240,9 @@ class Credentials {
       if (!token) {
         return reject(new Error('Missing push notification token'))
       }
-      //if (!pubEncKey) {
-        //return reject(new Error('Missing public encryption key of the receiver'))
-      //}
+      // if (!pubEncKey) {
+        // return reject(new Error('Missing public encryption key of the receiver'))
+      // }
       if (pubEncKey.url) {
         console.error('WARNING: Calling push without a public encryption key is deprecated')
         endpoint = '/api/v1/sns'
