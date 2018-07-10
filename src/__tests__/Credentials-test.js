@@ -2,7 +2,9 @@ import Credentials from '../Credentials'
 import { SimpleSigner, createJWT, verifyJWT, decodeJWT } from 'did-jwt'
 import MockDate from 'mockdate'
 import { registerMethod } from 'did-resolver'
-
+import nacl from 'tweetnacl'
+import naclutil from 'tweetnacl-util'
+import nock from 'nock'
 MockDate.set(1485321133 * 1000)
 
 const privateKey = '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
@@ -362,5 +364,99 @@ describe('receive', () => {
       expect(profile.pushToken).toEqual('PUSHTOKEN')
     }
     )
+  })
+})
+
+
+
+describe('push', () => {
+  const PUTUTU_URL = 'https://api.uport.me'//'https://pututu.uport.space' // TODO - change to .me
+  const API_v1_PATH = '/api/v1/sns'
+  const API_v2_PATH = '/pututu/sns'
+  const lambda = '/pututu/sns'
+  const PUSHTOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NkstUiJ9.eyJpYXQiOjE1MzExOTcwMzgsImV4cCI6MTUzMjQ5MzAzOCwiYXVkIjoiMzVERFh3RjZIZHI2ZFFRbzFCUndRcnU3VzNkNTRhdnpCd2siLCJ0eXBlIjoibm90aWZpY2F0aW9ucyIsInZhbHVlIjoiYXJuOmF3czpzbnM6dXMtd2VzdC0yOjExMzE5NjIxNjU1ODplbmRwb2ludC9BUE5TL3VQb3J0LzVmMTA4YjZlLTk3NTItM2IwZC05NWM2LWYyZTU3MTM4ZWNlNSIsImlzcyI6ImRpZDpldGhyOjB4YjA2ZDJjZWY5ZDJjYTA3MjU2NmU3Y2RlZDMyYWI0OWY1OTFlNDRlOCJ9.0qZE3N2m7rTn8JaNVfp5LhICmzEWCqTBBh9_gn4ZGD19PCfhInX7XTav0JBRBtSKkJXx03nik9k4jZ3qvQ6CigE'
+  const payload = { url: 'me.uport:me', message: 'a friendly message' }
+  const kp = nacl.box.keyPair()
+  const pubEncKey = naclutil.encodeBase64(kp.publicKey)
+  const secEncKey = kp.secretKey
+
+  beforeEach(() => {
+    nock.disableNetConnect()
+  })
+
+  afterEach(() => {
+    nock.enableNetConnect()
+  })
+
+  it('pushes url to pututu', () => {
+    nock(PUTUTU_URL, {
+      reqheaders: {
+        'authorization': `Bearer ${PUSHTOKEN}`
+      }
+    })
+    .post(lambda, (body) => {
+      let encObj = JSON.parse(body.message)
+      const box = naclutil.decodeBase64(encObj.ciphertext)
+      const nonce = naclutil.decodeBase64(encObj.nonce)
+      const from = naclutil.decodeBase64(encObj.from)
+      const decrypted = nacl.box.open(box, nonce, from, secEncKey)
+      const result = JSON.parse(naclutil.encodeUTF8(decrypted))
+
+      return result.url === payload.url && result.message === payload.message
+    })
+    .reply(200, { status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
+
+    return uport.push(PUSHTOKEN, pubEncKey, payload).then(response => {
+      return expect(response).toEqual({ status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
+    })
+  })
+
+  it('handles missing token', () => {
+    return uport.push(null, pubEncKey, payload).catch(error => expect(error.message).toEqual('Missing push notification token'))
+  })
+
+  it('handles missing pubEncKey', () => {
+    nock('https://pututu.uport.space', {
+      reqheaders: {
+        'authorization': `Bearer ${PUSHTOKEN}`
+      }
+    })
+    .post(API_v1_PATH, (body) => {
+      return body.message === payload.message && body.url === payload.url
+    })
+    .reply(200, { status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
+
+    console.error = jest.fn(msg => {
+      expect(msg).toEqual('WARNING: Calling push without a public encryption key is deprecated')
+    })
+    return uport.push(PUSHTOKEN, payload).catch(error => expect(error.message).toEqual('Missing public encryption key of the receiver'))
+  })
+
+  it('handles missing payload', () => {
+    return uport.push(PUSHTOKEN, pubEncKey, {}).catch(error => expect(error.message).toEqual('Missing payload url for sending to users device'))
+  })
+
+  it('handles invalid token', () => {
+    nock(PUTUTU_URL, {
+      reqheaders: {
+        'authorization': `Bearer ${PUSHTOKEN}`
+      }
+    })
+    .post(API_v2_PATH, () => true)
+    .reply(403, 'Not allowed')
+
+    return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: Invalid Token'))
+  })
+
+  it('handles random error', () => {
+    nock(PUTUTU_URL, {
+      reqheaders: {
+        'authorization': `Bearer ${PUSHTOKEN}`
+      }
+    })
+    .post(API_v2_PATH, () => true)
+    .reply(500, 'Server Error')
+
+    return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: 500 Server Error'))
   })
 })
