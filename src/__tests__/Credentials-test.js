@@ -24,6 +24,7 @@ function mockresolver (profile) {
       publicKey: [{
         id: `${id}#owner`,
         type: 'Secp256k1VerificationKey2018',
+        publicKeyHex: '048f71f156f9b489d8c566c9943585d4c255aa5d22924abe3b9f7997de46a378ac89a668eacb9053ceac72f6a0abdeee025d61984059a6732e6cb4f106ed281ffe',
         owner: id,
         ethereumAddress: parsed.id
       }],
@@ -194,13 +195,13 @@ describe('authenticate()', () => {
 
   async function createShareResp (payload = {}) {
     const req = await uport.createRequest({requested: ['name', 'phone']})
-    return uport.disclose({...payload, req})
+    return uport.createJWT({address: mnid, signer: signer}, {...payload, req})
   }
 
   async function createShareRespWithVerifiedCredential (payload = {}) {
     const req = await uport.createRequest({requested: ['name', 'phone']})
     const attestation = await uport.attest(claim)
-    return uport.disclose({...payload, verified: [attestation], req})
+    return uport.createJWT({address: mnid, signer: signer}, {...payload, verified: [attestation], req})
   }
 
   it('returns profile mixing public and private claims', async () => {
@@ -240,7 +241,7 @@ describe('authenticate()', () => {
   })
 
   it('handles response with missing challenge', async () => {
-    const jwt = await uport.disclose({own: {name: 'bob'}})
+    const jwt = await uport.createJWT({address: mnid, signer: signer}, {own: {name: 'bob'}})
     expect(uport.authenticate(jwt)).rejects.toMatchSnapshot()
   })
 })
@@ -251,8 +252,8 @@ describe('LEGACY receive()', () => {
     country: 'NI'
   }))
   it('returns profile mixing public and private claims', async () => {
-    const req = await uport.requestDisclosure({requested: ['name', 'phone']})
-    const jwt = await uport.disclose({own: {name: 'Davie', phone: '+15555551234'}, req})
+    const req = await uport.createRequest({requested: ['name', 'phone']})
+    const jwt = await uport.signJWT({own: {name: 'Davie', phone: '+15555551234'}, req})
     const profile = await uport.receive(jwt)
     expect(profile).toMatchSnapshot()
   })
