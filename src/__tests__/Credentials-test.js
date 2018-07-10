@@ -258,3 +258,111 @@ describe('LEGACY receive()', () => {
     expect(profile).toMatchSnapshot()
   })
 })
+
+
+
+describe('receive', () => {
+
+  function createShareResp (payload = {}) {
+    return uport.createRequest({requested: ['name', 'phone']}).then((jwt) => {
+      return uport.createJWT({address: mnid, signer: signer}, {...payload, type: 'shareResp', req: jwt})
+    })
+  }
+
+  function createShareRespMissingRequest (payload = {}) {
+    return uport.createRequest({requested: ['name', 'phone']}).then((jwt) => {
+      return uport.createJWT({address: mnid, signer: signer}, {...payload, type: 'shareResp'})
+    })
+  }
+
+  function createShareRespWithExpiredRequest (payload = {}) {
+    return uport.createRequest({requested: ['name', 'phone'], exp: Date.now() - 1}).then((jwt) => {
+      return uport.createJWT({address: mnid, signer: signer}, {...payload, type: 'shareResp', req: jwt})
+    })
+  }
+
+  function createShareRespWithVerifiedCredential (payload = {}, verifiedClaim = {sub: '0x112233', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133 + 1}) {
+    return uport.attest(verifiedClaim).then(jwt => {
+      return createShareResp({...payload, verified: [jwt]})
+    })
+  }
+
+  it('returns profile mixing public and private claims', () => {
+    return createShareResp({own: {name: 'Davie', phone: '+15555551234'}}).then(jwt => uport.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile mixing public and private claims and verified credentials', () => {
+    return createShareRespWithVerifiedCredential({own: {name: 'Davie', phone: '+15555551234'}}).then(jwt => uport.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile with only public claims', () => {
+    return createShareResp().then(jwt => uport.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile with private chain network id claims', () => {
+    return createShareResp({nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'}).then(jwt => uport.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile with device key claims', () => {
+    return createShareResp({dad: '0xdeviceKey'}).then(jwt => uport.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns pushToken if available', () => {
+    return createShareResp({capabilities: ['PUSHTOKEN']}).then(jwt => uport.receive(jwt)).then(profile =>
+      expect(profile.pushToken).toEqual('PUSHTOKEN')
+    )
+  })
+
+  it('handles response to expired request', () => {
+    return createShareRespWithExpiredRequest().then(jwt => uport.receive(jwt)).catch(error => expect(error.message).toEqual('JWT has expired: exp: 1485321132999 < now: 1485321133'))
+  })
+
+  it('handles response with missing challenge', () => {
+    return createShareRespMissingRequest().then(jwt => uport.receive(jwt)).catch(error => expect(error.message).toEqual('Challenge was not included in response'))
+  })
+
+/////////////////////////////// no address in uport settings ///////////////////////////////
+
+  it('returns profile mixing public and private claims', () => {
+    return createShareResp({own: {name: 'Davie', phone: '+15555551234'}}).then(jwt => uport2.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile mixing public and private claims and verified credentials', () => {
+    return createShareRespWithVerifiedCredential({own: {name: 'Davie', phone: '+15555551234'}}).then(jwt => uport2.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile with only public claims', () => {
+    return createShareResp().then(jwt => uport2.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns profile with private chain network id claims', () => {
+    return createShareResp({nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'}).then(jwt => uport2.receive(jwt)).then(profile =>
+      expect(profile).toMatchSnapshot()
+    )
+  })
+
+  it('returns pushToken if available', () => {
+    console.log('HERE')
+    return createShareResp({capabilities: ['PUSHTOKEN']}).then(jwt => uport.receive(jwt)).then(profile => {
+      console.log(profile)
+      expect(profile.pushToken).toEqual('PUSHTOKEN')
+    }
+    )
+  })
+})
