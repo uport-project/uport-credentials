@@ -358,9 +358,7 @@ describe('receive', () => {
   })
 
   it('returns pushToken if available', () => {
-    console.log('HERE')
     return createShareResp({capabilities: ['PUSHTOKEN']}).then(jwt => uport.receive(jwt)).then(profile => {
-      console.log(profile)
       expect(profile.pushToken).toEqual('PUSHTOKEN')
     }
     )
