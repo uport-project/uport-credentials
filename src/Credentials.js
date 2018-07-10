@@ -243,29 +243,23 @@ class Credentials {
   *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
   */
   push (token, pubEncKey, payload) {
-    const iss = decodeJWT(token).payload.iss
-    const PUTUTU_URL = iss.match(/did/) ? 'https://api.uport.me/pututu/sns' : 'https://pututu.uport.space/api/v2/sns'
-
     return new Promise((resolve, reject) => {
-      let endpoint = '/api/v2/sns'
       if (!token) {
         return reject(new Error('Missing push notification token'))
       }
-      // if (!pubEncKey) {
-        // return reject(new Error('Missing public encryption key of the receiver'))
-      // }
-      if (pubEncKey.url) {
-        console.error('WARNING: Calling push without a public encryption key is deprecated')
-        endpoint = '/api/v1/sns'
-        payload = pubEncKey
-      } else {
-        if (!payload.url) {
-          return reject(new Error('Missing payload url for sending to users device'))
-        }
-        const plaintext = padMessage(JSON.stringify(payload))
-        const enc = encryptMessage(plaintext, pubEncKey)
-        payload = { message: JSON.stringify(enc) }
+      if (!pubEncKey || pubEncKey.url) {
+        return reject(new Error('Missing public encryption key of the receiver'))
       }
+      if (!payload || !payload.url) {
+        return reject(new Error('Missing payload url for sending to users device'))
+      }
+
+      const iss = decodeJWT(token).payload.iss
+      const PUTUTU_URL = iss.match(/did/) ? 'https://api.uport.me' : 'https://pututu.uport.space'
+      let endpoint = iss.match(/did/) ? '/pututu/sns' : '/api/v2/sns'
+      const plaintext = padMessage(JSON.stringify(payload))
+      const enc = encryptMessage(plaintext, pubEncKey)
+      payload = { message: JSON.stringify(enc) }
 
       nets({
         uri: PUTUTU_URL + endpoint,
