@@ -43,17 +43,17 @@ function mockresolver (profile) {
 describe('configuration', () => {
 
   describe('sets did', () => {
-    describe('ethereum `address` configured', () => {
-      expect(new Credentials({address})).toThrowError()
+    it('ethereum `address` configured', () => {
+      expect(() => new Credentials({address})).toThrowError('Only MNID app identities accepted')
     })
 
-    describe('mnid `address` configured', () => {
+    it('mnid `address` configured', () => {
       expect(new Credentials({address: mnid}).settings.did).toEqual(`did:uport:${mnid}`)
     })
   })
 
   describe('sets signer', () => {
-    describe('always uses signer if passed in', () => {
+    it('always uses signer if passed in', () => {
       const signer = SimpleSigner(privateKey)
       expect(new Credentials({signer, mnid}).settings.signer).toEqual(signer)
     })

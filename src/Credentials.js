@@ -53,7 +53,7 @@ class Credentials {
         // this.address = address
         this.settings.did = `did:uport:${address}`
       } else {
-        throw Error('Only MNID app identities accepted')
+        throw new Error('Only MNID app identities accepted')
       }
     }
 
