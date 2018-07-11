@@ -1,4 +1,5 @@
-import { SimpleSigner, decodeJWT, createJWT, verifyJWT } from 'did-jwt'
+import { SimpleSigner, decodeJWT } from 'did-jwt'
+import { createJWT, verifyJWT } from './JWT'
 const MNID = require('mnid')
 import { ec as EC } from 'elliptic'
 const secp256k1 = new EC('secp256k1')
@@ -57,7 +58,7 @@ class Credentials {
       }
     }
 
-    this.signJWT = (payload, expiresIn) => createJWT(payload, { issuer: this.settings.address, signer: this.settings.signer, alg: 'ES256K', expiresIn })
+    this.signJWT = (payload, expiresIn) => createJWT({ issuer: this.settings.address, signer: this.settings.signer, expiresIn }, payload)
 
     // backwards compatibility
     this.settings.networks = networks ? configNetworks(networks) : {}
@@ -127,7 +128,7 @@ class Credentials {
     if (params.exp) { // checks for expiration on requests, if none is provided the default is 10 min
       payload.exp = params.exp
     }
-    return this.createJWT({address: this.settings.address, signer: this.settings.signer}, {...payload, type: 'shareReq'})
+    return createJWT({address: this.settings.address, signer: this.settings.signer}, {...payload, type: 'shareReq'})
     //return this.signJWT({...payload, type: 'shareReq'}, params.exp ? undefined : expiresIn)
   }
 
@@ -153,7 +154,7 @@ class Credentials {
  *  @return   {Promise<Object, Error>}                  a promise which resolves with a signed JSON Web Token or rejects with an error
  */
   createVerificationRequest (unsignedClaim, sub) {
-    return this.createJWT({address: this.settings.address, signer: this.settings.signer}, {unsignedClaim, sub, type: 'verReq'})
+    return createJWT({address: this.settings.address, signer: this.settings.signer}, {unsignedClaim, sub, type: 'verReq'})
   }
 
 /**
@@ -193,7 +194,7 @@ class Credentials {
     if (!credentials.publicEncKey) credentials.publicEncKey = payload.publicEncKey
 
     if (payload.verified) {
-      const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.settings.address})))
+      const verified = await Promise.all(payload.verified.map(token => verifyJWT({adress: this.settings.address, signer: this.settingssigner}, token)))
       return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
     } else {
       return credentials
@@ -219,10 +220,10 @@ class Credentials {
   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
   */
   async authenticate (token, callbackUrl = null) {
-    const { payload, doc } = await verifyJWT(token, {audience: this.settings.address, callbackUrl, auth: true})
+    const { payload, doc } = await verifyJWT({ address: this.settings.address }, token)
 
     if (payload.req) {
-      const challenge = await verifyJWT(payload.req)
+      const challenge = await verifyJWT({ address: this.settings.address }, payload.req)
       if (challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
         return this.processDisclosurePayload({payload, doc})
       }
@@ -245,15 +246,14 @@ class Credentials {
   push (token, pubEncKey, payload) {
     return new Promise((resolve, reject) => {
       if (!token) {
-        return reject(new Error('Missing push notification token'))
+        reject(new Error('Missing push notification token'))
       }
       if (!pubEncKey || pubEncKey.url) {
-        return reject(new Error('Missing public encryption key of the receiver'))
+        reject(new Error('Missing public encryption key of the receiver'))
       }
       if (!payload || !payload.url) {
-        return reject(new Error('Missing payload url for sending to users device'))
+        reject(new Error('Missing payload url for sending to users device'))
       }
-
       const iss = decodeJWT(token).payload.iss
       const PUTUTU_URL = iss.match(/did/) ? 'https://api.uport.me' : 'https://pututu.uport.space'
       let endpoint = iss.match(/did/) ? '/pututu/sns' : '/api/v2/sns'
@@ -302,7 +302,7 @@ class Credentials {
   * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
   */
   attest ({sub, claim, exp}) {
-    return this.createJWT({address: this.settings.address, signer: this.settings.signer}, {sub: sub, claim, exp})
+    return createJWT({address: this.settings.address, signer: this.settings.signer}, {sub: sub, claim, exp})
   }
 
 /**
@@ -322,15 +322,15 @@ class Credentials {
     return this.settings.registry(address)
   }
 
-  createJWT ({address, signer}, payload) {
-    return createJWT(
-      payload, { issuer: address,
-        signer: signer})
-  }
+  // createJWT ({address, signer}, payload) {
+  //   return createJWT(
+  //     payload, { issuer: address,
+  //       signer: signer})
+  // }
 
-  verifyJWT ({registry, address}, jwt, callbackUrl = null) {
-    return verifyJWT(jwt, {audience: address, callbackUrl: callbackUrl})
-  }
+  // verifyJWT ({registry, address}, jwt, callbackUrl = null) {
+  //   return verifyJWT(jwt, {audience: address, callbackUrl: callbackUrl})
+  // }
 }
 
 const configNetworks = (nets) => {

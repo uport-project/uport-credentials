@@ -1,5 +1,6 @@
 import Credentials from '../Credentials'
-import { SimpleSigner, createJWT, verifyJWT, decodeJWT } from 'did-jwt'
+import { createJWT, verifyJWT } from '../JWT'
+import { SimpleSigner, decodeJWT } from 'did-jwt'
 import MockDate from 'mockdate'
 import { registerMethod } from 'did-resolver'
 import nacl from 'tweetnacl'
@@ -90,7 +91,7 @@ describe('signJWT', () => {
   describe('uport method', () => {
     it('uses ES256K algorithm', async () => {
       const credentials = new Credentials({address: mnid, signer: signer})
-      const jwt = await credentials.signJWT({hello: 1})
+      const jwt = await createJWT({address: address, signer: signer}, {hello: 1})
       const { header } = decodeJWT(jwt)
       expect(header.alg).toEqual('ES256K')
     })
@@ -102,7 +103,7 @@ describe('createRequest()', () => {
   beforeAll(() => mockresolver())
   async function createAndVerify (params={}) {
     const jwt = await uport.createRequest(params)
-    return await verifyJWT(jwt)
+    return await verifyJWT({address: mnid, signer: signer}, jwt)
   }
   it('creates a valid JWT for a request', async () => {
     const response = await createAndVerify({requested: ['name', 'phone']})
@@ -165,7 +166,7 @@ describe('LEGACY createRequest()', () => {
   beforeAll(() => mockresolver())
   async function createAndVerify (params={}) {
     const jwt = await uport.createRequest(params)
-    return await verifyJWT(jwt)
+    return await verifyJWT({}, jwt)
   }
   it('creates a valid JWT for a request', async () => {
     const response = await createAndVerify({requested: ['name', 'phone']})
@@ -176,7 +177,7 @@ describe('LEGACY createRequest()', () => {
 describe('createVerificationRequest', () => {
   it('creates a valid JWT for a request', async () => {
     const jwt = await uport.createVerificationRequest({claim: { test: {prop1: 1, prop2: 2}}}, 'did:uport:223ab45')
-    return expect(await verifyJWT(jwt, {audience: did})).toMatchSnapshot()
+    return expect(await verifyJWT({audience: did}, jwt)).toMatchSnapshot()
   })
 })
 
@@ -197,13 +198,13 @@ describe('authenticate()', () => {
 
   async function createShareResp (payload = {}) {
     const req = await uport.createRequest({requested: ['name', 'phone']})
-    return uport.createJWT({address: mnid, signer: signer}, {...payload, req})
+    return createJWT({address: mnid, signer: signer}, {...payload, req})
   }
 
   async function createShareRespWithVerifiedCredential (payload = {}) {
     const req = await uport.createRequest({requested: ['name', 'phone']})
     const attestation = await uport.attest(claim)
-    return uport.createJWT({address: mnid, signer: signer}, {...payload, verified: [attestation], req})
+    return createJWT({address: mnid, signer: signer}, {...payload, verified: [attestation], req})
   }
 
   it('returns profile mixing public and private claims', async () => {
@@ -243,7 +244,7 @@ describe('authenticate()', () => {
   })
 
   it('handles response with missing challenge', async () => {
-    const jwt = await uport.createJWT({address: mnid, signer: signer}, {own: {name: 'bob'}})
+    const jwt = await createJWT({address: mnid, signer: signer}, {own: {name: 'bob'}})
     expect(uport.authenticate(jwt)).rejects.toMatchSnapshot()
   })
 })
@@ -255,31 +256,29 @@ describe('LEGACY receive()', () => {
   }))
   it('returns profile mixing public and private claims', async () => {
     const req = await uport.createRequest({requested: ['name', 'phone']})
-    const jwt = await uport.signJWT({own: {name: 'Davie', phone: '+15555551234'}, req})
+    const jwt = await createJWT({address: mnid, signer: signer}, {own: {name: 'Davie', phone: '+15555551234'}, req})
     const profile = await uport.receive(jwt)
     expect(profile).toMatchSnapshot()
   })
 })
 
-
-
 describe('receive', () => {
 
   function createShareResp (payload = {}) {
     return uport.createRequest({requested: ['name', 'phone']}).then((jwt) => {
-      return uport.createJWT({address: mnid, signer: signer}, {...payload, type: 'shareResp', req: jwt})
+      return createJWT({address: mnid, signer: signer}, {...payload, type: 'shareResp', req: jwt})
     })
   }
 
   function createShareRespMissingRequest (payload = {}) {
     return uport.createRequest({requested: ['name', 'phone']}).then((jwt) => {
-      return uport.createJWT({address: mnid, signer: signer}, {...payload, type: 'shareResp'})
+      return createJWT({address: mnid, signer: signer}, {...payload, type: 'shareResp'})
     })
   }
 
   function createShareRespWithExpiredRequest (payload = {}) {
     return uport.createRequest({requested: ['name', 'phone'], exp: Date.now() - 1}).then((jwt) => {
-      return uport.createJWT({address: mnid, signer: signer}, {...payload, type: 'shareResp', req: jwt})
+      return createJWT({address: mnid, signer: signer}, {...payload, type: 'shareResp', req: jwt})
     })
   }
 
@@ -367,14 +366,13 @@ describe('receive', () => {
   })
 })
 
-
-
 describe('push', () => {
   const PUTUTU_URL = 'https://api.uport.me'//'https://pututu.uport.space' // TODO - change to .me
   const API_v1_PATH = '/api/v1/sns'
   const API_v2_PATH = '/pututu/sns'
   const lambda = '/pututu/sns'
   const PUSHTOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NkstUiJ9.eyJpYXQiOjE1MzExOTcwMzgsImV4cCI6MTUzMjQ5MzAzOCwiYXVkIjoiMzVERFh3RjZIZHI2ZFFRbzFCUndRcnU3VzNkNTRhdnpCd2siLCJ0eXBlIjoibm90aWZpY2F0aW9ucyIsInZhbHVlIjoiYXJuOmF3czpzbnM6dXMtd2VzdC0yOjExMzE5NjIxNjU1ODplbmRwb2ludC9BUE5TL3VQb3J0LzVmMTA4YjZlLTk3NTItM2IwZC05NWM2LWYyZTU3MTM4ZWNlNSIsImlzcyI6ImRpZDpldGhyOjB4YjA2ZDJjZWY5ZDJjYTA3MjU2NmU3Y2RlZDMyYWI0OWY1OTFlNDRlOCJ9.0qZE3N2m7rTn8JaNVfp5LhICmzEWCqTBBh9_gn4ZGD19PCfhInX7XTav0JBRBtSKkJXx03nik9k4jZ3qvQ6CigE'
+  const token = PUSHTOKEN
   const payload = { url: 'me.uport:me', message: 'a friendly message' }
   const kp = nacl.box.keyPair()
   const pubEncKey = naclutil.encodeBase64(kp.publicKey)
@@ -405,8 +403,9 @@ describe('push', () => {
       return result.url === payload.url && result.message === payload.message
     })
     .reply(200, { status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
-
+    console.log('HEREOMEGA')
     return uport.push(PUSHTOKEN, pubEncKey, payload).then(response => {
+      console.log(response)
       return expect(response).toEqual({ status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
     })
   })
@@ -442,14 +441,14 @@ describe('push', () => {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
     })
-    .post(API_v2_PATH, () => true)
+    .post(lambda, () => true)
     .reply(403, 'Not allowed')
 
     return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: Invalid Token'))
   })
 
   it('handles random error', () => {
-    nock(PUTUTU_URL, {
+    nock(lambda, {
       reqheaders: {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
