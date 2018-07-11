@@ -426,7 +426,7 @@ describe('push', () => {
     console.error = jest.fn(msg => {
       expect(msg).toEqual('WARNING: Calling push without a public encryption key is deprecated')
     })
-    return uport.push(PUSHTOKEN, payload).catch(error => expect(error.message).toEqual('Missing public encryption key of the receiver'))
+    return uport.push(PUSHTOKEN, null, payload).catch(error => expect(error.message).toEqual('Missing public encryption key of the receiver'))
   })
 
   it('handles missing payload', () => {
@@ -439,14 +439,23 @@ describe('push', () => {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
     })
-    .post(lambda, () => true)
+    .post(lambda, (body) => {
+      let encObj = JSON.parse(body.message)
+      const box = naclutil.decodeBase64(encObj.ciphertext)
+      const nonce = naclutil.decodeBase64(encObj.nonce)
+      const from = naclutil.decodeBase64(encObj.from)
+      const decrypted = nacl.box.open(box, nonce, from, secEncKey)
+      const result = JSON.parse(naclutil.encodeUTF8(decrypted))
+
+      return result.url === payload.url && result.message === payload.message
+    })
     .reply(403, 'Not allowed')
 
     return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: Invalid Token'))
   })
 
   it('handles random error', () => {
-    nock(lambda, {
+    nock(PUTUTU_URL, {
       reqheaders: {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
