@@ -403,9 +403,7 @@ describe('push', () => {
       return result.url === payload.url && result.message === payload.message
     })
     .reply(200, { status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
-    console.log('HEREOMEGA')
     return uport.push(PUSHTOKEN, pubEncKey, payload).then(response => {
-      console.log(response)
       return expect(response).toEqual({ status: 'success', message: 'd0b2bd07-d49e-5ba1-9b05-ec23ac921930' })
     })
   })
