@@ -1,4 +1,4 @@
-import { createJWT, verifyJWT, SimpleSigner } from 'did-jwt'
+import { createJWT, verifyJWT, SimpleSigner, decodeJWT } from 'did-jwt'
 import UportLite from 'uport-lite'
 const MNID = require('mnid')
 import UportDIDResolver from 'uport-did-resolver'
@@ -7,6 +7,7 @@ import EthrDIDResolver from 'ethr-did-resolver'
 import { toEthereumAddress } from 'did-jwt/lib/Digest'
 import { ec as EC } from 'elliptic'
 import { ContractFactory } from './Contract.js'
+import { transport } from 'uport-core'
 const secp256k1 = new EC('secp256k1')
 /**
 *    The Credentials class allows you to easily create the signed payloads used in uPort inlcuding
@@ -80,11 +81,15 @@ class Credentials {
       this.signer = signer
     } else if (privateKey) {
       this.signer = SimpleSigner(privateKey)
-
     }
+
+    this.givenDID = false
+
     if (did) {
       this.did = did
+      this.givenDID = true
     } else if (address) {
+      this.address = address
       if (MNID.isMNID(address)) {
         this.did = `did:uport:${address}`
       }
@@ -97,7 +102,7 @@ class Credentials {
       this.did = `did:ethr:${address}`
     }
 
-    this.signJWT = (payload, expiresIn) => createJWT(payload, {issuer: this.did, signer: this.signer, alg: this.did.match('^did:uport:') ? 'ES256K' : 'ES256K-R', expiresIn })
+    this.signJWT = (payload, expiresIn) => createJWT(payload, {issuer: this.givenDID ? this.did : this.address, signer: this.signer, alg: this.did.match('^did:uport:') ? 'ES256K' : 'ES256K-R', expiresIn })
 
     UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
     EthrDIDResolver(ethrConfig || {})
@@ -193,6 +198,23 @@ class Credentials {
   }
 
 /**
+*  Send a push notification to a user, consumes a token which allows you to send push notifications
+*  and a url/uri request you want to send to the user.
+*
+*  @param    {String}                  token              a push notification token (get a pn token by requesting push permissions in a request)
+*  @param    {Object}                  payload            push notification payload
+*  @param    {String}                  payload.url        a uport request url
+*  @param    {String}                  payload.message    a message to display to the user
+*  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
+*  @return   {Promise<Object, Error>}                     a promise which resolves with successful status or rejects with an error
+*/
+push (token, pubEncKey, payload) {
+  const iss = decodeJWT(token).payload.iss
+  const pushUrl = iss.match(/did/) ? 'https://api.uport.me/pututu/sns' : 'https://pututu.uport.space/api/v2/sns'
+  return transport.push.send(token, pubEncKey, pushUrl)(payload.url, {message: payload.message})
+}
+
+/**
  * Creates a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
  *
  * This can either be used to share information about the signing identity or as the response to a
@@ -222,15 +244,24 @@ async disclose (payload = {}, expiresIn = 600 ) {
 }
 
 async processDisclosurePayload ({doc, payload}) {
-  const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
+  const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.nad, did: payload.iss}
   if (payload.nad) {
     credentials.networkAddress = payload.nad
   }
   if (payload.dad) {
     credentials.deviceKey = payload.dad
   }
+
+  // Backwards support
+  try {
+    if (doc.publicKey[0].publicKeyHex) credentials.publicKey = '0x' + doc.publicKey[0].publicKeyHex
+    if (doc.publicKey[1].publicKeyBase64) credentials.publicEncKey = doc.publicKey[1].publicKeyBase64
+  } catch (err) {}
+
+  if (!credentials.publicEncKey) credentials.publicEncKey = payload.publicEncKey
+
   if (payload.verified) {
-    const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.did})))
+    const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.givenDID ? this.did : this.address})))
     return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
   } else {
     return credentials
@@ -256,7 +287,7 @@ async processDisclosurePayload ({doc, payload}) {
   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
   */
   async authenticate (token, callbackUrl = null) {
-    const { payload, doc } = await verifyJWT(token, {audience: this.did, callbackUrl, auth: true})
+    const { payload, doc } = await verifyJWT(token, {audience: this.givenDID ? this.did : this.address, callbackUrl, auth: true})
 
     if(payload.req) {
       const challenge = await verifyJWT(payload.req)
@@ -312,7 +343,7 @@ async processDisclosurePayload ({doc, payload}) {
   *  @deprecated
   */
   receive (token, callbackUrl = null) {
-    return this.authenticate(token, callbackUrl)
+    return decodeJWT(token).req ? this.authenticate(token, callbackUrl) : this.verifyProfile(token, callbackUrl)
   }
 
   /**
@@ -332,8 +363,8 @@ async processDisclosurePayload ({doc, payload}) {
   *  @param    {String}                  token                 a response token
   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
   */
- async verifyProfile (token) {
-  const { payload, doc } = await verifyJWT(token, {audience: this.did})
+ async verifyProfile (token, callbackUrl = null) {
+  const { payload, doc } = await verifyJWT(token, {audience: this.givenDID ? this.did : this.address, callbackUrl})
   return this.processDisclosurePayload({ payload, doc })
  }
 
@@ -402,22 +433,22 @@ async processDisclosurePayload ({doc, payload}) {
     return this.signJWT({...payload, ...txObj, type: 'ethtx'}, exp )
   }
 
-// /**
-//   *  Look up a profile in the registry for a given uPort address. Address must be MNID encoded.
-//   *
-//   *  @example
-//   *  credentials.lookup('5A8bRWU3F7j3REx3vkJ...').then(profile => {
-//   *     const name = profile.name
-//   *     const pubkey = profile.pubkey
-//   *     ...
-//   *   })
-//   *
-//   * @param    {String}            address             a MNID encoded address
-//   * @return   {Promise<Object, Error>}                a promise which resolves with parsed profile or rejects with an error
-//   */
-//   lookup (address) {
-//     return this.settings.registry(address)
-//   }
+/**
+  *  Look up a profile in the registry for a given uPort address. Address must be MNID encoded.
+  *
+  *  @example
+  *  credentials.lookup('5A8bRWU3F7j3REx3vkJ...').then(profile => {
+  *     const name = profile.name
+  *     const pubkey = profile.pubkey
+  *     ...
+  *   })
+  *
+  * @param    {String}            address             a MNID encoded address
+  * @return   {Promise<Object, Error>}                a promise which resolves with parsed profile or rejects with an error
+  */
+  lookup (address) {
+    return this.settings.registry(address)
+  }
 }
 
 const configNetworks = (nets) => {

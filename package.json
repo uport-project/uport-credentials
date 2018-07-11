@@ -1,6 +1,6 @@
 {
   "name": "uport",
-  "version": "0.7.0-alpha-5",
+  "version": "0.7.0-alpha-minor-12",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
   "files": [
@@ -29,7 +29,8 @@
     "ethr-did-resolver": "^0.0.7",
     "mnid": "^0.1.1",
     "muport-did-resolver": "^0.1.0",
-    "uport-did-resolver": "^0.0.2",
+    "uport-core": "^0.0.43",
+    "uport-did-resolver": "^0.0.3",
     "uport-lite": "^1.0.2"
   },
   "jest": {
