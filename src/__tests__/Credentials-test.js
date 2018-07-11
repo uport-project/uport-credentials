@@ -185,7 +185,7 @@ describe('attest()', () => {
   beforeAll(() => mockresolver())
   it('has correct payload in JWT for an attestation', () => {
     return uport.attest({sub: 'did:uport:223ab45', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133 + 1}).then((jwt) => {
-      return expect(verifyJWT(jwt)).toMatchSnapshot()
+      return expect(verifyJWT({audience: did}, jwt)).toMatchSnapshot()
     })
   })
 })
