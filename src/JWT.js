@@ -18,11 +18,15 @@ import {createJWT as createJwt, verifyJWT as verifyJwt} from 'did-jwt'
 *  @return   {Promise<Object, Error>}               a promise which resolves with a signed JSON Web Token or rejects with an error
 */
 export function createJWT ({address, signer}, payload) {
-  if (!address) { throw new Error('No application identity address has been configured') }
-  if (!signer) { throw new Error('No Signer functionality has been configured') }
-  return createJwt(
-    payload, { issuer: address,
-      signer: signer})
+  return new Promise((resolve, reject) => {
+    if (!address) { return reject(new Error('No application identity address has been configured')) }
+    if (!signer) { return reject(new Error('No Signer functionality has been configured')) }
+    return createJwt(
+      payload, { issuer: address,
+        signer: signer}).then(jwt => {
+          resolve(jwt)
+        })
+  })
 }
 
 /**
@@ -47,7 +51,13 @@ export function createJWT ({address, signer}, payload) {
 *  @return   {Promise<Object, Error>}               a promise which resolves with a response object or rejects with an error
 */
 export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
-  return verifyJwt(jwt, {audience: address, callbackUrl: callbackUrl})
+  return new Promise((resolve, reject) => {
+    return verifyJwt(jwt, {audience: address, callbackUrl: callbackUrl}).then(verifiedObj => {
+      const obj = {}
+      if (verifiedObj.doc) obj.profile = verifiedObj.doc
+      resolve({...obj, ...verifiedObj})
+    })
+  })
 }
 
 export default { createJWT, verifyJWT }
