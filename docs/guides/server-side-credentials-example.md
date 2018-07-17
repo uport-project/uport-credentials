@@ -3,6 +3,7 @@ title: "Uport-JS Server How-to"
 index: 1
 category: "tutorials"
 type: "content"
+source: "https://github.com/uport-project/uport-js/blob/develop/docs/guides/server-side-credentials-example.md"
 ---
 
 
