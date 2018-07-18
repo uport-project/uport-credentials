@@ -228,7 +228,7 @@ class Credentials {
         return this.processDisclosurePayload({payload, doc})
       }
     } else {
-      throw new Error('Challenge was not included in response')
+      return this.processDisclosurePayload({payload, doc})
     }
   }
 
