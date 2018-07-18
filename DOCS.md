@@ -113,14 +113,14 @@ Instantiates a new uPort Credentials object
 
 **Example**  
 ```js
-import { Credentials, SimpleSigner } from 'uport'
+import { Credentials, SimpleSigner } from 'uport-credentials'
 const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x0101.... }}
 const setttings = { networks, address: '5A8bRWU3F7j3REx3vkJ...', signer: new SimpleSigner(process.env.PRIVATE_KEY)}
 const credentials = new Credentials(settings)
 ```
 **Example**  
 ```js
-import { Credentials } from 'uport'
+import { Credentials } from 'uport-credentials'
 const credentials = new Credentials()
 ```
 <a name="Credentials+createRequest"></a>

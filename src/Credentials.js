@@ -22,7 +22,7 @@ class Credentials {
    * The following example is just for testing purposes. You should never store a private key in source code.
    *
    * @example
-   * import { Credentials } from 'uport'
+   * import { Credentials } from 'uport-credentials'
    * const credentials = new Credentials({
    *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
    * })
@@ -31,7 +31,7 @@ class Credentials {
    * Generating a public key from a private key is slow. It is recommended to configure the `did` option as well.
    *
    * @example
-   * import { Credentials } from 'uport'
+   * import { Credentials } from 'uport-credentials'
    * const credentials = new Credentials({
    *   did: 'did:ethr:0xbc3ae59bc76f894822622cdef7a2018dbe353840',
    *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
@@ -40,7 +40,7 @@ class Credentials {
    * It is recommended to store the address and private key in environment variables for your server application
    *
    * @example
-   * import { Credentials, SimpleSigner } from 'uport'
+   * import { Credentials, SimpleSigner } from 'uport-credentials'
    * const credentials = new Credentials({
    *   did: process.env.APPLICATION_DID,
    *   signer: SimpleSigner(process.env.PRIVATE_KEY)
@@ -50,7 +50,7 @@ class Credentials {
    * present UX or call a HSM.
 
    * @example
-   * import { Credentials } from 'uport'
+   * import { Credentials } from 'uport-credentials'
    *
    * function mySigner (data) {
    *   return new Promise((resolve, reject) => {
