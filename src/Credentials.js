@@ -220,10 +220,10 @@ class Credentials {
   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
   */
   async authenticate (token, callbackUrl = null) {
-    const { payload, doc } = await verifyJWT({ address: this.settings.address }, token)
+    const { payload, doc } = await verifyJWT({ address: this.settings.address }, token, callbackUrl)
 
     if (payload.req) {
-      const challenge = await verifyJWT({ address: this.settings.address }, payload.req)
+      const challenge = await verifyJWT({ address: this.settings.address }, payload.req, callbackUrl)
       if (challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
         return this.processDisclosurePayload({payload, doc})
       }
