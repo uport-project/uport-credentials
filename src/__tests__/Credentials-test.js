@@ -47,11 +47,7 @@ describe('configuration', () => {
 
   describe('sets did', () => {
     it('ethereum `address` configured', () => {
-      expect(() => new Credentials({address})).toThrowError('Only MNID app identities accepted')
-    })
-
-    it('mnid `address` configured', () => {
-      expect(new Credentials({address: mnid}).settings.did).toEqual(`did:uport:${mnid}`)
+      expect(() => new Credentials({address: `did:uport:${mnid}`})).toThrowError('Only MNID/hex app identities supported')
     })
   })
 

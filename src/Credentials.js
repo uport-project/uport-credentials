@@ -43,19 +43,11 @@ class Credentials {
    */
   constructor ({networks, registry, signer, address, ethrConfig, muportConfig} = {}) {
     this.settings = {}
-    if (signer) {
-      this.settings.signer = signer
-      // this.signer = signer
-    }
+    if (signer) this.settings.signer = signer
 
     if (address) {
-      if (MNID.isMNID(address)) {
-        this.settings.address = address
-        // this.address = address
-        this.settings.did = `did:uport:${address}`
-      } else {
-        throw new Error('Only MNID app identities accepted')
-      }
+      if (/did/.test(address)) throw new Error('Only MNID/hex app identities supported')
+      this.settings.address = address
     }
 
     this.signJWT = (payload, expiresIn) => createJWT({ issuer: this.settings.address, signer: this.settings.signer, expiresIn }, payload)
