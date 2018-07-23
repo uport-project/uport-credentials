@@ -1,18 +1,4 @@
-import { TokenVerifier, decodeToken } from 'jsontokens'
-import { isMNID, decode} from 'mnid'
-import base64url from 'base64url'
-
-const JOSE_HEADER = {typ: 'JWT', alg: 'ES256K'}
-
-function encodeSection (data) {
-  return base64url.encode(JSON.stringify(data))
-}
-
-const ENCODED_HEADER = encodeSection(JOSE_HEADER)
-
-const LEGACY_MS = 1000000000000
-
-export const IAT_SKEW = 60
+import {createJWT as createJwt, verifyJWT as verifyJwt} from 'did-jwt'
 
 /**  @module uport-js/JWT */
 
@@ -32,17 +18,14 @@ export const IAT_SKEW = 60
 *  @return   {Promise<Object, Error>}               a promise which resolves with a signed JSON Web Token or rejects with an error
 */
 export function createJWT ({address, signer}, payload) {
-  const signingInput = [ENCODED_HEADER,
-    encodeSection({iss: address, iat: Math.floor(Date.now() / 1000), ...payload })
-  ].join('.')
-
   return new Promise((resolve, reject) => {
-    if (!signer) return reject(new Error('No Signer functionality has been configured'))
-    if (!address) return reject(new Error('No application identity address has been configured'))
-    return signer(signingInput, (error, signature) => {
-      if (error) return reject(error)
-      resolve([signingInput, signature].join('.'))
-    })
+    if (!address) { return reject(new Error('No application identity address has been configured')) }
+    if (!signer) { return reject(new Error('No Signer functionality has been configured')) }
+    return createJwt(
+      payload, { issuer: address,
+        signer: signer}).then(jwt => {
+          resolve(jwt)
+        })
   })
 }
 
@@ -69,43 +52,11 @@ export function createJWT ({address, signer}, payload) {
 */
 export function verifyJWT ({registry, address}, jwt, callbackUrl = null) {
   return new Promise((resolve, reject) => {
-    const {payload} = decodeToken(jwt)
-    registry(payload.iss).then(profile => {
-      if (!profile) return reject(new Error('No profile found, unable to verify JWT'))
-      const publicKey = profile.publicKey.match(/^0x/) ? profile.publicKey.slice(2) : profile.publicKey
-      const verifier = new TokenVerifier('ES256K', publicKey)
-      if (verifier.verify(jwt)) {
-        if ((payload.iat >=LEGACY_MS && payload.iat > (Date.now() + IAT_SKEW * 1000)) || ( payload.iat < LEGACY_MS && payload.iat > (Date.now() / 1000 + IAT_SKEW))) {
-          return reject(new Error(`JWT not valid yet (issued in the future): iat: ${payload.iat} > now: ${Date.now()/1000}`))
-        }
-        if (payload.exp && (payload.exp >=LEGACY_MS && payload.exp <= Date.now()) || (payload.iat < LEGACY_MS && payload.exp <= Date.now() / 1000)) {
-          return reject(new Error(`JWT has expired: exp: ${payload.exp} < now: ${Date.now()/1000}`))
-        }
-        if (payload.aud) {
-          if (payload.aud.match(/^0x[0-9a-fA-F]+$/) || isMNID(payload.aud)) {
-            if (!address) {
-              return reject(new Error('JWT audience is required but your app address has not been configured'))
-            }
-
-            const addressHex = isMNID(address) ? decode(address).address : address
-            const audHex = isMNID(payload.aud) ? decode(payload.aud).address : payload.aud
-            if (audHex !== addressHex) {
-              return reject(new Error(`JWT audience does not match your address: aud: ${payload.aud} !== yours: ${address}`))
-            }
-          } else {
-            if (!callbackUrl) {
-              return reject(new Error('JWT audience matching your callback url is required but one wasn\'t passed in'))
-            }
-            if (payload.aud !== callbackUrl) {
-              return reject(new Error(`JWT audience does not match the callback url: aud: ${payload.aud} !== url: ${callbackUrl}`))
-            }
-          }
-        }
-        resolve({payload, profile, jwt})
-      } else {
-        return reject(new Error('Signature invalid for JWT'))
-      }
-    }).catch(reject)
+    return verifyJwt(jwt, {audience: address, callbackUrl: callbackUrl}).then(verifiedObj => {
+      const obj = {}
+      if (verifiedObj.doc) obj.profile = verifiedObj.doc
+      resolve({...obj, ...verifiedObj})
+    })
   })
 }
 
