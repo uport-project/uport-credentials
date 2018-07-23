@@ -241,7 +241,7 @@ describe('authenticate()', () => {
 
   it('handles response with missing challenge', async () => {
     const jwt = await createJWT({address: mnid, signer: signer}, {own: {name: 'bob'}})
-    expect(uport.authenticate(jwt)).toMatchSnapshot()
+    expect(uport.authenticate(jwt)).rejects.toMatchSnapshot()
   })
 })
 
@@ -366,7 +366,6 @@ describe('push', () => {
   const PUTUTU_URL = 'https://api.uport.me'//'https://pututu.uport.space' // TODO - change to .me
   const API_v1_PATH = '/api/v1/sns'
   const API_v2_PATH = '/pututu/sns'
-  const lambda = '/pututu/sns'
   const PUSHTOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NkstUiJ9.eyJpYXQiOjE1MzExOTcwMzgsImV4cCI6MTUzMjQ5MzAzOCwiYXVkIjoiMzVERFh3RjZIZHI2ZFFRbzFCUndRcnU3VzNkNTRhdnpCd2siLCJ0eXBlIjoibm90aWZpY2F0aW9ucyIsInZhbHVlIjoiYXJuOmF3czpzbnM6dXMtd2VzdC0yOjExMzE5NjIxNjU1ODplbmRwb2ludC9BUE5TL3VQb3J0LzVmMTA4YjZlLTk3NTItM2IwZC05NWM2LWYyZTU3MTM4ZWNlNSIsImlzcyI6ImRpZDpldGhyOjB4YjA2ZDJjZWY5ZDJjYTA3MjU2NmU3Y2RlZDMyYWI0OWY1OTFlNDRlOCJ9.0qZE3N2m7rTn8JaNVfp5LhICmzEWCqTBBh9_gn4ZGD19PCfhInX7XTav0JBRBtSKkJXx03nik9k4jZ3qvQ6CigE'
   const token = PUSHTOKEN
   const payload = { url: 'me.uport:me', message: 'a friendly message' }
@@ -375,7 +374,7 @@ describe('push', () => {
   const secEncKey = kp.secretKey
 
   beforeEach(() => {
-    nock.disableNetConnect()
+    nock.disableNetConnect();
   })
 
   afterEach(() => {
@@ -388,7 +387,7 @@ describe('push', () => {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
     })
-    .post(lambda, (body) => {
+    .post(API_v2_PATH, (body) => {
       let encObj = JSON.parse(body.message)
       const box = naclutil.decodeBase64(encObj.ciphertext)
       const nonce = naclutil.decodeBase64(encObj.nonce)
@@ -435,7 +434,7 @@ describe('push', () => {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
     })
-    .post(lambda, (body) => {
+    .post(API_v2_PATH, (body) => {
       let encObj = JSON.parse(body.message)
       const box = naclutil.decodeBase64(encObj.ciphertext)
       const nonce = naclutil.decodeBase64(encObj.nonce)
@@ -445,7 +444,7 @@ describe('push', () => {
 
       return result.url === payload.url && result.message === payload.message
     })
-    .reply(403, 'Not allowed')
+      .reply(403, 'Not allowed')
 
     return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: Invalid Token'))
   })
@@ -456,7 +455,7 @@ describe('push', () => {
         'authorization': `Bearer ${PUSHTOKEN}`
       }
     })
-    .post(API_v2_PATH, () => true)
+    .post(API_v2_PATH)
     .reply(500, 'Server Error')
 
     return uport.push(PUSHTOKEN, pubEncKey, payload).catch(error => expect(error.message).toEqual('Error sending push notification to user: 500 Server Error'))
