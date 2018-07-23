@@ -47,7 +47,8 @@ class Credentials {
 
     if (address) {
       if (/did/.test(address)) throw new Error('Only MNID/hex app identities supported')
-      this.settings.address = address
+      // legacy hex app ids are on ropsten, but need mnid here for did jwt
+      this.settings.address = MNID.isMNID(address) ? address : MNID.encode({network: '0x3', address })
     }
 
     this.signJWT = (payload, expiresIn) => createJWT({ issuer: this.settings.address, signer: this.settings.signer, expiresIn }, payload)
