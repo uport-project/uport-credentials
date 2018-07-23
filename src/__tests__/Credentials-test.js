@@ -241,7 +241,7 @@ describe('authenticate()', () => {
 
   it('handles response with missing challenge', async () => {
     const jwt = await createJWT({address: mnid, signer: signer}, {own: {name: 'bob'}})
-    expect(uport.authenticate(jwt)).rejects.toMatchSnapshot()
+    expect(uport.authenticate(jwt)).toMatchSnapshot()
   })
 })
 
