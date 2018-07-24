@@ -94,7 +94,7 @@ const ContractFactory = (extend) => (contractABI) => {
 
 const buildRequestURI = (txObject, {callbackUrl, type} = {}) => {
   if (!isMNID(txObject.to)) throw new Error('To address must be MNID')
-  const uri = `https://id.uport.me/${txObject.to}`
+  const uri = `me.uport:${txObject.to}`
 
   const pairs = []
   if (txObject.value)    pairs.push(['value', parseInt(txObject.value, 16)])
