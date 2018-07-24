@@ -1,5 +1,5 @@
 {
-  "name": "uport",
+  "name": "uport-credentials",
   "version": "0.7.0-alpha-minor-17",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
@@ -21,7 +21,7 @@
     "prepublish": "yarn build"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "base64url": "^3.0.0",
     "did-jwt": "^0.0.7",
