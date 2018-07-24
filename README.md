@@ -1,4 +1,4 @@
-# uport-js
+# uport-credentials
 
 ## Integrate uPort in your javascript application
 

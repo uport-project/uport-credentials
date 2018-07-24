@@ -1,6 +1,6 @@
 import {createJWT as createJwt, verifyJWT as verifyJwt} from 'did-jwt'
 
-/**  @module uport-js/JWT */
+/**  @module uport-credentials/JWT */
 
 /**
 *  Creates a signed JWT given an address which becomes the issuer, a signer, and a payload for which the signature is over.

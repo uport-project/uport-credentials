@@ -1,9 +1,9 @@
 ---
-title: "Uport-JS Server How-to"
+title: "Uport-Credentials Server How-to"
 index: 1
 category: "tutorials"
 type: "content"
-source: "https://github.com/uport-project/uport-js/blob/develop/docs/guides/server-side-credentials-example.md"
+source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/guides/server-side-credentials-example.md"
 ---
 
 
@@ -13,12 +13,12 @@ Here we will demonstrate how to create and sign a custom credential on a server 
 
 ### Prerequisites:
 
-1. The code for this tutorial can be found in the [Uport-JS examples.](github.com/uport-project/uport-js/blob/develop/examples/simple-credential-tutorial/).  Use this to follow the tutorial.
+1. The code for this tutorial can be found in the [Uport-Credentials examples.](github.com/uport-project/uport-credentials/blob/develop/examples/simple-credential-tutorial/).  Use this to follow the tutorial.
 1. A publicly available IP address to deploy the service to.  An HTTP tunneling service, such as [Ngrok](https://ngrok.com) can be used.
 
 ## Register an App
 
-We have created application identities and hard-coded them in the [examples](github.com/uport-project/uport-js/blob/develop/examples/simple-credential-tutorial) for convenience and educational purposes.  If you wish to expand upon these examples please utilize our [Application Manager](https://appmanager.uport.me) or [Uport JS Client](https://github.com/uport-project/uport-js-client) to create a new application identity and replace the signing key and MNID in the examples with your own.
+We have created application identities and hard-coded them in the [examples](github.com/uport-project/uport-credentials/blob/develop/examples/simple-credential-tutorial) for convenience and educational purposes.  If you wish to expand upon these examples please utilize our [Application Manager](https://appmanager.uport.me) or [Uport JS Client](https://github.com/uport-project/uport-js-client) to create a new application identity and replace the signing key and MNID in the examples with your own.
 
 *Please note that in practice the signing key for the identity should be protected information*
 
@@ -35,7 +35,7 @@ Now that you have the application identity sorted, lets step into the code.
 
 ## Setup a Requestor Service
 
-If you haven't yet, clone the Uport-JS [repository](github.com/uport-project/uport-js) and from the root of the project change directory to *examples/simple-credential-tutorial*, then `npm install` to ensure required dependencies are present.
+If you haven't yet, clone the Uport-Credentials [repository](github.com/uport-project/uport-credentials) and from the root of the project change directory to *examples/simple-credential-tutorial*, then `npm install` to ensure required dependencies are present.
 
 The file *requestcredential.js* contains a service that will request the MNID identifier of the mobile application.  This identifier will be used throughout the tutorial.
 
