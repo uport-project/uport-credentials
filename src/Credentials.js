@@ -170,7 +170,7 @@ class Credentials {
   }
 
   async processDisclosurePayload ({doc, payload}) {
-    const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.nad, did: payload.iss}
+    const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss, did: payload.iss}
     if (payload.nad) {
       credentials.networkAddress = payload.nad
     }
@@ -187,7 +187,7 @@ class Credentials {
     if (!credentials.publicEncKey) credentials.publicEncKey = payload.publicEncKey
 
     if (payload.verified) {
-      const verified = await Promise.all(payload.verified.map(token => verifyJWT({adress: this.settings.address, signer: this.settingssigner}, token)))
+      const verified = await Promise.all(payload.verified.map(token => verifyJWT({adress: this.settings.address, signer: this.settings.signer}, token)))
       return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
     } else {
       return credentials
