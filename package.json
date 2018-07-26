@@ -1,6 +1,6 @@
 {
   "name": "uport",
-  "version": "0.7.0-alpha-minor-17",
+  "version": "0.7.0-alpha-minor-18",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
   "files": [
