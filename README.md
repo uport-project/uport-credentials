@@ -1,36 +1,41 @@
 # uport-js
 
-## Integrate uport in your javascript application
+## Integrate uPort in your javascript application
 
-Uport provides a simple way for your users to login to your website and provide private credentials such as identity information and contact details to you.
+uPort provides a simple way for your users to login to your website and provide private credentials such as identity information and contact details to you.
 
-You can also “attest” credentials they provide to you or that you yourself have about them. This can be shared back to your customers so you can help them build their digitial identity.
+You can also “attest” credentials they provide to you or that you yourself have about them. This can be shared back to your customers so you can help them build their digital identity.
 
-Uport.js provides a simple way for you to integrate uport.js into your javscript application. You can also interact with your uport users directly in the browser.
+Uport.js provides a simple way for you to integrate uport.js into your javascript application. You can also interact with your uPort users directly in the browser.
 
 We have an easy to use browser library [uport-connect](https://github.com/uport-project/uport-connect) which can help you do so.
 
-## Setup your uport application identity
+## Setup your uPort application identity
 
-First make sure you have your uport app installed and you've setup your own uport identity.
+First make sure you have your uPort app installed and you've setup your own uPort identity.
 
-### What is a uport identity?
+### What is a uPort identity?
 
-A uport identity is a special kind of ethereum Smart Contract known as a proxy contract. It has an ethereum address, can hold value and can interact with any other Ethereum smart contracts.
+An identity in uPort is really just someone or something that can sign data or transactions and also receive signed data about itself.
 
-The identity is controlled by a Controller Contract, which is basically an access control layer. You can develop your own custom access control layers and replace them, while keeping the primary identity intact (or permanent as we like to call it).
+An identity has an identifier in the form of an [MNID](https://github.com/uport-project/mnid), a signing key, and a public key stored on the [uPort Registry](https://github.com/uport-project/uport-registry).
 
-Our default uport controller contract is controlled by a single device, but you can add multiple recovery contacts to help retain control if you lose that device. Feel free to replace the controller contract with your own contract.
+An identity can:
 
-### The uport registry
-
-A uport identity also optionally has a public profile stored on ipfs and linked to your identity through the uport registry. This profile consists of JSON using the [Schema.org](http://schema.org/) conventions.
+- Sign JWTs (JSON Web Tokens)
+  - [Authenticate themselves to a third party](messages/shareresp.md)
+  - [Disclose private information about themselves](messages/shareresp.md)
+- [Receive requests for disclosure about themselves](messages/sharereq.md)
+- [Receive and store signed third party verifications about themselves](flows/verification.md)
+- [Sign Ethereum transactions](flows/tx.md)
 
 When interacting privately with a user you will be interchanging signed JWT([JSON Web Token](https://jwt.io/)). To verify the signature of the JWT you and your users will be fetching your public key from the public profile.
 
+For details on uPort's underlying architecture, read our [spec repo](https://github.com/uport-project/specs) or check out the [uPort identity contracts] (https://github.com/uport-project/uport-identity).
+
 ## Configure your application
 
-In your application you must first configure your Uport object.
+In your application you must first configure your uPort object.
 
 ```javascript
 import { Credentials, SimpleSigner } from 'uport'
@@ -76,7 +81,7 @@ You can ask for specific private data like this:
 credentials.createRequest({
     requested: ['name','phone','identity_no'],
     callbackUrl: 'https://....' // URL to send the response of the request to
-  }.then(requestToken => {
+  }).then(requestToken => {
   // send requestToken to browser
   })
 ```
@@ -170,7 +175,6 @@ connect.showRequest(attestation) // no response is needed for an attestation
 If you requested a push notification token in the above selective disclosure step you can also send attestations directly to your users app in real time.
 
 ```javascript
-// Coming soon, not yet implemented
 credentials.push(pushToken, `me.uport:add?attestation=${attestationjwt}`, message).then(response => {
 
 })
