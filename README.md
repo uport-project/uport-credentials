@@ -1,5 +1,5 @@
 # uport-js
-
+**Required Upgrade to v0.6.3 to support new uPort Clients - [View Details](https://github.com/uport-project/uport-js/releases/tag/v0.6.3)**
 ## Integrate uPort in your javascript application
 
 uPort provides a simple way for your users to login to your website and provide private credentials such as identity information and contact details to you.
