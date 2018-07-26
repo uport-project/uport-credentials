@@ -170,7 +170,7 @@ class Credentials {
   }
 
   async processDisclosurePayload ({doc, payload}) {
-    const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.nad, did: payload.iss}
+    const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss, did: payload.iss}
     if (payload.nad) {
       credentials.networkAddress = payload.nad
     }
