@@ -1,5 +1,5 @@
 ---
-title: "Uport-JS Server How-to"
+title: "Using uPort from a server backend"
 index: 1
 category: "tutorials"
 type: "content"
