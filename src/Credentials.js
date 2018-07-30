@@ -222,7 +222,7 @@ async disclose (payload = {}, expiresIn = 600 ) {
 }
 
 async processDisclosurePayload ({doc, payload}) {
-  const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
+  const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss, boxPub: payload.boxPub}
   if (payload.nad) {
     credentials.networkAddress = payload.nad
   }
