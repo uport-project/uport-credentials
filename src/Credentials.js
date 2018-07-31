@@ -222,9 +222,10 @@ async disclose (payload = {}, expiresIn = 600 ) {
 }
 
 async processDisclosurePayload ({doc, payload}) {
-  const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss, boxPub: payload.boxPub}
+  const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), did: payload.iss, boxPub: payload.boxPub}
   if (payload.nad) {
-    credentials.networkAddress = payload.nad
+    credentials.mnid = payload.nad
+    credentials.address = MNID.decode(payload.nad).address
   }
   if (payload.dad) {
     credentials.deviceKey = payload.dad
