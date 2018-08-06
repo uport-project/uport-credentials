@@ -1,7 +1,7 @@
 const arrayContainsArray = require('ethjs-util').arrayContainsArray;
+const Web3 = require('web3')
 
 // A derivative work of Nick Dodson's eths-contract https://github.com/ethjs/ethjs-contract/blob/master/src/index.js
-
 const hasTransactionObject = (args) => {
   const txObjectProperties = ['from', 'to', 'data', 'value', 'gasPrice', 'gas'];
   if (typeof args === 'object' && Array.isArray(args) === true && args.length > 0) {
@@ -28,10 +28,6 @@ const encodeMethodReadable = (methodObject, methodArgs) => {
 
     if (input.type === 'string') {
       argString += `'${methodArgs[i]}'`
-    } else if (input.type === ( 'bytes32' || 'bytes')) {
-      // TODO don't assume hex input? or throw error if not hex
-      // argString += `0x${new Buffer(methodArgs[i], 'hex')}`
-      argString += `${methodArgs[i]}`
     } else {
       argString += `${methodArgs[i]}`
     }
@@ -45,55 +41,89 @@ const encodeMethodReadable = (methodObject, methodArgs) => {
   return dataString += `)`
 }
 
-const ContractFactory = (extend) => (contractABI) => {
-  const output = {};
-  output.at = function atContract(address) {
+/**
+ * A factory function that returns web3-style contract classes, which calls
+ * the provided sendTransaction function on the transaction object for each
+ * contract method call.  Generally this is used to create signed JWTs from 
+ * method calls which can be signed by the uPort mobile app
+ *
+ * @param {Function} sendTransaction    The function to be called with the transaction
+ *                                      object and a method-specific id on every method call
+ * @param {Object}   [provider]         A web3 provider to handle requests etc. that don't
+ *                                      require sending an ethereum transaction
+ *
+ * @returns {UportContract Constructor} The web3-style contract, configured with the above
+ */
+function ContractFactory (sendTransaction, provider) {
+  const Web3Contract = provider && (new Web3(provider)).eth.Contract
 
-    function Contract() {
-      const self = this;
-      self.abi = contractABI || [];
-      self.address = address || '0x';
+  /**
+   * The Contract class, which mocks web3 functionality by creating signed transaction
+   * requests, which can be passed to the Uport Mobile app to actually send
+   */
+  class UportContract {
+    constructor (jsonInterface = [], address = '0x', options = {}) {      
+      // Create a parallel contract using the provider, for handling non-transaction methods
+      this.contract = provider 
+        ? new Web3Contract(jsonInterface, address, options)
+        : {}
 
-      getCallableMethodsFromABI(contractABI).forEach((methodObject) => {
-        self[methodObject.name] = function contractMethod() {
+      this.jsonInterface = jsonInterface
+      this.address = address
+      this.options = { ...options, address, jsonInterface }
 
-          if (methodObject.constant === true) {
-            throw new Error('A call does not return the txobject, no transaction necessary.')
-          }
+      this.methods = {}
+      this.events = this.contract.events
 
-          if (methodObject.type === 'event') {
-            throw new Error('An event does not return the txobject, events not supported')
-          }
+      // Create a transaction request function for each Contract method
+      getCallableMethodsFromABI(jsonInterface).map(({name, type, inputs, constant}) => {
+        if (type === 'function') {          
+          // Callable functions are available in this.methods[methodName]
+          this.methods[name] = (...args) => ({
+            // Borrow estimateGas and encodeABI from web3 contract
+            ...(this.contract && this.contract.methods[name](args)),
+            // Overwrite the send function with the uPort sendTransaction or request creator 
+            send: (txObject) => {
+              txObject = {
+                ...txObject, 
+                to: address, 
+                fn: encodeMethodReadable({name, inputs}, args)
+              }
 
-          let providedTxObject = {};
-          const methodArgs = [].slice.call(arguments);
+              return sendTransaction 
+                ? sendTransaction(txObject, txObject.fn) // TODO: Come up with better id
+                : txObject
+            },
+          })
+        } else if (constant) {
+          this.methods[name] = provider 
+            ? this.contract.methods[name]
+            : () => new Error('Constant functions cannot be computed without a web3 provider')
+        } else {
+          // What about the fallback function ?? 
+          console.warn(`Unhandled ABI method: ${name}`)
+        }
+      })
 
-          if (methodObject.type === 'function') {
-            if (hasTransactionObject(methodArgs)) providedTxObject = methodArgs.pop();
-            const methodTxObject = Object.assign({},
-                providedTxObject, {
-                  to: self.address,
-              });
-
-            methodTxObject.function = encodeMethodReadable(methodObject, methodArgs)
-
-            if (!extend) return methodTxObject
-
-            const extendArgs = methodArgs.slice(methodObject.inputs.length)
-            return extend(methodTxObject, ...extendArgs)
-          }
-        };
-      });
+      // Wrap other web3 contract api methods
+      this.getPastEvents = this.contract.getPastEvents
+      this.once = this.contract.once
     }
 
-    return new Contract();
-  };
+    clone () {
+      return new UportContract(this.jsonInterface, this.address, this.options)
+    }
 
-  return output;
-};
+    deploy () {
+      throw new Error('Contract deployment not yet supported, use web3')
+    }
+  }
+
+  return UportContract  
+}
 
 const buildRequestURI = (txObject) => {
-  return `me.uport:${txObject.to}?function=${txObject.function}`
+  return `me.uport:${txObject.to}?function=${txObject.fn}`
 }
 
 const Contract = ContractFactory(buildRequestURI)
