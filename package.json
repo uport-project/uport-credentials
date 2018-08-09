@@ -16,12 +16,12 @@
     "build:browser": "./node_modules/.bin/webpack --config webpack.config.js",
     "build": "yarn build:es5 && yarn test:ci && yarn build:browser",
     "build:docs:html": "./node_modules/.bin/jsdoc src/* README.md -d docs",
-    "build:docs:md": "./node_modules/jsdoc-to-markdown/bin/cli.js -f src/* --template 'template.hbs' -c js2doc.conf > docs/reference/index.md; echo",
+    "build:docs:md": "./node_modules/jsdoc-to-markdown/bin/cli.js -f src/* --template \"./template.hbs\" -c js2doc.conf > docs/reference/index.md; echo",
     "build:docs": "npm run build:docs:html && npm run build:docs:md",
     "prepublish": "yarn build"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "did-jwt": "^0.0.7",
     "did-resolver": "^0.0.4",
@@ -41,7 +41,7 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
+    "babel-core": "^6.26.3",
     "babel-jest": "^22.4.3",
     "babel-loader": "^7.1.4",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
@@ -50,14 +50,14 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.22.0",
     "babel-preset-env": "^1.6.1",
-    "body-parser": "^1.17.1",
-    "express": "^4.15.2",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
     "jest": "^22.4.3",
-    "jsdoc": "^3.4.3",
-    "jsdoc-to-markdown": "^1.3.7",
+    "jsdoc-to-markdown": "^4.0.1",
     "json-loader": "^0.5.4",
     "mockdate": "^2.0.1",
-    "webpack": "^4.6.0",
+    "nock": "^9.4.3",
+    "webpack": "^4.16.2",
     "webpack-cli": "^2.0.15"
   }
 }
