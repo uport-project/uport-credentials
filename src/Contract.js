@@ -1,5 +1,4 @@
 const arrayContainsArray = require('ethjs-util').arrayContainsArray;
-const Web3 = require('web3')
 
 // A derivative work of Nick Dodson's eths-contract https://github.com/ethjs/ethjs-contract/blob/master/src/index.js
 const hasTransactionObject = (args) => {
@@ -54,8 +53,8 @@ const encodeMethodReadable = (methodObject, methodArgs) => {
  *
  * @returns {UportContract Constructor} The web3-style contract, configured with the above
  */
-function ContractFactory (sendTransaction, provider) {
-  const Web3Contract = provider && (new Web3(provider)).eth.Contract
+function ContractFactory (sendTransaction) {
+  // const Web3Contract = provider && (new Web3(provider)).eth.Contract
 
   /**
    * The Contract class, which mocks web3 functionality by creating signed transaction
@@ -64,16 +63,16 @@ function ContractFactory (sendTransaction, provider) {
   class UportContract {
     constructor (jsonInterface = [], address = '0x', options = {}) {      
       // Create a parallel contract using the provider, for handling non-transaction methods
-      this.contract = provider 
-        ? new Web3Contract(jsonInterface, address, options)
-        : {}
+      // this.contract = provider 
+      //   ? new Web3Contract(jsonInterface, address, options)
+      //   : {}
 
       this.jsonInterface = jsonInterface
       this.address = address
       this.options = { ...options, address, jsonInterface }
 
       this.methods = {}
-      this.events = this.contract.events
+      // this.events = this.contract.events
 
       // Create a transaction request function for each Contract method
       getCallableMethodsFromABI(jsonInterface).map(({name, type, inputs, constant}) => {
@@ -81,7 +80,7 @@ function ContractFactory (sendTransaction, provider) {
           // Callable functions are available in this.methods[methodName]
           this.methods[name] = (...args) => ({
             // Borrow estimateGas and encodeABI from web3 contract
-            ...(this.contract && this.contract.methods[name](args)),
+            // ...(this.contract && this.contract.methods[name](args)),
             // Overwrite the send function with the uPort sendTransaction or request creator 
             send: (txObject) => {
               txObject = {
@@ -96,9 +95,12 @@ function ContractFactory (sendTransaction, provider) {
             },
           })
         } else if (constant) {
-          this.methods[name] = provider 
-            ? this.contract.methods[name]
-            : () => new Error('Constant functions cannot be computed without a web3 provider')
+          this.methods[name] = () => ({
+            call: () => { throw new Error('Constant methods do not require uport interaction') }
+          })
+          // this.methods[name] = provider 
+          //   ? this.contract.methods[name]
+          //   : () => new Error('Constant functions cannot be computed without a web3 provider')
         } else {
           // What about the fallback function ?? 
           console.warn(`Unhandled ABI method: ${name}`)
@@ -106,8 +108,8 @@ function ContractFactory (sendTransaction, provider) {
       })
 
       // Wrap other web3 contract api methods
-      this.getPastEvents = this.contract.getPastEvents
-      this.once = this.contract.once
+      // this.getPastEvents = this.contract.getPastEvents
+      // this.once = this.contract.once
     }
 
     clone () {
