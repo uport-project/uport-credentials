@@ -1,5 +1,5 @@
 # uport-js
-
+**Required Upgrade to v0.6.3 to support new uPort Clients - [View Details](https://github.com/uport-project/uport-js/releases/tag/v0.6.3)**
 ## Integrate uPort in your javascript application
 
 uPort provides a simple way for your users to login to your website and provide private credentials such as identity information and contact details to you.
@@ -23,11 +23,11 @@ An identity has an identifier in the form of an [MNID](https://github.com/uport-
 An identity can:
 
 - Sign JWTs (JSON Web Tokens)
-  - [Authenticate themselves to a third party](messages/shareresp.md)
-  - [Disclose private information about themselves](messages/shareresp.md)
-- [Receive requests for disclosure about themselves](messages/sharereq.md)
-- [Receive and store signed third party verifications about themselves](flows/verification.md)
-- [Sign Ethereum transactions](flows/tx.md)
+  - [Authenticate themselves to a third party](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md)
+  - [Disclose private information about themselves](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md)
+- [Receive requests for disclosure about themselves](https://github.com/uport-project/specs/blob/develop/messages/sharereq.md)
+- [Receive and store signed third party verifications about themselves](https://github.com/uport-project/specs/blob/develop/flows/verification.md)
+- [Sign Ethereum transactions](https://github.com/uport-project/specs/blob/developflows/tx.md)
 
 When interacting privately with a user you will be interchanging signed JWT([JSON Web Token](https://jwt.io/)). To verify the signature of the JWT you and your users will be fetching your public key from the public profile.
 
