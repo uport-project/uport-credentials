@@ -1,134 +1,54 @@
-## Modules
-
-<dl>
-<dt><a href="#module_uport-js/JWT">uport-js/JWT</a></dt>
-<dd></dd>
-</dl>
-
-## Classes
-
-<dl>
-<dt><a href="#Credentials">Credentials</a></dt>
-<dd><p>The Credentials class allows you to easily create the signed payloads used in uPort inlcuding
-   credentials and signed mobile app requests (ex. selective disclosure requests
-   for private data). It also provides signature verification over signed payloads and
-   allows you to send push notifications to users.</p>
-</dd>
-</dl>
-
-<a name="module_uport-js/JWT"></a>
-
-## uport-js/JWT
-
-* [uport-js/JWT](#module_uport-js/JWT)
-    * [.createJWT([config], payload)](#module_uport-js/JWT.createJWT) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-    * [.verifyJWT([config], jwt, callbackUrl)](#module_uport-js/JWT.verifyJWT) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-
-<a name="module_uport-js/JWT.createJWT"></a>
-
-### uport-js/JWT.createJWT([config], payload) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Creates a signed JWT given an address which becomes the issuer, a signer, and a payload for which the signature is over.
-
-**Kind**: static method of <code>[uport-js/JWT](#module_uport-js/JWT)</code>  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or rejects with an error  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [config] | <code>Object</code> | an unsigned credential object |
-| config.address | <code>String</code> | address, typically the uPort address of the signer which becomes the issuer |
-| config.signer | <code>SimpleSigner</code> | a signer, reference our SimpleSigner.js |
-| payload | <code>Object</code> | payload object |
-
-**Example**  
-```js
-const signer = SimpleSigner(process.env.PRIVATE_KEY)
- createJWT({address: '5A8bRWU3F7j3REx3vkJ...', signer}, {key1: 'value', key2: ..., ... }).then(jwt => {
-     ...
- })
-
- 
-```
-<a name="module_uport-js/JWT.verifyJWT"></a>
-
-### uport-js/JWT.verifyJWT([config], jwt, callbackUrl) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Verifies given JWT. Registry is used to resolve uPort address to public key for verification.
- If the JWT is valid, the promise returns an object including the JWT, the payload of the JWT,
- and the profile of the issuer of the JWT.
-
-**Kind**: static method of <code>[uport-js/JWT](#module_uport-js/JWT)</code>  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a response object or rejects with an error  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [config] | <code>Object</code> | an unsigned credential object |
-| config.address | <code>String</code> | address, typically the uPort address of the signer which becomes the issuer |
-| config.registry | <code>UportLite</code> | a uPort registry, reference our uport-lite library |
-| jwt | <code>String</code> | a JSON Web Token to verify |
-| callbackUrl | <code>String</code> | callback url in JWT |
-
-**Example**  
-```js
-const registry =  new UportLite()
- verifyJWT({registry, address: '5A8bRWU3F7j3REx3vkJ...'}, 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....').then(obj => {
-     const payload = obj.payload
-     const profile = obj.profile
-     const jwt = obj.jwt
-     ...
- })
-
- 
-```
 <a name="Credentials"></a>
 
 ## Credentials
-The Credentials class allows you to easily create the signed payloads used in uPort inlcuding
-   credentials and signed mobile app requests (ex. selective disclosure requests
-   for private data). It also provides signature verification over signed payloads and
-   allows you to send push notifications to users.
+The Credentials class allows you to easily create the signed payloads used in uPort including
+credentials and signed mobile app requests (ex. selective disclosure requests
+for private data). It also provides signature verification over signed payloads.
 
 **Kind**: global class  
 
 * [Credentials](#Credentials)
     * [new Credentials([settings])](#new_Credentials_new)
-    * [.createRequest([params])](#Credentials+createRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-    * [.createVerificationRequest(unsignedClaim, sub)](#Credentials+createVerificationRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-    * [.receive(token, [callbackUrl])](#Credentials+receive) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-    * [.push(token, payload, pubEncKey)](#Credentials+push) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-    * [.attest([credential])](#Credentials+attest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-    * [.lookup(address)](#Credentials+lookup) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+    * _instance_
+        * [.createDisclosureRequest([params], expiresIn)](#Credentials+createDisclosureRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+        * [.createVerification([credential])](#Credentials+createVerification) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+        * [.createSignVerificationRequest(unsignedClaim, aud, sub, callbackUrl)](#Credentials+createSignVerificationRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+        * [.createTxRequest(txObj, [id])](#Credentials+createTxRequest) ⇒ <code>String</code>
+        * [.createDisclosureResponse([payload])](#Credentials+createDisclosureResponse) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+        * [.processDisclosurePayload(response)](#Credentials+processDisclosurePayload)
+        * [.verifyAuthentication(token, [callbackUrl])](#Credentials+verifyAuthentication) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+        * ~~[.receive(token, [callbackUrl])](#Credentials+receive) ⇒ <code>Promise.&lt;Object, Error&gt;</code>~~
+        * [.verifyProfile(token)](#Credentials+verifyProfile) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+        * [.contract(abi)](#Credentials+contract) ⇒ <code>Object</code>
+    * _static_
+        * [.createIdentity()](#Credentials.createIdentity) ⇒ <code>Object</code>
 
 <a name="new_Credentials_new"></a>
 
 ### new Credentials([settings])
 Instantiates a new uPort Credentials object
 
+The following example is just for testing purposes. *You should never store a private key in source code.*
+
 
 | Param | Type | Description |
 | --- | --- | --- |
 | [settings] | <code>Object</code> | setttings |
-| settings.networks | <code>Object</code> | networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }} |
-| settings.registry | <code>UportLite</code> | a registry object from UportLite |
-| settings.signer | <code>SimpleSigner</code> | a signer object, see SimpleSigner.js |
-| settings.address | <code>Address</code> | your uPort address (may be the address of your application's uPort identity) |
+| settings.did | <code>DID</code> | Application [DID](https://w3c-ccg.github.io/did-spec/#decentralized-identifiers-dids) (unique identifier) for your application |
+| settings.privateKey | <code>String</code> | A hex encoded 32 byte private key |
+| settings.signer | <code>SimpleSigner</code> | a signer object, see [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions) |
+| settings.ethrConfig | <code>Object</code> | Configuration object for ethr did resolver. See [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver) |
+| settings.muportConfig | <code>Object</code> | Configuration object for muport did resolver. See [muport-did-resolver](https://github.com/uport-project/muport-did-resolver) |
+| settings.address | <code>Address</code> | DEPRECATED your uPort address (may be the address of your application's uPort identity) |
+| settings.networks | <code>Object</code> | DEPRECATED networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }} |
+| settings.registry | <code>UportLite</code> | DEPRECATED a registry object from UportLite |
 
-**Example**  
-```js
-import { Credentials, SimpleSigner } from 'uport-credentials'
-const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x0101.... }}
-const setttings = { networks, address: '5A8bRWU3F7j3REx3vkJ...', signer: new SimpleSigner(process.env.PRIVATE_KEY)}
-const credentials = new Credentials(settings)
-```
-**Example**  
-```js
-import { Credentials } from 'uport-credentials'
-const credentials = new Credentials()
-```
-<a name="Credentials+createRequest"></a>
+<a name="Credentials+createDisclosureRequest"></a>
 
-### credentials.createRequest([params]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Creates a signed request token (JWT) given a request params object.
+### credentials.createDisclosureRequest([params], expiresIn) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/specs/blob/develop/messages/sharereq.md)
 
-**Kind**: instance method of <code>[Credentials](#Credentials)</code>  
+**Kind**: instance method of [<code>Credentials</code>](#Credentials)  
 **Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or rejects with an error  
 
 | Param | Type | Default | Description |
@@ -140,100 +60,25 @@ Creates a signed request token (JWT) given a request params object.
 | params.callbackUrl | <code>String</code> |  | the url which you want to receive the response of this request |
 | params.network_id | <code>String</code> |  | network id of Ethereum chain of identity eg. 0x4 for rinkeby |
 | params.accountType | <code>String</code> |  | Ethereum account type: "general", "segregated", "keypair", "devicekey" or "none" |
+| expiresIn | <code>Number</code> |  | Seconds until expiry |
 
 **Example**  
 ```js
 const req = { requested: ['name', 'country'],
                callbackUrl: 'https://myserver.com',
                notifications: true }
- credentials.createRequest(req).then(jwt => {
-     ...
- })
-
-
- requested: ['name','phone','identity_no'],
-    callbackUrl: 'https://....' // URL to send the response of the request to
-    notifications: true
-
- 
-```
-<a name="Credentials+createVerificationRequest"></a>
-
-### credentials.createVerificationRequest(unsignedClaim, sub) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Creates a signed request for the user to attest a list of claims.
-
-**Kind**: instance method of <code>[Credentials](#Credentials)</code>  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or rejects with an error  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| unsignedClaim | <code>Object</code> | an object that is an unsigned claim which you want the user to attest |
-| sub | <code>String</code> | the DID of the identity you want to sign the attestation |
-
-**Example**  
-```js
-const unsignedClaim = {
-   claim: {
-     "Citizen of city X": {
-       "Allowed to vote": true,
-       "Document": "QmZZBBKPS2NWc6PMZbUk9zUHCo1SHKzQPPX4ndfwaYzmPW"
-     }
-   },
-   sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
- }
- credentials.createVerificationRequest(unsignedClaim).then(jwt => {
-   ...
- })
-
- 
-```
-<a name="Credentials+receive"></a>
-
-### credentials.receive(token, [callbackUrl]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Receive signed response token from mobile app. Verifies and parses the given response token.
-
-**Kind**: instance method of <code>[Credentials](#Credentials)</code>  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a parsed response or rejects with an error.  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| token | <code>String</code> |  | a response token |
-| [callbackUrl] | <code>String</code> | <code></code> | callbackUrl |
-
-**Example**  
-```js
-const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
- credentials.receive(resToken).then(res => {
-     const credentials = res.verified
-         const name =  res.name
+ credentials.requestDisclosure(req).then(jwt => {
      ...
  })
 
  
 ```
-<a name="Credentials+push"></a>
+<a name="Credentials+createVerification"></a>
 
-### credentials.push(token, payload, pubEncKey) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Send a push notification to a user, consumes a token which allows you to send push notifications
- and a url/uri request you want to send to the user.
-
-**Kind**: instance method of <code>[Credentials](#Credentials)</code>  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with successful status or rejects with an error  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| token | <code>String</code> | a push notification token (get a pn token by requesting push permissions in a request) |
-| payload | <code>Object</code> | push notification payload |
-| payload.url | <code>String</code> | a uport request url |
-| payload.message | <code>String</code> | a message to display to the user |
-| pubEncKey | <code>String</code> | the public encryption key of the receiver, encoded as a base64 string |
-
-<a name="Credentials+attest"></a>
-
-### credentials.attest([credential]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+### credentials.createVerification([credential]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
 Create a credential (a signed JSON Web Token)
 
-**Kind**: instance method of <code>[Credentials](#Credentials)</code>  
+**Kind**: instance method of [<code>Credentials</code>](#Credentials)  
 **Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a credential (JWT) or rejects with an error  
 
 | Param | Type | Description |
@@ -253,23 +98,209 @@ credentials.attest({
   ...
  })
 ```
-<a name="Credentials+lookup"></a>
+<a name="Credentials+createSignVerificationRequest"></a>
 
-### credentials.lookup(address) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Look up a profile in the registry for a given uPort address. Address must be MNID encoded.
+### credentials.createSignVerificationRequest(unsignedClaim, aud, sub, callbackUrl) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+Creates a signed request for the user to attest a list of claims.
 
-**Kind**: instance method of <code>[Credentials](#Credentials)</code>  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with parsed profile or rejects with an error  
+**Kind**: instance method of [<code>Credentials</code>](#Credentials)  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or rejects with an error  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| address | <code>String</code> | a MNID encoded address |
+| unsignedClaim | <code>Object</code> | an object that is an unsigned claim which you want the user to attest |
+| aud | <code>String</code> | the DID of the identity you want to sign the attestation |
+| sub | <code>String</code> | the DID which the unsigned claim is about |
+| callbackUrl | <code>String</code> | the url which you want to receive the response of this request |
 
 **Example**  
 ```js
-credentials.lookup('5A8bRWU3F7j3REx3vkJ...').then(profile => {
-    const name = profile.name
-    const pubkey = profile.pubkey
-    ...
-  })
+const unsignedClaim = {
+   claim: {
+     "Citizen of city X": {
+       "Allowed to vote": true,
+       "Document": "QmZZBBKPS2NWc6PMZbUk9zUHCo1SHKzQPPX4ndfwaYzmPW"
+     }
+   },
+   sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
+ }
+ credentials.createVerificationRequest(unsignedClaim).then(jwt => {
+   ...
+ })
+
+ 
+```
+<a name="Credentials+createTxRequest"></a>
+
+### credentials.createTxRequest(txObj, [id]) ⇒ <code>String</code>
+Given a transaction object, similarly defined as the web3 transaction object,
+ it creates a JWT transaction request and appends addtional request options.
+
+**Kind**: instance method of [<code>Credentials</code>](#Credentials)  
+**Returns**: <code>String</code> - a transaction request jwt  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| txObj | <code>Object</code> |  |  |
+| [id] | <code>String</code> | <code>&#x27;addressReq&#x27;</code> | string to identify request, later used to get response |
+
+**Example**  
+```js
+const txobject = {
+   to: '0xc3245e75d3ecd1e81a9bfb6558b6dafe71e9f347',
+   value: '0.1',
+   fn: "setStatus(string 'hello', bytes32 '0xc3245e75d3ecd1e81a9bfb6558b6dafe71e9f347')",
+ }
+ connect.createTxRequest(txObject, {callbackUrl: 'http://mycb.domain'}).then(jwt => {
+   ...
+ })
+
+ 
+```
+<a name="Credentials+createDisclosureResponse"></a>
+
+### credentials.createDisclosureResponse([payload]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+Creates a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
+
+This can either be used to share information about the signing identity or as the response to a
+[Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md), where it can be used to verifyAuthentication the identity.
+
+**Kind**: instance method of [<code>Credentials</code>](#Credentials)  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or rejects with an error  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [payload] | <code>Object</code> | <code>{}</code> | request params object |
+| payload.req | <code>JWT</code> |  | A selective disclosure Request JWT if this is returned as part of an authentication flow |
+| payload.own | <code>Object</code> |  | An object of self attested claims about the signer (eg. name etc) |
+| payload.verified | <code>Array</code> |  | An array of attestation JWT's to include |
+| payload.nad | <code>MNID</code> |  | An ethereum address encoded as an [MNID](https://github.com/uport-project/mnid) |
+| payload.capabilities | <code>Array</code> |  | An array of capability JWT's to include |
+
+**Example**  
+```js
+credentials.createDisclosureResponse({own: {name: 'Lourdes Valentina Gomez'}}).then(jwt => {
+     ...
+ })
+
+ 
+```
+<a name="Credentials+processDisclosurePayload"></a>
+
+### credentials.processDisclosurePayload(response)
+Parse a selective disclosure response, and verify signatures on each included signed claim ("verification")
+
+**Kind**: instance method of [<code>Credentials</code>](#Credentials)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| response | <code>Object</code> | A selective disclosure response payload, with associated did doc |
+| response.doc | <code>Object</code> |  |
+
+<a name="Credentials+verifyAuthentication"></a>
+
+### credentials.verifyAuthentication(token, [callbackUrl]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from mobile
+ app as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
+
+ It Verifies and parses the given response token and verifies the challenge response flow.
+
+**Kind**: instance method of [<code>Credentials</code>](#Credentials)  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a parsed response or rejects with an error.  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| token | <code>String</code> |  | a response token |
+| [callbackUrl] | <code>String</code> | <code></code> | callbackUrl |
+
+**Example**  
+```js
+const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
+ credentials.verifyAuthentication(resToken).then(res => {
+     const credentials = res.verified
+      const name =  res.name
+     ...
+ })
+
+ 
+```
+<a name="Credentials+receive"></a>
+
+### ~~credentials.receive(token, [callbackUrl]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>~~
+***Deprecated***
+
+Receive signed response token from mobile app. Verifies and parses the given response token.
+
+**Kind**: instance method of [<code>Credentials</code>](#Credentials)  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a parsed response or rejects with an error.  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| token | <code>String</code> |  | a response token |
+| [callbackUrl] | <code>String</code> | <code></code> | callbackUrl |
+
+**Example**  
+```js
+const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
+ credentials.receive(resToken).then(res => {
+     const credentials = res.verified
+     const name =  res.name
+     ...
+ })
+
+ 
+```
+<a name="Credentials+verifyProfile"></a>
+
+### credentials.verifyProfile(token) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
+
+ The main difference between this and `verifyAuthentication()` is that it does not verify the challenge. This can be used to verify user profiles that have been shared
+ through other methods such as QR codes and messages.
+
+**Kind**: instance method of [<code>Credentials</code>](#Credentials)  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a parsed response or rejects with an error.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | <code>String</code> | a response token |
+
+**Example**  
+```js
+const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
+ credentials.verifyProfile(resToken).then(profile => {
+     const credentials = profile.verified
+     const name =  profile.name
+     ...
+ })
+
+ 
+```
+<a name="Credentials+contract"></a>
+
+### credentials.contract(abi) ⇒ <code>Object</code>
+Builds and returns a contract object which can be used to interact with
+ a given contract. Similar to web3.eth.contract but with promises. Once specifying .at(address)
+ you can call the contract functions with this object. Each call will create a request.
+
+**Kind**: instance method of [<code>Credentials</code>](#Credentials)  
+**Returns**: <code>Object</code> - contract object  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| abi | <code>Object</code> | contract ABI |
+
+<a name="Credentials.createIdentity"></a>
+
+### Credentials.createIdentity() ⇒ <code>Object</code>
+Generate a DID and private key, effectively creating a new identity that can sign and verify data
+
+**Kind**: static method of [<code>Credentials</code>](#Credentials)  
+**Returns**: <code>Object</code> - keypair
+          - {String} keypair.did         An ethr-did string for the new identity
+          - {String} keypair.privateKey  The identity's private key, as a string  
+**Example**  
+```js
+const {did, privateKey} = Credentials.createIdentity()
+const credentials = new Credentials({did, privateKey, ...})
 ```

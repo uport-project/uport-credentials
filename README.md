@@ -2,13 +2,9 @@
 
 ## Integrate uPort in your javascript application
 
-uPort provides a simple way for your users to login to your website and provide private credentials such as identity information and contact details to you.
+uPort provides a set of tools for creating and managing identities that conform to the [decentralized identifier (DID) specification](), and requesting and exchanging verified data between them.  This library simplifies the process of identity creation within javascript applications, and allows apps to easily sign pieces of data and verify data signed by other identities to facilitate secure communication between parties.  These pieces of data take the form of *signed [JSON web tokens](https://jwt.io/introduction/) (JWTs)* with specific fields designed for use with uPort clients, and described in the uPort [specifications](https://github.com/uport-project/specs), collectively referred to as *verifications*.
 
-You can also “attest” credentials they provide to you or that you yourself have about them. This can be shared back to your customers so you can help them build their digital identity.
-
-Uport.js provides a simple way for you to integrate uport.js into your javascript application. You can also interact with your uPort users directly in the browser.
-
-We have an easy to use browser library [uport-connect](https://github.com/uport-project/uport-connect) which can help you do so.
+To allow maximum flexibility, this library only deals with creation and validation of verifications.  To pass verifications between a javascript application and a user via the uPort mobile app, we have also developed the [uport-transports](https://github.com/uport-project/uport-transports) library, which may be used in conjunction with this one.  For a simpler, out-of-the-box solution for interacting with a uPort mobile wallet from a web application, we have an easy to use browser library [uport-connect](https://github.com/uport-project/uport-connect).
 
 ### What is a uPort identity?
 
@@ -17,80 +13,85 @@ An identity in uPort is really just someone or something that can sign data or t
 An identity can:
 
 - Sign JWTs (JSON Web Tokens)
-  - [Authenticate themselves to a third party](messages/shareresp.md)
-  - [Disclose private information about themselves](messages/shareresp.md)
+- [Authenticate themselves to a third party](messages/shareresp.md)
+- [Disclose private information about themselves](messages/shareresp.md)
 - [Receive requests for disclosure about themselves](messages/sharereq.md)
 - [Receive and store signed third party verifications about themselves](flows/verification.md)
 - [Sign Ethereum transactions](flows/tx.md)
 
-When interacting privately with a user you will be interchanging signed JWT([JSON Web Token](https://jwt.io/)). To verify the signature of the JWT you and your users will be fetching your public key from the public profile.
+When interacting privately with a user you will be interchanging signed JWT([JSON Web Token](https://jwt.io/)). To verify the signature of the JWT you and your users will be fetching your public key from the public profile.  
 
-For details on uPort's underlying architecture, read our [spec repo](https://github.com/uport-project/specs) or check out the [uPort identity contracts] (https://github.com/uport-project/uport-identity).
+For details on uPort's underlying architecture, read our [spec repo](https://github.com/uport-project/specs) or check out the [uPort identity contracts](https://github.com/uport-project/uport-identity).
 
 ## Configure your application
 
-In your application you must first configure your uPort object.
+In your application you must first configure your uPort object with an identifier and a private key (or signer function).  There are several ways to instantiate a credentials object.  The most common approach is to save a DID and private key on a server for your application, and create a credentials instance from your application's unique private key.  Signed JWTs for requests and verifications can then be passed to a client-side application, and presented to a user as a QR code, or sent via a [transport](http://github.com/uport-project/uport-transports).
 
 ```javascript
 import { Credentials } from 'uport-credentials'
 
-// For new ethereum based addresses
+// For ethereum based addresses (ethr-did)
 const credentials = new Credentials({
   appName: 'App Name',
   did: 'did:ethr:0x....',
   privateKey: process.env.PRIVATE_KEY
 })
+```
 
-// You can create a new identity
+There may also be cases where you want identities to be created dynamically, either in the browser or on a server.  This can be accomplished with the static `Credentials.createIdentity()` method, which generates an ethereum keypair, and returns an object containing the associated did and private key.
+```
+// Create a credentials object for a brand new identity
+const {did, privateKey} = Credentials.createIdentity()
+const credentials = new Credentials({
+  appName: 'App Name', did, privateKey
+})
+```
 
-console.log(Credentials.createIdentity())
-
+Finally, we continue to support older uport identities described by an [MNID](http://github.com/uport-project/mnid)-encoded ethereum address.  These identifiers can be expressed as a did via the 'uport' did method: `did:uport:<mnid>`
+```
 // For legacy application identity created on App Manager
 const credentials = new Credentials({
   appName: 'App Name',
-  address: 'MNID Encoded uPort Address For Your App',
+  address: '2nQtiQG...', // MNID Encoded uPort Address For Your App
   privateKey: process.env.PRIVATE_KEY
 })
-
-
 ```
 
 ## Requesting information from your users
 
-To request information from your user you create a Selective Disclosure Request JWT and present it to your user in the web browser.
-
-The most basic request to get a users public uport identity details:
+To request information from your user you create a Selective Disclosure Request JWT.  When this is presented to a user via a QR code or other [transport](https://github.com/uport-project/uport-transports), they will be prompted to approve sharing the request attributes.  All requests will return a user's `did`.
 
 ```javascript
-credentials.requestDisclosure().then(requestToken => {
+credentials.createDisclosureRequest().then(requestToken => {
   // send requestToken to browser
 })
 ```
 
-You can ask for specific private data like this:
+A selective disclosure request JWT can ask for specific private data, and/or provide a URL to which a mobile app should send a response.
 
 ```javascript
-credentials.requestDisclosure({
-    requested: ['name','phone','identity_no'],
-    callbackUrl: 'https://....' // URL to send the response of the request to
-  }.then(requestToken => {
-  // send requestToken to browser
-  })
-```
-
-If you need to know the users address on a specific ethereum network, specify it's `network_id` (currently defaults to ropsten `0x3`). In this case be aware that the `address` returned will be the address on the public network (currently ropsten) for the users profile. The requested network address will be in the `networkAddress` field and will be MNID encoded.
-
-```javascript
-credentials.requestDisclosure({network_id: '0x4'}).then(requestToken => {
+credentials.createDisclosureRequest().then({
+  requested: ['name', 'phone', 'identity_no'],
+  callbackUrl: 'https://....' // URL to send the response of the request to
+}).then(requestToken => {
   // send requestToken to browser
 })
 ```
 
-Back in your server code you receive the token:
+If you need to know the users address on a specific ethereum network, specify it's `networkId` (currently defaults to mainnet `0x1`). In this case be aware that the `address` returned will be the address on the public network (currently mainnet) for the users profile. The requested network address will be in the `networkAddress` field and will be MNID encoded.
 
 ```javascript
-credentials.authenticate(responseToken).then(profile => {
-  // Store user profile
+// Request an address on Rinkeby
+credentials.requestDisclosure({networkId: '0x4'}).then(requestToken => {
+  // send requestToken to browser
+})
+```
+
+When a response JWT is received, it can be parsed and verified via the `verifyAuthentication()` method, which checks both the 
+
+```javascript
+credentials.verifyAuthentication(responseToken).then(verifiedData => {
+  // Do stuff with verified data
 })
 ```
 
@@ -98,13 +99,11 @@ credentials.authenticate(responseToken).then(profile => {
 
 To ensure that the response received was created as a response to your selective disclosure request above, the original request is included in the response from the mobile app.
 
-The default verification rule is that the issuer of the embedded request must match the clientId in your Credentials object and that the original request has not yet expired.
-
-Some applications that exclusively live in the browser are unable to sign the original request. In those cases the request token verification is ignored.
+The verification rule for the Selective Disclosure Response is that the issuer of the embedded request must match the did in your Credentials object and that the original request has not yet expired.  This is to be sure that when requesting data from a user, only a response to your initial request will be accepted as valid.  If you would like to consume an arbitrary signed JWT that is not part of a particular selective disclosure flow, you can use the `verifyProfile()` method to skip the challenge/response check.
 
 ### Requesting Push notification tokens from your users
 
-As part of the selective disclosure request you can ask for permission from your users to communicate directly with their app.
+As part of the selective disclosure request you can also ask for permission from your users to communicate directly with their app.  With a push token, you can configure a [transport](https://github.com/uport-project/uport-transports) to send JWTs via push.
 
 ```javascript
 credentials.createRequest({
@@ -114,76 +113,46 @@ credentials.createRequest({
   // send to browser
 })
 ```
-
-Present it to the user like before. On the server you can receive the push token like this:
+If the user approves the use of push notifications, the selective disclosure response will contain a `pushToken` field, which can be saved when the response is received and verified.
 
 ```javascript
-credentials.receive(responseToken).then(profile => {
-  // Store user profile
+credentials.verifyAuthentication(responseToken).then(verifiedData => {
   // Store push token securely
-  console.log(profile.pushToken)
+  doSomethingWith(verifiedData.pushToken)
 })
 ```
 
 ## Attesting information about your users
+In addition to requesting and verifying information, you can also sign new data on behalf of your application and share it with your users in the form of _attestations_, also known as _verifications_.  By presenting an attestation to a user, you are making a claim about them, and are _attesting_ to its truth with your application's signature.  Exactly what information your app should attest to depends the context -- If you're a financial institution you may be able to attest to KYC related information such as national identity numbers. If you're an educational application you may want to attest to your users achievements in a way that they can securely share.  Anyone with access to your application's `did` can verify that a particular attestation came from your app.
 
-Attesting information about your users helps add real value to your application. Your users will use uport to build up their own digital identity and your business is an important part of this.
-
-If you're a financial institution you may be able to attest to KYC related information such as national identity numbers. If you're an educational application you may want to attest to your users achievements in a way that they can securely share.
-
-### What are attestations
-
-Attestations are shareable private information that one party can sign about another party. They are designed to be shared privately by you to your users and by them to other users.
+Attesting to information about your users helps add real value to your application, and your users will use uPort to build up their own digital identity.
 
 ### Creating an attestation
 
 ```javascript
-credentials.attest({
+credentials.createVerification({
   sub: '0x...', // uport address of user
   exp: <future timestamp>, // If your information is not permanent make sure to add an expires timestamp
-  claims: {name:'John Smith'}
+  claims: {name: 'John Smith'}
 }).then(attestation => {
   // send attestation to user
 })
 ```
-
-As before you will want to send this to your user. You can do this in the browser
-
-```javascript
-const connect = new uportconnect.Connect('app name')
-connect.showRequest(attestation) // no response is needed for an attestation
-```
-
-If you requested a push notification token in the above selective disclosure step you can also send attestations directly to your users app in real time.
-
-```javascript
-credentials.push(pushToken, `me.uport:add?attestation=${attestationjwt}`, message).then(response => {
-
-})
-```
+As with a verification request, you will want to send this JWT to your user. You can do this in the browser via QR, using push with a previously requested pushToken, or via another [transport](https://github.com/uport-project/uport-transports) of your choosing.
 
 ## Asking users to sign Ethereum transactions
 
-Ethereum smart contracts live on the blockchain and at a certain address. The application interface is known as the abi and can be created by the Solidity compiler.
-
-Our Contract class will let you create a javascript object modelling the SmartContract allowing you to create uport uri's that you can send to the user.
+Finally, as uPort is based in the Ethereum blockchain, uPort Credentials can be used to request that a user call a particular Ethereum smart contract function.  Smart contracts live on the blockchain at a certain address, and expose public functions that can be called according to their ABI.  Using the `Credentials.contract` method, you can create an object from a contract abi that will create transaction request JWTs for each contract method, that can be presented to a user's mobile application like any other JWT described above.  This is just a wrapper around `Credentials.createTxRequest()`, which generates the txObject for a particular contract method call.
 
 ```javascript
-import { Contract } from 'uport-credentials'
-const abi = // import from json or have directly in code
-const contract = Contract(abi).at(contractAddress)
+import abi from './myContractAbi.json'
+const myContract = Credentials.contract(abi).at(contractAddress)
 // creates a request for the user to call the transfer() function on the smart contract
-const txRequest = tokenContract.transfer(....)
-```
-
-In your front end use 'uport-connect' to present it to your user either as a QR code or as a uport-button depending on whether they are on a desktop or mobile browser.
-
-```javascript
-const connect = new uportconnect.Connect('app name')
-connect.sendTransaction(txRequest).then(txResponse => {
-  // send response back to server
+const txRequest = myContract.transfer(...).then(txRequestToken => {
+  // send tx request token to user
 })
 ```
+---------------------------------------------------
 
-Back in your server code you receive the `txResponse`. This is a standard ethereum transaction object that you can verify.
+This library is part of a suite of tools maintained by the uPort Project, a Consensys formation.  For more information on the project, visit [uport.me](https://uport.me)
 
