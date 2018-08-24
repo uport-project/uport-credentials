@@ -124,10 +124,10 @@ describe('signJWT', () => {
 
 })
 
-describe('requestDisclosure()', () => {
+describe('createDisclosureRequest()', () => {
   beforeAll(() => mockresolver())
   async function createAndVerify (params={}) {
-    const jwt = await uport.requestDisclosure(params)
+    const jwt = await uport.createDisclosureRequest(params)
     return await verifyJWT(jwt)
   }
   it('creates a valid JWT for a request', async () => {
@@ -187,10 +187,10 @@ describe('requestDisclosure()', () => {
   })
 })
 
-describe('LEGACY createRequest()', () => {
+describe('LEGACY createDisclosureRequest()', () => {
   beforeAll(() => mockresolver())
   async function createAndVerify (params={}) {
-    const jwt = await uport.createRequest(params)
+    const jwt = await uport.createDisclosureRequest(params)
     return await verifyJWT(jwt)
   }
   it('creates a valid JWT for a request', async () => {
@@ -202,7 +202,7 @@ describe('LEGACY createRequest()', () => {
 describe('disclose()', () => {
   beforeAll(() => mockresolver())
   async function createAndVerify (params={}) {
-    const jwt = await uport.disclose(params)
+    const jwt = await uport.createDisclosureResponse(params)
     return await verifyJWT(jwt, {audience: did})
   }
 
@@ -212,84 +212,84 @@ describe('disclose()', () => {
   })
 
   it('creates a valid JWT for a disclosure', async () => {
-    const req = await uport.requestDisclosure()
+    const req = await uport.createDisclosureRequest()
     const response = await createAndVerify({req})
     return expect(response).toMatchSnapshot()
   })
 })
 
-describe('createVerificationRequest', () => {
+describe('createSignVerificationRequest()', () => {
   it('creates a valid JWT for a request', async () => {
-    const jwt = await uport.createVerificationRequest({claim: { test: {prop1: 1, prop2: 2}}}, 'did:uport:223ab45')
+    const jwt = await uport.createSignVerificationRequest({claim: { test: {prop1: 1, prop2: 2}}}, 'did:uport:223ab45')
     return expect(await verifyJWT(jwt, {audience: did})).toMatchSnapshot()
   })
 })
 
-describe('attest()', () => {
+describe('createVerification()', () => {
   beforeAll(() => mockresolver())
   it('has correct payload in JWT for an attestation', () => {
-    return uport.attest({sub: 'did:uport:223ab45', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133 + 1}).then((jwt) => {
+    return uport.createVerification({sub: 'did:uport:223ab45', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133 + 1}).then((jwt) => {
       return expect(verifyJWT(jwt)).toMatchSnapshot()
     })
   })
 })
 
-describe('authenticate()', () => {
+describe('verifyAuthentication()', () => {
   beforeAll(() => mockresolver({
     name: 'Super Developer',
     country: 'NI'
   }))
 
   async function createShareResp (payload = {}) {
-    const req = await uport.requestDisclosure({requested: ['name', 'phone']})
-    return uport.disclose({...payload, req})
+    const req = await uport.createDisclosureRequest({requested: ['name', 'phone']})
+    return uport.createDisclosureResponse({...payload, req})
   }
 
   async function createShareRespWithVerifiedCredential (payload = {}) {
-    const req = await uport.requestDisclosure({requested: ['name', 'phone']})
-    const attestation = await uport.attest(claim)
-    return uport.disclose({...payload, verified: [attestation], req})
+    const req = await uport.createDisclosureRequest({requested: ['name', 'phone']})
+    const attestation = await uport.createVerification(claim)
+    return uport.createDisclosureResponse({...payload, verified: [attestation], req})
   }
 
   it('returns profile mixing public and private claims', async () => {
     const jwt = await createShareResp({own: {name: 'Davie', phone: '+15555551234'}})
-    const profile = await uport.authenticate(jwt)
+    const profile = await uport.verifyAuthentication(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile mixing public and private claims and verified credentials', async () => {
     const jwt = await createShareRespWithVerifiedCredential({own: {name: 'Davie', phone: '+15555551234'}})
-    const profile = await uport.authenticate(jwt)
+    const profile = await uport.verifyAuthentication(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with only public claims', async () => {
     const jwt = await createShareResp()
-    const profile = await uport.authenticate(jwt)
+    const profile = await uport.verifyAuthentication(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with private chain network id claims', async () => {
     const jwt = await createShareResp({nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'})
-    const profile = await uport.authenticate(jwt)
+    const profile = await uport.verifyAuthentication(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with device key claims', async () => {
     const jwt = await createShareResp({dad: '0xdeviceKey'})
-    const profile = await uport.authenticate(jwt)
+    const profile = await uport.verifyAuthentication(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns pushToken if available', async () => {
     const jwt = await createShareResp({capabilities: ['PUSHTOKEN']})
-    const profile = await uport.authenticate(jwt)
+    const profile = await uport.verifyAuthentication(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('handles response with missing challenge', async () => {
-    const jwt = await uport.disclose({own: {name: 'bob'}})
-    expect(uport.authenticate(jwt)).rejects.toMatchSnapshot()
+    const jwt = await uport.createDisclosureResponse({own: {name: 'bob'}})
+    expect(uport.verifyAuthentication(jwt)).rejects.toMatchSnapshot()
   })
 })
 
@@ -299,32 +299,32 @@ describe('verifyProfile()', () => {
     country: 'NI'
   }))
   it('returns profile mixing public and private claims', async () => {
-    const jwt = await uport.disclose({own: {name: 'Davie', phone: '+15555551234'}})
+    const jwt = await uport.createDisclosureResponse({own: {name: 'Davie', phone: '+15555551234'}})
     const profile = await uport.verifyProfile(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile mixing public and private claims and verified credentials', async () => {
-    const attestation = await uport.attest(claim)
-    const jwt = await uport.disclose({own: {name: 'Davie', phone: '+15555551234'}, verified: [attestation]})
+    const attestation = await uport.createVerification(claim)
+    const jwt = await uport.createDisclosureResponse({own: {name: 'Davie', phone: '+15555551234'}, verified: [attestation]})
     const profile = await uport.verifyProfile(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with only public claims', async () => {
-    const jwt = await uport.disclose()
+    const jwt = await uport.createDisclosureResponse()
     const profile = await uport.verifyProfile(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with private chain network id claims', async () => {
-    const jwt = await uport.disclose({nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'})
+    const jwt = await uport.createDisclosureResponse({nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'})
     const profile = await uport.verifyProfile(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns pushToken if available', async () => {
-    const jwt = await uport.disclose({capabilities: ['PUSHTOKEN']})
+    const jwt = await uport.createDisclosureResponse({capabilities: ['PUSHTOKEN']})
     const profile = await uport.verifyProfile(jwt)
     expect(profile).toMatchSnapshot()
   })
@@ -336,8 +336,8 @@ describe('LEGACY receive()', () => {
     country: 'NI'
   }))
   it('returns profile mixing public and private claims', async () => {
-    const req = await uport.requestDisclosure({requested: ['name', 'phone']})
-    const jwt = await uport.disclose({own: {name: 'Davie', phone: '+15555551234'}, req})
+    const req = await uport.createDisclosureRequest({requested: ['name', 'phone']})
+    const jwt = await uport.createDisclosureResponse({own: {name: 'Davie', phone: '+15555551234'}, req})
     const profile = await uport.receive(jwt)
     expect(profile).toMatchSnapshot()
   })

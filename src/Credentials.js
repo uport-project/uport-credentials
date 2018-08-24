@@ -6,7 +6,7 @@ import UportDIDResolver from 'uport-did-resolver'
 import MuportDIDResolver from 'muport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
 import UportLite from 'uport-lite'
-import MNID from 'mnid'
+import { isMNID } from 'mnid'
 
 import { ContractFactory } from './Contract.js'
 
@@ -90,11 +90,11 @@ class Credentials {
     } else if (privateKey) {
       this.signer = SimpleSigner(privateKey)
     }
-    
+
     if (did) {
       this.did = did
     } else if (address) {
-      if (MNID.isMNID(address)) {
+      if (isMNID(address)) {
         this.did = `did:uport:${address}`
       }
       if (address.match('^0x[0-9a-fA-F]{40}$')) {
@@ -399,7 +399,7 @@ class Credentials {
     const txObjHandler = (txObj, opts) => {
       if (txObj.function) txObj.fn = txObj.function
       delete txObj['function']
-      return this.txRequest(txObj, opts)
+      return this.createTxRequest(txObj, opts)
     }
     return ContractFactory(txObjHandler.bind(this))(abi)
   }
