@@ -263,7 +263,8 @@ class Credentials {
    * Creates a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
    *
    * This can either be used to share information about the signing identity or as the response to a
-   * [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md), where it can be used to verifyAuthentication the identity.
+   * [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md), 
+   * where it can be used to verifyDisclosureResponse the identity.
    *
    *  @example
    *  credentials.createDisclosureResponse({own: {name: 'Lourdes Valentina Gomez'}}).then(jwt => {
@@ -318,7 +319,7 @@ class Credentials {
    *
    *  @example
    *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
-   *  credentials.verifyAuthentication(resToken).then(res => {
+   *  credentials.verifyDisclosureResponse(resToken).then(res => {
    *      const credentials = res.verified
    *       const name =  res.name
    *      ...
@@ -328,7 +329,7 @@ class Credentials {
    *  @param    {String}                  [callbackUrl=null]    callbackUrl
    *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
    */
-  async verifyAuthentication (token, callbackUrl = null) {
+  async verifyDisclosureResponse (token, callbackUrl = null) {
     const { payload, doc } = await verifyJWT(token, {audience: this.did, callbackUrl, auth: true})
 
     if (payload.req) {
@@ -362,18 +363,18 @@ class Credentials {
    *  @deprecated
    */
   receive (token, callbackUrl = null) {
-    return this.verifyAuthentication(token, callbackUrl)
+    return this.verifyDisclosureResponse(token, callbackUrl)
   }
 
   /**
    *  Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
    *
-   *  The main difference between this and `verifyAuthentication()` is that it does not verify the challenge. This can be used to verify user profiles that have been shared
-   *  through other methods such as QR codes and messages.
+   * The main difference between this and `verifyDisclosureResponse()` is that it does not verify the challenge. 
+   * This can be used to verify user profiles that have been shared through other methods such as QR codes and messages.
    *
    *  @example
    *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
-   *  credentials.verifyProfile(resToken).then(profile => {
+   *  credentials.verifyDisclosure(resToken).then(profile => {
    *      const credentials = profile.verified
    *      const name =  profile.name
    *      ...
@@ -382,7 +383,7 @@ class Credentials {
    *  @param    {String}                  token                 a response token
    *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
    */
-  async verifyProfile (token) {
+  async verifyDisclosure (token) {
     const { payload, doc } = await verifyJWT(token, {audience: this.did})
     return this.processDisclosurePayload({ payload, doc })
   }

@@ -87,10 +87,10 @@ credentials.requestDisclosure({networkId: '0x4'}).then(requestToken => {
 })
 ```
 
-When a response JWT is received, it can be parsed and verified via the `verifyAuthentication()` method, which checks both the 
+When a response JWT is received, it can be parsed and verified via the `verifyDisclosureResponse()` method, which checks the validity of the signature on the JWT, as well as validity of the original dislcosure request, which is expected as part of the response.  
 
 ```javascript
-credentials.verifyAuthentication(responseToken).then(verifiedData => {
+credentials.verifyDisclosureResponse(responseToken).then(verifiedData => {
   // Do stuff with verified data
 })
 ```
@@ -99,7 +99,7 @@ credentials.verifyAuthentication(responseToken).then(verifiedData => {
 
 To ensure that the response received was created as a response to your selective disclosure request above, the original request is included in the response from the mobile app.
 
-The verification rule for the Selective Disclosure Response is that the issuer of the embedded request must match the did in your Credentials object and that the original request has not yet expired.  This is to be sure that when requesting data from a user, only a response to your initial request will be accepted as valid.  If you would like to consume an arbitrary signed JWT that is not part of a particular selective disclosure flow, you can use the `verifyProfile()` method to skip the challenge/response check.
+The verification rule for the Selective Disclosure Response is that the issuer of the embedded request must match the did in your Credentials object and that the original request has not yet expired.  This is to be sure that when requesting data from a user, only a response to your initial request will be accepted as valid.  If you would like to consume an arbitrary signed JWT that is not part of a particular selective disclosure flow, you can use the `verifyDisclosure()` method to skip the challenge/response check.
 
 ### Requesting Push notification tokens from your users
 
@@ -116,7 +116,7 @@ credentials.createRequest({
 If the user approves the use of push notifications, the selective disclosure response will contain a `pushToken` field, which can be saved when the response is received and verified.
 
 ```javascript
-credentials.verifyAuthentication(responseToken).then(verifiedData => {
+credentials.verifyDisclosureResponse(responseToken).then(verifiedData => {
   // Store push token securely
   doSomethingWith(verifiedData.pushToken)
 })
