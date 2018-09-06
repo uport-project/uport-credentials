@@ -1,6 +1,3 @@
-const express = require('express');
-const uport = require('uport');
-const jsontokens = require('jsontokens')
 
 var express = require('express');
 var uport = require('../lib/index.js');
