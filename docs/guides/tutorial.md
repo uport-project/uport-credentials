@@ -1,12 +1,25 @@
+---
+title: "Uport-Credentials Server"
+index: 1
+category: "uport-credentials"
+type: "tutorial"
+source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/guides/tutorial.md"
+---
+
 # Server-side Credentials
 
 Here we will demonstrate how to create and sign a custom credential on a server (called the Creator) and present this to a uport identity. The user of the uPort app will add this credential to her list of credentials. Then we'll show how another service (called the Requestor) can request this credential and validate the corresponding JSON Web Token.
+
+The code for this tutorial can be found in the [Uport-Credentials examples.](github.com/uport-project/uport-credentials/blob/develop/examples/).
+
 
 ## Register The App
 
 First we wish to create identities for our apps. You can skip this step if you're ok with using the default identities that are hardcoded in the tutorial files. To create identities, go to the [uPort AppManager](https://appmanager.uport.me), connect with your uPort, and select "New App". This will create a uPort identity for your app, and will display a private key, which you will use on the server to sign credentials. It's important that you save this key!
 
 Go ahead and create identities for the Creator and Requestor, or if you wish to skip this step we have created identities for these services already, with the private keys and addresses hard coded in the apps.
+
+*Please note that in practice the signing key for the identity should be protected information*
 
 ## Creator service
 
