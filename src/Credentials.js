@@ -140,7 +140,7 @@ class Credentials {
    *  const req = { requested: ['name', 'country'],
    *                callbackUrl: 'https://myserver.com',
    *                notifications: true }
-   *  credentials.requestDisclosure(req).then(jwt => {
+   *  credentials.createDisclosureRequest(req).then(jwt => {
    *      ...
    *  })
    *
@@ -188,7 +188,7 @@ class Credentials {
    *  Create a credential (a signed JSON Web Token)
    *
    *  @example
-   *  credentials.attest({
+   *  credentials.createVerification({
    *   sub: '5A8bRWU3F7j3REx3vkJ...', // uPort address of user, likely a MNID
    *   exp: <future timestamp>,
    *   claim: { name: 'John Smith' }
@@ -219,7 +219,7 @@ class Credentials {
    *    },
    *    sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
    *  }
-   *  credentials.createVerificationRequest(unsignedClaim).then(jwt => {
+   *  credentials.createVerificationSignatureRequest(unsignedClaim).then(jwt => {
    *    ...
    *  })
    *
@@ -229,7 +229,7 @@ class Credentials {
    *  @param    {String}      callbackUrl       the url which you want to receive the response of this request
    *  @return   {Promise<Object, Error>}        a promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createSignVerificationRequest(unsignedClaim, sub, callbackUrl, aud) {
+  createVerificationSignatureRequest(unsignedClaim, sub, callbackUrl, aud) {
     return this.signJWT({unsignedClaim, sub, aud, callback: callbackUrl, type: Types.VER_REQ})
   }
 
@@ -238,7 +238,7 @@ class Credentials {
    *  it creates a JWT transaction request and appends addtional request options.
    *
    *  @example
-   *  const txobject = {
+   *  const txObject = {
    *    to: '0xc3245e75d3ecd1e81a9bfb6558b6dafe71e9f347',
    *    value: '0.1',
    *    fn: "setStatus(string 'hello', bytes32 '0xc3245e75d3ecd1e81a9bfb6558b6dafe71e9f347')",

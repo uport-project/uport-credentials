@@ -218,9 +218,9 @@ describe('disclose()', () => {
   })
 })
 
-describe('createSignVerificationRequest()', () => {
+describe('createVerificationSignatureRequest()', () => {
   it('creates a valid JWT for a request', async () => {
-    const jwt = await uport.createSignVerificationRequest({claim: { test: {prop1: 1, prop2: 2}}}, 'did:uport:223ab45')
+    const jwt = await uport.createVerificationSignatureRequest({claim: { test: {prop1: 1, prop2: 2}}}, 'did:uport:223ab45')
     return expect(await verifyJWT(jwt, {audience: did})).toMatchSnapshot()
   })
 })
