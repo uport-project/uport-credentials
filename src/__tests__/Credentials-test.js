@@ -360,7 +360,7 @@ describe('txRequest()', () => {
   it('encodes readable function calls including given args in function key of jwt', async () => {
     const jwt = await statusContract.updateStatus('hello')
     const verified = await verifyJWT(jwt)
-    expect(verified.payload.fn).toEqual("updateStatus(string 'hello')")
+    expect(verified.payload.fn).toEqual('updateStatus(string "hello")')
   })
 
   it('adds to key as contract address to jwt', async () => {
