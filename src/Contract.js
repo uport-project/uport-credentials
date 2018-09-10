@@ -27,7 +27,7 @@ const encodeMethodReadable = (methodObject, methodArgs) => {
     let argString = `${input.type} `
 
     if (input.type === 'string') {
-      argString += `'${methodArgs[i]}'`
+      argString += `"${methodArgs[i]}"`
     } else if (input.type === ( 'bytes32' || 'bytes')) {
       // TODO don't assume hex input? or throw error if not hex
       // argString += `0x${new Buffer(methodArgs[i], 'hex')}`
