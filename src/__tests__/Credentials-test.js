@@ -140,17 +140,17 @@ describe('createDisclosureRequest()', () => {
     return expect(response).toMatchSnapshot()
   })
 
-  it('has correct payload in JWT requesting a specific network_id', async () => {
-    const response = await createAndVerify({network_id: '0x4'})
+  it('has correct payload in JWT requesting a specific networkId', async () => {
+    const response = await createAndVerify({networkId: '0x4'})
     return expect(response).toMatchSnapshot()
   })
 
-  it('has correct payload in JWT requesting a specific network_id', async () => {
-    const response = await createAndVerify({network_id: '0x4'})
+  it('has correct payload in JWT requesting a specific networkId', async () => {
+    const response = await createAndVerify({networkId: '0x4'})
     return expect(response).toMatchSnapshot()
   })
 
-  for (let accountType of ['general', 'segregated', 'keypair', 'devicekey', 'none']) {
+  for (let accountType of ['general', 'segregated', 'keypair', 'none']) {
     it(`has correct payload in JWT requesting accountType of ${accountType}`, async () => {
       const response = await createAndVerify({accountType})
       return expect(response).toMatchSnapshot()
@@ -276,12 +276,6 @@ describe('verifyDisclosureResponse()', () => {
     expect(profile).toMatchSnapshot()
   })
 
-  it('returns profile with device key claims', async () => {
-    const jwt = await createShareResp({dad: '0xdeviceKey'})
-    const profile = await uport.verifyDisclosureResponse(jwt)
-    expect(profile).toMatchSnapshot()
-  })
-
   it('returns pushToken if available', async () => {
     const jwt = await createShareResp({capabilities: ['PUSHTOKEN']})
     const profile = await uport.verifyDisclosureResponse(jwt)
@@ -331,19 +325,6 @@ describe('verifyDisclosure()', () => {
   })
 })
 
-describe('LEGACY receive()', () => {
-  beforeAll(() => mockresolver({
-    name: 'Bob Smith',
-    country: 'NI'
-  }))
-  it('returns profile mixing public and private claims', async () => {
-    const req = await uport.createDisclosureRequest({requested: ['name', 'phone']})
-    const jwt = await uport.createDisclosureResponse({own: {name: 'Davie', phone: '+15555551234'}, req})
-    const profile = await uport.receive(jwt)
-    expect(profile).toMatchSnapshot()
-  })
-})
-
 describe('txRequest()', () => {
   beforeAll(() => mockresolver())
 
@@ -370,11 +351,11 @@ describe('txRequest()', () => {
   })
 
   it('adds additional request options passed to jwt', async () => {
-      const network_id =  '0x4'
+      const networkId =  '0x4'
       const callbackUrl = 'mydomain'
-      const jwt = await statusContract.updateStatus('hello', {network_id, callbackUrl })
+      const jwt = await statusContract.updateStatus('hello', {networkId, callbackUrl })
       const verified = await verifyJWT(jwt)
-      expect(verified.payload.net).toEqual(network_id)
+      expect(verified.payload.net).toEqual(networkId)
       expect(verified.payload.callback).toEqual(callbackUrl)
   })
 })

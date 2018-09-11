@@ -149,13 +149,14 @@ class Credentials {
    *  @param    {Array}              params.verified       an array of attributes for which you are requesting verified credentials to be shared for
    *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
    *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
-   *  @param    {String}             params.network_id     network id of Ethereum chain of identity eg. 0x4 for rinkeby
+   *  @param    {String}             params.networkId      network id of Ethereum chain of identity eg. 0x4 for rinkeby
    *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", "devicekey" or "none"
    *  @param    {Number}             expiresIn             Seconds until expiry
    *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
    */
   createDisclosureRequest (params = {}, expiresIn = 600) {
     const payload = {}
+
     if (params.requested) {
       payload.requested = params.requested
     }
@@ -168,11 +169,12 @@ class Credentials {
     if (params.callbackUrl) {
       payload.callback = params.callbackUrl
     }
-    if (params.network_id) {
-      payload.net = params.network_id
+    if (params.networkId) {
+      payload.net = params.networkId
     }
+
     if (params.accountType) {
-      if (['general', 'segregated', 'keypair', 'devicekey', 'none'].indexOf(params.accountType) >= 0) {
+      if (['general', 'segregated', 'keypair', 'none'].indexOf(params.accountType) >= 0) {
         payload.act = params.accountType
       } else {
         return Promise.reject(new Error(`Unsupported accountType ${params.accountType}`))
@@ -219,17 +221,21 @@ class Credentials {
    *    },
    *    sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
    *  }
-   *  credentials.createVerificationSignatureRequest(unsignedClaim).then(jwt => {
-   *    ...
+   *  const aud = '0x123...'
+   *  const sub = '0x456...'
+   *  const callbackUrl = 'https://my.cool.site/handleTheResponse'
+   *  credentials.createVerificationSignatureRequest(unsignedClaim, {aud, sub, callbackUrl}).then(jwt => {
+   *    // ...
    *  })
    *
-   *  @param    {Object}      unsignedClaim     an object that is an unsigned claim which you want the user to attest
-   *  @param    {String}      aud               the DID of the identity you want to sign the attestation
-   *  @param    {String}      sub               the DID which the unsigned claim is about
-   *  @param    {String}      callbackUrl       the url which you want to receive the response of this request
-   *  @return   {Promise<Object, Error>}        a promise which resolves with a signed JSON Web Token or rejects with an error
+   * @param    {Object}      unsignedClaim     an object that is an unsigned claim which you want the user to attest
+   * @param    {Object}      opts            
+   *   @param    {String}      opts.aud          the DID of the identity you want to sign the attestation
+   *   @param    {String}      opts.sub          the DID which the unsigned claim is about
+   *   @param    {String}      opts.callbackUrl  the url to receive the response of this request
+   * @returns  {Promise<Object, Error>}        a promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim, sub, callbackUrl, aud) {
+  createVerificationSignatureRequest(unsignedClaim, {aud, sub, callbackUrl} = {}) {
     return this.signJWT({unsignedClaim, sub, aud, callback: callbackUrl, type: Types.VER_REQ})
   }
 
@@ -251,10 +257,10 @@ class Credentials {
    *  @param    {String}    [id='addressReq']    string to identify request, later used to get response
    *  @return   {String}                         a transaction request jwt
    */
-  createTxRequest(txObj, { callbackUrl, exp = 600, network_id, label } = {}) {
+  createTxRequest(txObj, { callbackUrl, exp = 600, networkId, label } = {}) {
     const payload = {}
     if (callbackUrl) payload.callback = callbackUrl
-    if (network_id) payload.net = network_id
+    if (networkId) payload.net = networkId
     if (label) payload.label = label
     return this.signJWT({...payload, ...txObj, type: Types.ETH_TX}, exp )
   }
@@ -300,9 +306,7 @@ class Credentials {
     if (payload.nad) {
       credentials.networkAddress = payload.nad
     }
-    if (payload.dad) {
-      credentials.deviceKey = payload.dad
-    }
+
     if (payload.verified) {
       const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.did})))
       return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
@@ -344,26 +348,6 @@ class Credentials {
     } else {
       throw new Error('Challenge was not included in response')
     }
-  }
-
-  /**
-   *  Receive signed response token from mobile app. Verifies and parses the given response token.
-   *
-   *  @example
-   *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
-   *  credentials.receive(resToken).then(res => {
-   *      const credentials = res.verified
-   *      const name =  res.name
-   *      ...
-   *  })
-   *
-   *  @param    {String}                  token                 a response token
-   *  @param    {String}                  [callbackUrl=null]    callbackUrl
-   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
-   *  @deprecated
-   */
-  receive (token, callbackUrl = null) {
-    return this.verifyDisclosureResponse(token, callbackUrl)
   }
 
   /**
