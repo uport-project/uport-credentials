@@ -242,6 +242,57 @@ class Credentials {
   }
 
   /**
+   * Create a JWT requesting a signature on a piece of structured/typed data conforming to
+   * the ERC712 specification
+   * @example
+   * // A ERC712 Greeting Structure
+   * const data = {
+   *   types: {
+   *     EIP712Domain: [
+   *       {name: 'name', type: 'string'},
+   *       {name: 'version', type: 'string'},
+   *       {name: 'chainId', type: 'uint256'},
+   *       {name: 'verifyingContract', type: 'address'},
+   *       {name: 'salt', type: 'bytes32'}
+   *     ],
+   *     Greeting: [
+   *       {name: 'text', type: 'string'},
+   *       {name: 'subject', type: 'string'},
+   *     ]
+   *   }
+   *   domain: {
+   *    name: 'My dapp', 
+   *    version: '1.0', 
+   *    chainId: 1, 
+   *    verifyingContract: '0xdeadbeef',
+   *    salt: '0x999999999910101010101010'
+   *   },
+   *   primaryType: 'Greeting',
+   *   message: {
+   *     text: 'Hello',
+   *     subject: 'World'
+   *   }
+   * }
+   * const sub = 'did:ethr:0xbeef1234' // Who the claim is "about"
+   * const aud = 'did:ethr:0xbeef4567' // Who you are asking to sign the claim
+   * const callbackUrl = 'https://my.cool.site/handleTheResponse'
+   * const signRequestJWT = credentials.createTypedDataSignatureRequest(data, {sub, aud, callbackUrl})
+   * // Send the JWT to a client 
+   * // ...
+   * 
+   * @param {Object} typedData              the ERC712 data to sign
+   * @param {Object} opts                   additional options for the jwt
+   *   @param {String} opts.sub             the subject of the JWT (arbitrary)
+   *   @param {String} opts.aud             the did of the identity you want to sign the typed data
+   *   @param {String} opts.callbackUrl     callback URL to handle the response
+   * @returns {Promise<Object, Error>}      a promise which resolves to a signed JWT or rejects with an error
+   */
+  createTypedDataSignatureRequest(typedData, {sub, aud, callbackUrl} = {}) {
+    // TODO: Check if the typedData is a valid ERC712 ?
+    return this.signJWT({typedData, sub, aud, callback: callbackUrl, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
+  }
+
+  /**
    *  Given a transaction object, similarly defined as the web3 transaction object,
    *  it creates a JWT transaction request and appends addtional request options.
    *
