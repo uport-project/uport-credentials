@@ -172,7 +172,7 @@ class Credentials {
       payload.net = params.network_id
     }
     if (params.accountType) {
-      if (['general', 'segregated', 'keypair', 'devicekey', 'none'].indexOf(params.accountType) >= 0) {
+      if (['general', 'segregated', 'keypair', 'none'].indexOf(params.accountType) >= 0) {
         payload.act = params.accountType
       } else {
         return Promise.reject(new Error(`Unsupported accountType ${params.accountType}`))
@@ -219,17 +219,21 @@ class Credentials {
    *    },
    *    sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
    *  }
-   *  credentials.createVerificationSignatureRequest(unsignedClaim).then(jwt => {
-   *    ...
+   *  const aud = '0x123...'
+   *  const sub = '0x456...'
+   *  const callbackUrl = 'https://my.cool.site/handleTheResponse'
+   *  credentials.createVerificationSignatureRequest(unsignedClaim, {aud, sub, callbackUrl}).then(jwt => {
+   *    // ...
    *  })
    *
-   *  @param    {Object}      unsignedClaim     an object that is an unsigned claim which you want the user to attest
-   *  @param    {String}      aud               the DID of the identity you want to sign the attestation
-   *  @param    {String}      sub               the DID which the unsigned claim is about
-   *  @param    {String}      callbackUrl       the url which you want to receive the response of this request
-   *  @return   {Promise<Object, Error>}        a promise which resolves with a signed JSON Web Token or rejects with an error
+   * @param    {Object}      unsignedClaim     an object that is an unsigned claim which you want the user to attest
+   * @param    {Object}      opts            
+   *   @param    {String}      opts.aud          the DID of the identity you want to sign the attestation
+   *   @param    {String}      opts.sub          the DID which the unsigned claim is about
+   *   @param    {String}      opts.callbackUrl  the url to receive the response of this request
+   * @returns  {Promise<Object, Error>}        a promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim, sub, callbackUrl, aud) {
+  createVerificationSignatureRequest(unsignedClaim, {aud, sub, callbackUrl} = {}) {
     return this.signJWT({unsignedClaim, sub, aud, callback: callbackUrl, type: Types.VER_REQ})
   }
 
@@ -344,26 +348,6 @@ class Credentials {
     } else {
       throw new Error('Challenge was not included in response')
     }
-  }
-
-  /**
-   *  Receive signed response token from mobile app. Verifies and parses the given response token.
-   *
-   *  @example
-   *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
-   *  credentials.receive(resToken).then(res => {
-   *      const credentials = res.verified
-   *      const name =  res.name
-   *      ...
-   *  })
-   *
-   *  @param    {String}                  token                 a response token
-   *  @param    {String}                  [callbackUrl=null]    callbackUrl
-   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
-   *  @deprecated
-   */
-  receive (token, callbackUrl = null) {
-    return this.verifyDisclosureResponse(token, callbackUrl)
   }
 
   /**
