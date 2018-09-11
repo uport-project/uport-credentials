@@ -166,6 +166,10 @@ describe('createDisclosureRequest()', () => {
     return expect(response).toMatchSnapshot()
   })
 
+  it('includes issc in payload', async () => {
+    expect(createAndVerify({issc: {details: 'good'}})).toMatchSnapshot()
+  })
+
   it('has correct payload in JWT for a request', async () => {
     const response = await createAndVerify({requested: ['name', 'phone']})
     return expect(response).toMatchSnapshot()
