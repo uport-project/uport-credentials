@@ -151,7 +151,7 @@ class Credentials {
    *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
    *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
    *  @param    {String}             params.networkId      network id of Ethereum chain of identity eg. 0x4 for rinkeby
-   *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", "devicekey" or "none"
+   *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", or "none"
    *  @param    {Number}             expiresIn             Seconds until expiry
    *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
    */
@@ -259,13 +259,13 @@ class Credentials {
    *       {name: 'text', type: 'string'},
    *       {name: 'subject', type: 'string'},
    *     ]
-   *   }
+   *   },
    *   domain: {
-   *    name: 'My dapp', 
-   *    version: '1.0', 
-   *    chainId: 1, 
-   *    verifyingContract: '0xdeadbeef',
-   *    salt: '0x999999999910101010101010'
+   *     name: 'My dapp', 
+   *     version: '1.0', 
+   *     chainId: 1, 
+   *     verifyingContract: '0xdeadbeef',
+   *     salt: '0x999999999910101010101010'
    *   },
    *   primaryType: 'Greeting',
    *   message: {
@@ -401,7 +401,7 @@ class Credentials {
       const challenge = await verifyJWT(payload.req)
       if (challenge.payload.iss !== this.did) {
         throw new Error(`Challenge issuer does not match current identity: ${challenge.payload.iss} !== ${this.did}`)
-      } else if (challenge.payload.type !== Types.SHARE_REQ) {
+      } else if (challenge.payload.type !== Types.DISCLOSURE_REQUEST) {
         throw new Error(`Challenge payload type invalid: ${challenge.payload.type}`)
       } else {
         return this.processDisclosurePayload({payload, doc})

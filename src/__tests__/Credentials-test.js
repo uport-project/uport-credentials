@@ -234,8 +234,43 @@ describe('disclose()', () => {
 
 describe('createVerificationSignatureRequest()', () => {
   it('creates a valid JWT for a request', async () => {
-    const jwt = await uport.createVerificationSignatureRequest({claim: { test: {prop1: 1, prop2: 2}}}, 'did:uport:223ab45')
+    const jwt = await uport.createVerificationSignatureRequest({claim: { test: {prop1: 1, prop2: 2}}}, {sub: 'did:uport:223ab45'})
     return expect(await verifyJWT(jwt, {audience: did})).toMatchSnapshot()
+  })
+})
+
+describe('createTypedDataSignatureRequest()', () => {
+  const typedData = {
+    types: {
+      EIP712Domain: [
+        {name: 'name', type: 'string'},
+        {name: 'version', type: 'string'},
+        {name: 'chainId', type: 'uint256'},
+        {name: 'verifyingContract', type: 'address'},
+        {name: 'salt', type: 'bytes32'}
+      ],
+      Greeting: [
+        {name: 'text', type: 'string'},
+        {name: 'subject', type: 'string'},
+      ]
+    },
+    domain: {
+      name: 'My dapp', 
+      version: '1.0', 
+      chainId: 1, 
+      verifyingContract: '0xdeadbeef',
+      salt: '0x999999999910101010101010'
+    },
+    primaryType: 'Greeting',
+    message: {
+      text: 'Hello',
+      subject: 'World'
+    }
+  }
+
+  it('creates a valid JWT for a typed data request', async () => {
+    const jwt = await uport.createTypedDataSignatureRequest(typedData, {aud: 'did:ethr:deadbeef', sub: 'did:ethr:deadbeef'})
+    expect(jwt).toMatchSnapshot()
   })
 })
 
