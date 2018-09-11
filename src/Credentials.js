@@ -174,7 +174,9 @@ class Credentials {
     if (params.networkId) {
       payload.net = params.networkId
     }
-
+    if (params.issc) {
+      payload.issc = params.issc
+    }
     if (params.accountType) {
       if (['general', 'segregated', 'keypair', 'none'].indexOf(params.accountType) >= 0) {
         payload.act = params.accountType
