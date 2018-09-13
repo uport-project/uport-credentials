@@ -21,13 +21,12 @@ for private data). It also provides signature verification over signed payloads.
     * _instance_
         * [.createDisclosureRequest([params], expiresIn)](#Credentials+createDisclosureRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
         * [.createVerification([credential])](#Credentials+createVerification) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-        * [.createSignVerificationRequest(unsignedClaim, aud, sub, callbackUrl)](#Credentials+createSignVerificationRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+        * [.createVerificationSignatureRequest(unsignedClaim, opts)](#Credentials+createVerificationSignatureRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
         * [.createTxRequest(txObj, [id])](#Credentials+createTxRequest) ⇒ <code>String</code>
         * [.createDisclosureResponse([payload])](#Credentials+createDisclosureResponse) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
         * [.processDisclosurePayload(response)](#Credentials+processDisclosurePayload)
-        * [.verifyAuthentication(token, [callbackUrl])](#Credentials+verifyAuthentication) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-        * ~~[.receive(token, [callbackUrl])](#Credentials+receive) ⇒ <code>Promise.&lt;Object, Error&gt;</code>~~
-        * [.verifyProfile(token)](#Credentials+verifyProfile) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+        * [.verifyDisclosureResponse(token, [callbackUrl])](#Credentials+verifyDisclosureResponse) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+        * [.verifyDisclosure(token)](#Credentials+verifyDisclosure) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
         * [.contract(abi)](#Credentials+contract) ⇒ <code>Object</code>
     * _static_
         * [.createIdentity()](#Credentials.createIdentity) ⇒ <code>Object</code>
@@ -67,7 +66,7 @@ Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/sp
 | params.verified | <code>Array</code> |  | an array of attributes for which you are requesting verified credentials to be shared for |
 | params.notifications | <code>Boolean</code> |  | boolean if you want to request the ability to send push notifications |
 | params.callbackUrl | <code>String</code> |  | the url which you want to receive the response of this request |
-| params.network_id | <code>String</code> |  | network id of Ethereum chain of identity eg. 0x4 for rinkeby |
+| params.networkId | <code>String</code> |  | network id of Ethereum chain of identity eg. 0x4 for rinkeby |
 | params.accountType | <code>String</code> |  | Ethereum account type: "general", "segregated", "keypair", "devicekey" or "none" |
 | expiresIn | <code>Number</code> |  | Seconds until expiry |
 
@@ -76,7 +75,7 @@ Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/sp
 const req = { requested: ['name', 'country'],
                callbackUrl: 'https://myserver.com',
                notifications: true }
- credentials.requestDisclosure(req).then(jwt => {
+ credentials.createDisclosureRequest(req).then(jwt => {
      ...
  })
 
@@ -99,7 +98,7 @@ Create a credential (a signed JSON Web Token)
 
 **Example**  
 ```js
-credentials.attest({
+credentials.createVerification({
   sub: '5A8bRWU3F7j3REx3vkJ...', // uPort address of user, likely a MNID
   exp: <future timestamp>,
   claim: { name: 'John Smith' }
@@ -107,9 +106,9 @@ credentials.attest({
   ...
  })
 ```
-<a name="Credentials+createSignVerificationRequest"></a>
+<a name="Credentials+createVerificationSignatureRequest"></a>
 
-### credentials.createSignVerificationRequest(unsignedClaim, aud, sub, callbackUrl) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+### credentials.createVerificationSignatureRequest(unsignedClaim, opts) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
 Creates a signed request for the user to attest a list of claims.
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
@@ -118,9 +117,11 @@ Creates a signed request for the user to attest a list of claims.
 | Param | Type | Description |
 | --- | --- | --- |
 | unsignedClaim | <code>Object</code> | an object that is an unsigned claim which you want the user to attest |
-| aud | <code>String</code> | the DID of the identity you want to sign the attestation |
-| sub | <code>String</code> | the DID which the unsigned claim is about |
-| callbackUrl | <code>String</code> | the url which you want to receive the response of this request |
+| opts | <code>Object</code> |  |
+| opts.aud | <code>String</code> | the DID of the identity you want to sign the attestation |
+| opts.sub | <code>String</code> | the DID which the unsigned claim is about |
+| opts.riss | <code>String</code> | The DID of the identity you want to sign the Verified Claim |
+| opts.callbackUrl | <code>String</code> | the url to receive the response of this request |
 
 **Example**  
 ```js
@@ -133,11 +134,12 @@ const unsignedClaim = {
    },
    sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
  }
- credentials.createVerificationRequest(unsignedClaim).then(jwt => {
-   ...
+ const aud = '0x123...'
+ const sub = '0x456...'
+ const callbackUrl = 'https://my.cool.site/handleTheResponse'
+ credentials.createVerificationSignatureRequest(unsignedClaim, {aud, sub, callbackUrl}).then(jwt => {
+   // ...
  })
-
-
 ```
 <a name="Credentials+createTxRequest"></a>
 
@@ -155,7 +157,7 @@ Given a transaction object, similarly defined as the web3 transaction object,
 
 **Example**  
 ```js
-const txobject = {
+const txObject = {
    to: '0xc3245e75d3ecd1e81a9bfb6558b6dafe71e9f347',
    value: '0.1',
    fn: "setStatus(string 'hello', bytes32 '0xc3245e75d3ecd1e81a9bfb6558b6dafe71e9f347')",
@@ -172,7 +174,8 @@ const txobject = {
 Creates a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
 
 This can either be used to share information about the signing identity or as the response to a
-[Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md), where it can be used to verifyAuthentication the identity.
+[Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md),
+where it can be used to verifyDisclosureResponse the identity.
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
 **Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or rejects with an error  
@@ -206,9 +209,9 @@ Parse a selective disclosure response, and verify signatures on each included si
 | response | <code>Object</code> | A selective disclosure response payload, with associated did doc |
 | response.doc | <code>Object</code> |  |
 
-<a name="Credentials+verifyAuthentication"></a>
+<a name="Credentials+verifyDisclosureResponse"></a>
 
-### credentials.verifyAuthentication(token, [callbackUrl]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+### credentials.verifyDisclosureResponse(token, [callbackUrl]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
 Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from mobile
  app as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
 
@@ -225,7 +228,7 @@ Authenticates [Selective Disclosure Response JWT](https://github.com/uport-proje
 **Example**  
 ```js
 const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
- credentials.verifyAuthentication(resToken).then(res => {
+ credentials.verifyDisclosureResponse(resToken).then(res => {
      const credentials = res.verified
       const name =  res.name
      ...
@@ -233,39 +236,13 @@ const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
 
 
 ```
-<a name="Credentials+receive"></a>
+<a name="Credentials+verifyDisclosure"></a>
 
-### ~~credentials.receive(token, [callbackUrl]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>~~
-***Deprecated***
-
-Receive signed response token from mobile app. Verifies and parses the given response token.
-
-**Kind**: instance method of [<code>Credentials</code>](#Credentials)  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a parsed response or rejects with an error.  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| token | <code>String</code> |  | a response token |
-| [callbackUrl] | <code>String</code> | <code></code> | callbackUrl |
-
-**Example**  
-```js
-const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
- credentials.receive(resToken).then(res => {
-     const credentials = res.verified
-     const name =  res.name
-     ...
- })
-
-
-```
-<a name="Credentials+verifyProfile"></a>
-
-### credentials.verifyProfile(token) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+### credentials.verifyDisclosure(token) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
 Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
 
- The main difference between this and `verifyAuthentication()` is that it does not verify the challenge. This can be used to verify user profiles that have been shared
- through other methods such as QR codes and messages.
+The main difference between this and `verifyDisclosureResponse()` is that it does not verify the challenge.
+This can be used to verify user profiles that have been shared through other methods such as QR codes and messages.
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
 **Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a parsed response or rejects with an error.  
@@ -277,7 +254,7 @@ Verify and return profile from a [Selective Disclosure Response JWT](https://git
 **Example**  
 ```js
 const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
- credentials.verifyProfile(resToken).then(profile => {
+ credentials.verifyDisclosure(resToken).then(profile => {
      const credentials = profile.verified
      const name =  profile.name
      ...
