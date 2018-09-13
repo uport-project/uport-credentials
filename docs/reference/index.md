@@ -21,8 +21,8 @@ for private data). It also provides signature verification over signed payloads.
     * _instance_
         * [.createDisclosureRequest([params], expiresIn)](#Credentials+createDisclosureRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
         * [.createVerification([credential])](#Credentials+createVerification) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-        * [.createVerificationSignatureRequest(unsignedClaim, opts)](#Credentials+createVerificationSignatureRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-        * [.createTxRequest(txObj, [id])](#Credentials+createTxRequest) ⇒ <code>String</code>
+        * [.createVerificationSignatureRequest(unsignedClaim, [opts])](#Credentials+createVerificationSignatureRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+        * [.createTxRequest(txObj, [opts])](#Credentials+createTxRequest) ⇒ <code>String</code>
         * [.createDisclosureResponse([payload])](#Credentials+createDisclosureResponse) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
         * [.processDisclosurePayload(response)](#Credentials+processDisclosurePayload)
         * [.verifyDisclosureResponse(token, [callbackUrl])](#Credentials+verifyDisclosureResponse) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
@@ -41,15 +41,15 @@ The following example is just for testing purposes. *You should never store a pr
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [settings] | <code>Object</code> | setttings |
-| settings.did | <code>DID</code> | Application [DID](https://w3c-ccg.github.io/did-spec/#decentralized-identifiers-dids) (unique identifier) for your application |
-| settings.privateKey | <code>String</code> | A hex encoded 32 byte private key |
-| settings.signer | <code>SimpleSigner</code> | a signer object, see [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions) |
-| settings.ethrConfig | <code>Object</code> | Configuration object for ethr did resolver. See [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver) |
-| settings.muportConfig | <code>Object</code> | Configuration object for muport did resolver. See [muport-did-resolver](https://github.com/uport-project/muport-did-resolver) |
-| settings.address | <code>Address</code> | DEPRECATED your uPort address (may be the address of your application's uPort identity) |
-| settings.networks | <code>Object</code> | DEPRECATED networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }} |
-| settings.registry | <code>UportLite</code> | DEPRECATED a registry object from UportLite |
+| [settings] | <code>Object</code> | optional setttings |
+| [settings.did] | <code>DID</code> | Application [DID](https://w3c-ccg.github.io/did-spec/#decentralized-identifiers-dids) (unique identifier) for your application |
+| [settings.privateKey] | <code>String</code> | A hex encoded 32 byte private key |
+| [settings.signer] | <code>SimpleSigner</code> | a signer object, see [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions) |
+| [settings.ethrConfig] | <code>Object</code> | Configuration object for ethr did resolver. See [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver) |
+| [settings.muportConfig] | <code>Object</code> | Configuration object for muport did resolver. See [muport-did-resolver](https://github.com/uport-project/muport-did-resolver) |
+| [settings.address] | <code>Address</code> | DEPRECATED your uPort address (may be the address of your application's uPort identity) |
+| [settings.networks] | <code>Object</code> | DEPRECATED networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }} |
+| [settings.registry] | <code>UportLite</code> | DEPRECATED a registry object from UportLite |
 
 <a name="Credentials+createDisclosureRequest"></a>
 
@@ -91,8 +91,8 @@ Create a credential (a signed JSON Web Token)
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [credential] | <code>Object</code> | a unsigned credential object |
-| credential.sub | <code>String</code> | subject of credential (a uPort address) |
+| [credential] | <code>Object</code> | a unsigned claim object |
+| credential.sub | <code>String</code> | subject of credential (a valid DID) |
 | credential.claim | <code>String</code> | claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}}) |
 | credential.exp | <code>String</code> | time at which this claim expires and is no longer valid (seconds since epoch) |
 
@@ -108,20 +108,20 @@ credentials.createVerification({
 ```
 <a name="Credentials+createVerificationSignatureRequest"></a>
 
-### credentials.createVerificationSignatureRequest(unsignedClaim, opts) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Creates a signed request for the user to attest a list of claims.
+### credentials.createVerificationSignatureRequest(unsignedClaim, [opts]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+Creates a request a for a DID to [sign a verification](https://github.com/uport-project/specs/blob/develop/messages/verificationreq.md)
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or rejects with an error  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - A promise which resolves with a signed JSON Web Token or rejects with an error  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| unsignedClaim | <code>Object</code> | an object that is an unsigned claim which you want the user to attest |
-| opts | <code>Object</code> |  |
-| opts.aud | <code>String</code> | the DID of the identity you want to sign the attestation |
-| opts.sub | <code>String</code> | the DID which the unsigned claim is about |
-| opts.riss | <code>String</code> | The DID of the identity you want to sign the Verified Claim |
-| opts.callbackUrl | <code>String</code> | the url to receive the response of this request |
+| unsignedClaim | <code>Object</code> | Unsigned claim object which you want the user to attest |
+| [opts] | <code>Object</code> |  |
+| [opts.aud] | <code>String</code> | The DID of the identity you want to sign the attestation |
+| [opts.sub] | <code>String</code> | The DID which the unsigned claim is about |
+| [opts.riss] | <code>String</code> | The DID of the identity you want to sign the Verified Claim |
+| [opts.callbackUrl] | <code>String</code> | The url to receive the response of this request |
 
 **Example**  
 ```js
@@ -143,17 +143,21 @@ const unsignedClaim = {
 ```
 <a name="Credentials+createTxRequest"></a>
 
-### credentials.createTxRequest(txObj, [id]) ⇒ <code>String</code>
+### credentials.createTxRequest(txObj, [opts]) ⇒ <code>String</code>
 Given a transaction object, similarly defined as the web3 transaction object,
  it creates a JWT transaction request and appends addtional request options.
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
 **Returns**: <code>String</code> - a transaction request jwt  
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| txObj | <code>Object</code> |  |  |
-| [id] | <code>String</code> | <code>&#x27;addressReq&#x27;</code> | string to identify request, later used to get response |
+| Param | Type | Description |
+| --- | --- | --- |
+| txObj | <code>Object</code> | A web3 style transaction object |
+| [opts] | <code>Object</code> |  |
+| [opts.callbackUrl] | <code>String</code> | The url to receive the response of this request |
+| [opts.exp] | <code>String</code> | Time at which this request expires and is no longer valid (seconds since epoch) |
+| [opts.networkId] | <code>String</code> | Network ID for which this transaction request is for |
+| [opts.label] | <code>String</code> |  |
 
 **Example**  
 ```js
@@ -200,20 +204,21 @@ credentials.createDisclosureResponse({own: {name: 'Lourdes Valentina Gomez'}}).t
 <a name="Credentials+processDisclosurePayload"></a>
 
 ### credentials.processDisclosurePayload(response)
-Parse a selective disclosure response, and verify signatures on each included signed claim ("verification")
+Parse a selective disclosure response, and verify signatures on each signed claim ("verification") included.
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | response | <code>Object</code> | A selective disclosure response payload, with associated did doc |
+| response.payload | <code>Object</code> | A selective disclosure response payload, with associated did doc |
 | response.doc | <code>Object</code> |  |
 
 <a name="Credentials+verifyDisclosureResponse"></a>
 
 ### credentials.verifyDisclosureResponse(token, [callbackUrl]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from mobile
- app as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
+Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from uPort
+ client as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
 
  It Verifies and parses the given response token and verifies the challenge response flow.
 
@@ -230,7 +235,7 @@ Authenticates [Selective Disclosure Response JWT](https://github.com/uport-proje
 const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
  credentials.verifyDisclosureResponse(resToken).then(res => {
      const credentials = res.verified
-      const name =  res.name
+     const name =  res.name
      ...
  })
 
