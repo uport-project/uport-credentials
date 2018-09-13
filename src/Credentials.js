@@ -6,7 +6,7 @@ import UportDIDResolver from 'uport-did-resolver'
 import MuportDIDResolver from 'muport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
 import UportLite from 'uport-lite'
-import { isMNID } from 'mnid'
+import { isMNID, decode as mnidDecode } from 'mnid'
 
 import { ContractFactory } from './Contract.js'
 
@@ -229,7 +229,7 @@ class Credentials {
    *  })
    *
    * @param    {Object}      unsignedClaim     an object that is an unsigned claim which you want the user to attest
-   * @param    {Object}      opts            
+   * @param    {Object}      opts
    *   @param    {String}      opts.aud          the DID of the identity you want to sign the attestation
    *   @param    {String}      opts.sub          the DID which the unsigned claim is about
    *   @param    {String}      opts.callbackUrl  the url to receive the response of this request
@@ -269,7 +269,7 @@ class Credentials {
    * Creates a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
    *
    * This can either be used to share information about the signing identity or as the response to a
-   * [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md), 
+   * [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md),
    * where it can be used to verifyDisclosureResponse the identity.
    *
    *  @example
@@ -302,11 +302,14 @@ class Credentials {
    * @param     {Object}             response.doc
    */
   async processDisclosurePayload ({doc, payload}) {
-    const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss}
+    const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), did: payload.iss, boxPub: payload.boxPub}
     if (payload.nad) {
-      credentials.networkAddress = payload.nad
+      credentials.mnid = payload.nad
+      credentials.address = mnidDecode(payload.nad).address
     }
-
+    if (payload.dad) {
+      credentials.deviceKey = payload.dad
+    }
     if (payload.verified) {
       const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.did})))
       return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
@@ -353,7 +356,7 @@ class Credentials {
   /**
    *  Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
    *
-   * The main difference between this and `verifyDisclosureResponse()` is that it does not verify the challenge. 
+   * The main difference between this and `verifyDisclosureResponse()` is that it does not verify the challenge.
    * This can be used to verify user profiles that have been shared through other methods such as QR codes and messages.
    *
    *  @example
