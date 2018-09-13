@@ -13,11 +13,11 @@ An identity in uPort is really just someone or something that can sign data or t
 An identity can:
 
 - Sign JWTs (JSON Web Tokens)
-- [Authenticate themselves to a third party](messages/shareresp.md)
-- [Disclose private information about themselves](messages/shareresp.md)
-- [Receive requests for disclosure about themselves](messages/sharereq.md)
-- [Receive and store signed third party verifications about themselves](flows/verification.md)
-- [Sign Ethereum transactions](flows/tx.md)
+- Authenticate themselves to a third party
+- Disclose private information about themselves
+- Receive requests for disclosure about themselves
+- Receive and store signed third party verifications about themselves
+- Sign Ethereum transactions
 
 When interacting privately with a user you will be interchanging signed JWT([JSON Web Token](https://jwt.io/)). To verify the signature of the JWT you and your users will be fetching your public key from the public profile.  
 
@@ -39,7 +39,7 @@ const credentials = new Credentials({
 ```
 
 There may also be cases where you want identities to be created dynamically, either in the browser or on a server.  This can be accomplished with the static `Credentials.createIdentity()` method, which generates an ethereum keypair, and returns an object containing the associated did and private key.
-```
+```javascript
 // Create a credentials object for a brand new identity
 const {did, privateKey} = Credentials.createIdentity()
 const credentials = new Credentials({
@@ -48,7 +48,7 @@ const credentials = new Credentials({
 ```
 
 Finally, we continue to support older uport identities described by an [MNID](http://github.com/uport-project/mnid)-encoded ethereum address.  These identifiers can be expressed as a did via the 'uport' did method: `did:uport:<mnid>`
-```
+```javascript
 // For legacy application identity created on App Manager
 const credentials = new Credentials({
   appName: 'App Name',
@@ -63,7 +63,7 @@ To request information from your user you create a Selective Disclosure Request 
 
 ```javascript
 credentials.createDisclosureRequest().then(requestToken => {
-  // send requestToken to browser
+  // send requestToken to browser or transport
 })
 ```
 
@@ -74,7 +74,7 @@ credentials.createDisclosureRequest().then({
   requested: ['name', 'phone', 'identity_no'],
   callbackUrl: 'https://....' // URL to send the response of the request to
 }).then(requestToken => {
-  // send requestToken to browser
+  // send requestToken to browser or transport
 })
 ```
 
@@ -83,7 +83,7 @@ If you need to know the users address on a specific ethereum network, specify it
 ```javascript
 // Request an address on Rinkeby
 credentials.requestDisclosure({networkId: '0x4'}).then(requestToken => {
-  // send requestToken to browser
+  // send requestToken to browser or transport
 })
 ```
 
@@ -91,7 +91,7 @@ When a response JWT is received, it can be parsed and verified via the `verifyDi
 
 ```javascript
 credentials.verifyDisclosureResponse(responseToken).then(verifiedData => {
-  // Do stuff with verified data
+  // Do stuff with verified data or transport
 })
 ```
 
@@ -155,4 +155,3 @@ const txRequest = myContract.transfer(...).then(txRequestToken => {
 ---------------------------------------------------
 
 This library is part of a suite of tools maintained by the uPort Project, a Consensys formation.  For more information on the project, visit [uport.me](https://uport.me)
-

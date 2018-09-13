@@ -24,6 +24,7 @@ const Types = {
  * credentials and signed mobile app requests (ex. selective disclosure requests
  * for private data). It also provides signature verification over signed payloads.
  */
+ 
 class Credentials {
   /**
    * Instantiates a new uPort Credentials object
@@ -73,16 +74,16 @@ class Credentials {
    *   signer: mySigner
    * })
    *
-   * @param       {Object}            [settings]             setttings
-   * @param       {DID}               settings.did           Application [DID](https://w3c-ccg.github.io/did-spec/#decentralized-identifiers-dids) (unique identifier) for your application
-   * @param       {String}            settings.privateKey    A hex encoded 32 byte private key
-   * @param       {SimpleSigner}      settings.signer        a signer object, see [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions)
-   * @param       {Object}            settings.ethrConfig    Configuration object for ethr did resolver. See [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver)
-   * @param       {Object}            settings.muportConfig  Configuration object for muport did resolver. See [muport-did-resolver](https://github.com/uport-project/muport-did-resolver)
-   * @param       {Address}           settings.address       DEPRECATED your uPort address (may be the address of your application's uPort identity)
-   * @param       {Object}            settings.networks      DEPRECATED networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
-   * @param       {UportLite}         settings.registry      DEPRECATED a registry object from UportLite
-   * @return      {Credentials}                              self
+   * @param       {Object}            [settings]               optional setttings
+   * @param       {DID}               [settings.did]           Application [DID](https://w3c-ccg.github.io/did-spec/#decentralized-identifiers-dids) (unique identifier) for your application
+   * @param       {String}            [settings.privateKey]    A hex encoded 32 byte private key
+   * @param       {SimpleSigner}      [settings.signer]        a signer object, see [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions)
+   * @param       {Object}            [settings.ethrConfig]    Configuration object for ethr did resolver. See [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver)
+   * @param       {Object}            [settings.muportConfig]  Configuration object for muport did resolver. See [muport-did-resolver](https://github.com/uport-project/muport-did-resolver)
+   * @param       {Address}           [settings.address]       DEPRECATED your uPort address (may be the address of your application's uPort identity)
+   * @param       {Object}            [settings.networks]      DEPRECATED networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
+   * @param       {UportLite}         [settings.registry]      DEPRECATED a registry object from UportLite
+   * @return      {Credentials}                                self
    */
   constructor ({did, address, privateKey, signer, networks, registry, ethrConfig, muportConfig} = {}) {
     if (signer) {
@@ -198,8 +199,8 @@ class Credentials {
    *   ...
    *  })
    *
-   * @param    {Object}            [credential]           a unsigned credential object
-   * @param    {String}            credential.sub         subject of credential (a uPort address)
+   * @param    {Object}            [credential]           a unsigned claim object
+   * @param    {String}            credential.sub         subject of credential (a valid DID)
    * @param    {String}            credential.claim       claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
    * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
@@ -209,7 +210,7 @@ class Credentials {
   }
 
   /**
-   *  Creates a signed request for the user to attest a list of claims.
+   *  Creates a request a for a DID to [sign a verification](https://github.com/uport-project/specs/blob/develop/messages/verificationreq.md)
    *
    *  @example
    *  const unsignedClaim = {
@@ -228,13 +229,13 @@ class Credentials {
    *    // ...
    *  })
    *
-   * @param    {Object}      unsignedClaim     an object that is an unsigned claim which you want the user to attest
-   * @param    {Object}      opts
-   *   @param    {String}      opts.aud          the DID of the identity you want to sign the attestation
-   *   @param    {String}      opts.sub          the DID which the unsigned claim is about
-   *   @param    {String}      opts.riss          The DID of the identity you want to sign the Verified Claim
-   *   @param    {String}      opts.callbackUrl  the url to receive the response of this request
-   * @returns  {Promise<Object, Error>}        a promise which resolves with a signed JSON Web Token or rejects with an error
+   * @param    {Object}      unsignedClaim       Unsigned claim object which you want the user to attest
+   * @param    {Object}      [opts]
+   * @param    {String}      [opts.aud]          The DID of the identity you want to sign the attestation
+   * @param    {String}      [opts.sub]          The DID which the unsigned claim is about
+   * @param    {String}      [opts.riss]         The DID of the identity you want to sign the Verified Claim
+   * @param    {String}      [opts.callbackUrl]  The url to receive the response of this request
+   * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
   createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl} = {}) {
     return this.signJWT({unsignedClaim, sub, riss, aud, callback: callbackUrl, type: Types.VER_REQ})
@@ -254,9 +255,13 @@ class Credentials {
    *    ...
    *  })
    *
-   *  @param    {Object}    txObj
-   *  @param    {String}    [id='addressReq']    string to identify request, later used to get response
-   *  @return   {String}                         a transaction request jwt
+   *  @param    {Object}    txObj               A web3 style transaction object
+   *  @param    {Object}    [opts]
+   *  @param    {String}    [opts.callbackUrl]  The url to receive the response of this request
+   *  @param    {String}    [opts.exp]          Time at which this request expires and is no longer valid (seconds since epoch)
+   *  @param    {String}    [opts.networkId]    Network ID for which this transaction request is for
+   *  @param    {String}    [opts.label]
+   *  @return   {String}                        a transaction request jwt
    */
   createTxRequest(txObj, { callbackUrl, exp = 600, networkId, label } = {}) {
     const payload = {}
@@ -297,9 +302,10 @@ class Credentials {
   }
 
   /**
-   * Parse a selective disclosure response, and verify signatures on each included signed claim ("verification")
+   * Parse a selective disclosure response, and verify signatures on each signed claim ("verification") included.
    *
    * @param     {Object}             response       A selective disclosure response payload, with associated did doc
+   * @param     {Object}             response.payload   A selective disclosure response payload, with associated did doc
    * @param     {Object}             response.doc
    */
   async processDisclosurePayload ({doc, payload}) {
@@ -320,8 +326,8 @@ class Credentials {
   }
 
   /**
-   *  Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from mobile
-   *  app as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
+   *  Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from uPort
+   *  client as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
    *
    *  It Verifies and parses the given response token and verifies the challenge response flow.
    *
@@ -329,7 +335,7 @@ class Credentials {
    *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
    *  credentials.verifyDisclosureResponse(resToken).then(res => {
    *      const credentials = res.verified
-   *       const name =  res.name
+   *      const name =  res.name
    *      ...
    *  })
    *
@@ -381,8 +387,8 @@ class Credentials {
    *  a given contract. Similar to web3.eth.contract but with promises. Once specifying .at(address)
    *  you can call the contract functions with this object. Each call will create a request.
    *
-   *  @param    {Object}       abi                                   contract ABI
-   *  @return   {Object}                                             contract object
+   *  @param    {Object}       abi          contract ABI
+   *  @return   {Object}                    contract object
    */
   contract (abi) {
     const txObjHandler = (txObj, opts) => {
