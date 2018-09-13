@@ -232,11 +232,12 @@ class Credentials {
    * @param    {Object}      opts            
    *   @param    {String}      opts.aud          the DID of the identity you want to sign the attestation
    *   @param    {String}      opts.sub          the DID which the unsigned claim is about
+   *   @param    {String}      opts.riss          The DID of the identity you want to sign the Verified Claim
    *   @param    {String}      opts.callbackUrl  the url to receive the response of this request
    * @returns  {Promise<Object, Error>}        a promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim, {aud, sub, callbackUrl} = {}) {
-    return this.signJWT({unsignedClaim, sub, aud, callback: callbackUrl, type: Types.VER_REQ})
+  createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl} = {}) {
+    return this.signJWT({unsignedClaim, sub, riss, aud, callback: callbackUrl, type: Types.VER_REQ})
   }
 
   /**
