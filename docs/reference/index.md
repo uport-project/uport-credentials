@@ -5,8 +5,6 @@ category: "uport-credentials"
 type: "reference"
 ---
 
-
-
 <a name="Credentials"></a>
 
 ## Credentials
