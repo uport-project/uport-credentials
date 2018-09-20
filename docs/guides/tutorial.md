@@ -1,5 +1,5 @@
 ---
-title: "Uport-Credentials Server"
+title: "Get Started with Uport-Credentials"
 index: 1
 category: "uport-credentials"
 type: "tutorial"

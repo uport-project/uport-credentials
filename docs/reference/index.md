@@ -1,5 +1,5 @@
 ---
-title: "Uport Credentials"
+title: "Library Reference"
 index: 4
 category: "uport-credentials"
 type: "reference"
