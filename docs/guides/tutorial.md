@@ -15,11 +15,9 @@ The code for this tutorial can be found in the [Uport-Credentials examples.](git
 
 ## Register The App
 
-First we wish to create identities for our apps. You can skip this step if you're ok with using the default identities that are hardcoded in the tutorial files. To create identities, go to the [uPort AppManager](https://appmanager.uport.me), connect with your uPort, and select "New App". This will create a uPort identity for your app, and will display a private key, which you will use on the server to sign credentials. It's important that you save this key!
+This tutorial uses sample application identities (i.e. private keys) to issue and verify credentials on a server.  For your own applications, you should be sure to create an identity using the uPort [app configuration wizard](https://developer.uport.me/myapps) -- click on **Register an App**, and you will be guided through the process of creating and saving an application identity. For this tutorial, feel free to follow along using the provided sample identities.
 
-Go ahead and create identities for the Creator and Requestor, or if you wish to skip this step we have created identities for these services already, with the private keys and addresses hard coded in the apps.
-
-*Please note that in practice the signing key for the identity should be protected information*
+*Please note that in practice the signing key for the identity should be kept secret!*
 
 ## Creator service
 
