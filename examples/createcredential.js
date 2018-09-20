@@ -11,7 +11,7 @@ var credentials = new uport.Credentials({
 })
 
 app.get('/', function (req, res) {
-  credentials.attest({
+  credentials.createVerification({
     sub: 'did:uport:2omWsSGspY7zhxaG6uHyoGtcYxoGeeohQXz',
     exp: 1552046024,
     claim: {'My Title' : {'KeyOne' : 'ValueOne', 'KeyTwo' : 'Value2', 'Last Key' : 'Last Value'} }
