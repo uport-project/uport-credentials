@@ -33,7 +33,7 @@ app.post('/callback', function (req, res) {
   var jwt = req.body.access_token
   console.log(jwt)
 
-  credentials.verifyDisclosureResponse(jwt).then( function(creds) {
+  credentials.authenticateDisclosureResponse(jwt).then( function(creds) {
     console.log(creds)
     if (creds.address == creds.verified[0].sub && 
        creds.verified[0].iss == '2od4Re9CL92phRUoAhv1LFcFkx2B9UAin92' &&

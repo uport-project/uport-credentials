@@ -95,7 +95,7 @@ and go to `http://localhost:8088` in your browser.
 
 When the mobile app user approves the request to share her credential after scanning the code, the `/callback` route is called using `app.post('/callback')`. Here we fetch the response JWT using `req.body.access_token`.
 
-Once we have the JWT we wish to validate it. We use the `verifyDisclsoureResponse()` function first. This validates the JWT by checking that the signature matches the public key of the issuer. This validation is done both for the overall JWT and also for the JWTs that are sent in the larger payload.
+Once we have the JWT we wish to validate it. We use the `authenticateDisclosureResponse()` function first. This validates the JWT by checking that the signature matches the public key of the issuer. This validation is done both for the overall JWT and also for the JWTs that are sent in the larger payload.
 
 Next we check that the issuer of the response token (i.e. the user) matches the subject (`sub` field) of the returned credential, that the issuer of the returned credential is the Creator App, and that the credential has title `My Title` with the values defined by the Creator App.
 
