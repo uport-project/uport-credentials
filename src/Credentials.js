@@ -151,6 +151,8 @@ class Credentials {
    *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
    *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
    *  @param    {String}             params.networkId      network id of Ethereum chain of identity eg. 0x4 for rinkeby
+   *  @param    {Object}             params.issc           Issuer claims, i.e. self-attested facts about the identity requesting the disclosure
+   *  @param    {String[]}           params.vc             An array of JWTs about the requester, signed by 3rd parties
    *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", "devicekey" or "none"
    *  @param    {Number}             expiresIn             Seconds until expiry
    *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
@@ -225,6 +227,8 @@ class Credentials {
    * @param    {String}      [opts.sub]          The DID which the unsigned claim is about
    * @param    {String}      [opts.riss]         The DID of the identity you want to sign the Verified Claim
    * @param    {String}      [opts.callbackUrl]  The url to receive the response of this request
+   * @param    {Object}      [opts.issc]         Issuer claims, i.e. self-attested facts about the identity requesting the signature
+   * @param    {Object[]}    [opts.vc]           An array of JWTs about the requester, signed by 3rd parties
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
   createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl, vc, issc} = {}) {
