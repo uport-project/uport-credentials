@@ -1,15 +1,14 @@
-const arrayContainsArray = require('ethjs-util').arrayContainsArray;
-import { isMNID } from 'mnid'
+
 // A derivative work of Nick Dodson's eths-contract https://github.com/ethjs/ethjs-contract/blob/master/src/index.js
 
-const hasTransactionObject = (args) => {
-  const txObjectProperties = ['from', 'to', 'data', 'value', 'gasPrice', 'gas'];
-  if (typeof args === 'object' && Array.isArray(args) === true && args.length > 0) {
-    if (typeof args[args.length - 1] === 'object'
-      && (Object.keys(args[args.length - 1]).length === 0
-      || arrayContainsArray(Object.keys(args[args.length - 1]), txObjectProperties, true))) {
-      return true;
-    }
+const isTransactionObject = (txObj) => {
+  const txObjectProperties = ['from', 'to', 'data', 'value', 'gasPrice', 'gas']
+  if (typeof txObj !== 'object') return false
+  // Return true for empty object
+  if (Object.keys(txObj).length === 0) return true
+  // Also return true if the object contains any of the expected txObject properties
+  for (const prop of txObjectProperties) {
+    if (prop in txObj) return true
   }
 
   return false;
@@ -67,19 +66,23 @@ const ContractFactory = (extend) => (contractABI) => {
 
           let providedTxObject = {};
           const methodArgs = [].slice.call(arguments);
+          const nArgs = methodObject.inputs.length
 
           if (methodObject.type === 'function') {
-            if (hasTransactionObject(methodArgs)) providedTxObject = methodArgs.pop();
-            const methodTxObject = Object.assign({},
-                providedTxObject, {
-                  to: self.address,
-              });
+            // Remove transaction object if provided
+            if (isTransactionObject(methodArgs[nArgs])) {
+              providedTxObject = methodArgs.splice(nArgs, 1)[0]
+            }
 
-            methodTxObject.function = encodeMethodReadable(methodObject, methodArgs)
+            const methodTxObject = {
+              ...providedTxObject,
+              to: self.address,
+              function: encodeMethodReadable(methodObject, methodArgs)
+            }
 
             if (!extend) return methodTxObject
 
-            const extendArgs = methodArgs.slice(methodObject.inputs.length)
+            const extendArgs = methodArgs.slice(nArgs)
             return extend(methodTxObject, ...extendArgs)
           }
         };
