@@ -158,25 +158,15 @@ class Credentials {
    */
   createDisclosureRequest (params = {}, expiresIn = 600) {
     const payload = {}
+    if (params.requested) payload.requested = params.requested
+    if (params.verified) payload.verified = params.verified
+    if (params.notifications) payload.permissions = ['notifications']
+    if (params.callbackUrl) payload.callback = params.callbackUrl
+    if (params.network_id) payload.net = params.network_id
+    if (params.issc) payload.issc = params.issc
+    if (params.vc) payload.vc = params.vc
+    if (params.exp) payload.exp = params.exp
 
-    if (params.requested) {
-      payload.requested = params.requested
-    }
-    if (params.verified) {
-      payload.verified = params.verified
-    }
-    if (params.notifications) {
-      payload.permissions = ['notifications']
-    }
-    if (params.callbackUrl) {
-      payload.callback = params.callbackUrl
-    }
-    if (params.networkId) {
-      payload.net = params.networkId
-    }
-    if (params.issc) {
-      payload.issc = params.issc
-    }
     if (params.accountType) {
       if (['general', 'segregated', 'keypair', 'none'].indexOf(params.accountType) >= 0) {
         payload.act = params.accountType
@@ -184,10 +174,15 @@ class Credentials {
         return Promise.reject(new Error(`Unsupported accountType ${params.accountType}`))
       }
     }
+<<<<<<< HEAD
     if (params.exp) {
       payload.exp = params.exp
     }
     return this.signJWT({...payload, type: Types.DISCLOSURE_REQUEST}, params.exp ? undefined : expiresIn)
+=======
+    
+    return this.signJWT({...payload, type: Types.SHARE_REQ}, params.exp ? undefined : expiresIn)
+>>>>>>> feat: add vc param in disclosure request
   }
 
   /**
@@ -240,8 +235,8 @@ class Credentials {
    * @param    {String}      [opts.callbackUrl]  The url to receive the response of this request
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl} = {}) {
-    return this.signJWT({unsignedClaim, sub, riss, aud, callback: callbackUrl, type: Types.VERIFICATION_SIGNATURE_REQUEST})
+  createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl, vc, issc} = {}) {
+    return this.signJWT({unsignedClaim, sub, riss, aud, vc, issc, callback: callbackUrl, type: Types.VERIFICATION_SIGNATURE_REQUEST})
   }
 
   /**
