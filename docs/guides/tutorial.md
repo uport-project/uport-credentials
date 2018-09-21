@@ -13,9 +13,18 @@ Here we will demonstrate how to create and sign a custom credential on a server 
 The code for this tutorial can be found in the [Uport-Credentials examples.](github.com/uport-project/uport-credentials/blob/develop/examples/).
 
 
-## Register The App
+## Create an Identity
 
-This tutorial uses sample application identities (i.e. private keys) to issue and verify credentials on a server.  For your own applications, you should be sure to create an identity using the uPort [app configuration wizard](https://developer.uport.me/myapps) -- click on **Register an App**, and you will be guided through the process of creating and saving an application identity. For this tutorial, feel free to follow along using the provided sample identities.
+This tutorial uses sample application identities (i.e. private keys) to issue and verify credentials on a server.  For your own applications, you can create a new private key with this library, using the code snippet below:
+```
+$ node
+> const { Credentials } = require('uport')
+> Credentials.createIdentity()
+{
+  did: 'did:ethr:0x123...',
+  privateKey: '3402abe3d...'
+}
+```
 
 *Please note that in practice the signing key for the identity should be kept secret!*
 
