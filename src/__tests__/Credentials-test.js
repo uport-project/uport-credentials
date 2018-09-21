@@ -105,8 +105,22 @@ describe('createIdentity()', () => {
 
 describe('signJWT', () => {
   describe('uport method', () => {
-    it('uses ES256K algorithm', async () => {
+    it('uses ES256K algorithm with address = mnid', async () => {
       const credentials = new Credentials({address: mnid, privateKey})
+      const jwt = await credentials.signJWT({hello: 1})
+      const { header } = decodeJWT(jwt)
+      expect(header.alg).toEqual('ES256K')
+    })
+
+    it('uses ES256K with did = mnid', async () => {
+      const credentials = new Credentials({did: mnid, privateKey})
+      const jwt = await credentials.signJWT({hello: 1})
+      const { header } = decodeJWT(jwt)
+      expect(header.alg).toEqual('ES256K')
+    })
+
+    it('uses ES256K with did = did:uport:mnid', async () => {
+      const credentials = new Credentials({did: `did:uport:${mnid}`, privateKey})
       const jwt = await credentials.signJWT({hello: 1})
       const { header } = decodeJWT(jwt)
       expect(header.alg).toEqual('ES256K')
