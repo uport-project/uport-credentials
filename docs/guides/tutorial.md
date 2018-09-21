@@ -41,7 +41,7 @@ var credentials = new uport.Credentials({
 })
 ```
 
-When we hit the default route using `app.get('/')` we will call `credentials.createVerification()` in order to sign the credential. For the fields of the credential, the `sub` field is the subject. Set this to the uPort Id of the user that is supposed to receive the credential. For testing purposes this would be the uPort identity shown on the mobile app of the reader. The `exp` field is the expiry of the token, in Unix time (seconds precision). As `claim` field, put your own custom object, with a single primary key defining. The format of the claim is serializable javascript (JSON) object, or a string: `{'Title': {'key':'value', 'another key': 'another value', ...}}` or simply `{'Title' : 'Value'}`. 
+When we hit the default route using `app.get('/')` we will call `credentials.createVerification()` in order to sign the credential. For the fields of the credential, the `sub` field is the subject. Set this to the uPort Id of the user that is supposed to receive the credential. For testing purposes this would be the uPort identity shown on the mobile app of the reader. The `exp` field is the expiry of the token, in Unix time (seconds precision). As `claim` field, put your own custom object, with a single primary key defining the claime 'title'. The remainder of the claim is a serializable javascript (JSON) object, or a string: `{'Title': {'key':'value', 'another key': 'another value', ...}}` or simply `{'Title' : 'Value'}`. 
 
 ```js
 credentials.createVerification({
