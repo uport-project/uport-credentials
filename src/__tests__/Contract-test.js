@@ -357,5 +357,21 @@ describe('ContractFactory', () => {
       const tokenContract = Contract(abiToken).at(address)
       expect(tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10, str)).toEqual(str)
     });
+
+    it('passes additional args beyond a transaction object to the extend function', () => {
+      const extend = (txObj, id, sendOpts) => ({txObj, id, sendOpts})
+      const Contract = ContractFactory(extend)
+      const tokenContract = Contract(abiToken).at(address)
+
+      const txObj = {gas: '10000000'}
+      const id = 'WOOP'
+      const sendOpts = {woop: 'woop'}
+
+      const result = tokenContract.transfer('0xdeadbeef', 10, txObj, id, sendOpts)
+
+      expect(result.txObj).toMatchObject(txObj)
+      expect(result.id).toEqual(id)
+      expect(result.sendOpts).toEqual(sendOpts)
+    })
   });
 });
