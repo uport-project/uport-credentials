@@ -180,8 +180,8 @@ describe('createDisclosureRequest()', () => {
     return expect(response).toMatchSnapshot()
   })
 
-  it('includes issc in payload', async () => {
-    expect(createAndVerify({issc: {details: 'good'}})).toMatchSnapshot()
+  it('includes issc and vc in payload', async () => {
+    expect(createAndVerify({issc: {details: 'good'}, vc: ['woop']})).toMatchSnapshot()
   })
 
   it('has correct payload in JWT for a request', async () => {
