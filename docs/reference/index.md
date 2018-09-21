@@ -1,11 +1,9 @@
 ---
-title: "Uport Credentials"
+title: "Library Reference"
 index: 4
-category: "reference"
-type: "content"
+category: "uport-credentials"
+type: "reference"
 ---
-
-
 
 <a name="Credentials"></a>
 
@@ -144,6 +142,10 @@ const unsignedClaim = {
 <a name="Credentials+createTxRequest"></a>
 
 ### credentials.createTxRequest(txObj, [opts]) ⇒ <code>String</code>
+Given a transaction object, similarly defined as the web3 transaction object,
+ it creates a JWT transaction request and appends addtional request options.
+
+### credentials.createTxRequest(txObj, [id]) ⇒ <code>String</code>
 Given a transaction object, similarly defined as the web3 transaction object,
  it creates a JWT transaction request and appends addtional request options.
 

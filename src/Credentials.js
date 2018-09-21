@@ -276,7 +276,7 @@ class Credentials {
    *
    * This can either be used to share information about the signing identity or as the response to a
    * [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md),
-   * where it can be used to verifyDisclosureResponse the identity.
+   * where it can be used to authenticate the identity.
    *
    *  @example
    *  credentials.createDisclosureResponse({own: {name: 'Lourdes Valentina Gomez'}}).then(jwt => {
@@ -333,7 +333,7 @@ class Credentials {
    *
    *  @example
    *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
-   *  credentials.verifyDisclosureResponse(resToken).then(res => {
+   *  credentials.authenticateDisclosureResponse(resToken).then(res => {
    *      const credentials = res.verified
    *      const name =  res.name
    *      ...
@@ -343,7 +343,7 @@ class Credentials {
    *  @param    {String}                  [callbackUrl=null]    callbackUrl
    *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
    */
-  async verifyDisclosureResponse (token, callbackUrl = null) {
+  async authenticateDisclosureResponse (token, callbackUrl = null) {
     const { payload, doc } = await verifyJWT(token, {audience: this.did, callbackUrl, auth: true})
 
     if (payload.req) {
@@ -363,7 +363,7 @@ class Credentials {
   /**
    *  Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
    *
-   * The main difference between this and `verifyDisclosureResponse()` is that it does not verify the challenge.
+   * The main difference between this and `authenticateDisclosureResponse()` is that it does not verify the challenge.
    * This can be used to verify user profiles that have been shared through other methods such as QR codes and messages.
    *
    *  @example
