@@ -107,7 +107,7 @@ class Credentials {
       this.did = `did:ethr:${address}`
     }
 
-    this.signJWT = (payload, expiresIn) => createJWT(payload, {issuer: this.did, signer: this.signer, alg: this.did.match('^did:uport:') ? 'ES256K' : 'ES256K-R', expiresIn })
+    this.signJWT = (payload, expiresIn) => createJWT(payload, {issuer: this.did, signer: this.signer, alg: this.did.match('^did:uport:') || isMNID(this.did) ? 'ES256K' : 'ES256K-R', expiresIn })
 
     UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
     EthrDIDResolver(ethrConfig || {})
