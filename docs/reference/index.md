@@ -1,8 +1,9 @@
 ---
 title: "Library Reference"
-index: 4
+index: 10
 category: "uport-credentials"
 type: "reference"
+source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/reference/index.md"
 ---
 
 <a name="Credentials"></a>
@@ -23,7 +24,7 @@ for private data). It also provides signature verification over signed payloads.
         * [.createTxRequest(txObj, [opts])](#Credentials+createTxRequest) ⇒ <code>String</code>
         * [.createDisclosureResponse([payload])](#Credentials+createDisclosureResponse) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
         * [.processDisclosurePayload(response)](#Credentials+processDisclosurePayload)
-        * [.verifyDisclosureResponse(token, [callbackUrl])](#Credentials+verifyDisclosureResponse) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+        * [.authenticateDisclosureResponse(token, [callbackUrl])](#Credentials+authenticateDisclosureResponse) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
         * [.verifyDisclosure(token)](#Credentials+verifyDisclosure) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
         * [.contract(abi)](#Credentials+contract) ⇒ <code>Object</code>
     * _static_
@@ -145,10 +146,6 @@ const unsignedClaim = {
 Given a transaction object, similarly defined as the web3 transaction object,
  it creates a JWT transaction request and appends addtional request options.
 
-### credentials.createTxRequest(txObj, [id]) ⇒ <code>String</code>
-Given a transaction object, similarly defined as the web3 transaction object,
- it creates a JWT transaction request and appends addtional request options.
-
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
 **Returns**: <code>String</code> - a transaction request jwt  
 
@@ -181,7 +178,7 @@ Creates a [Selective Disclosure Response JWT](https://github.com/uport-project/s
 
 This can either be used to share information about the signing identity or as the response to a
 [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md),
-where it can be used to verifyDisclosureResponse the identity.
+where it can be used to authenticate the identity.
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
 **Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or rejects with an error  
@@ -216,9 +213,9 @@ Parse a selective disclosure response, and verify signatures on each signed clai
 | response.payload | <code>Object</code> | A selective disclosure response payload, with associated did doc |
 | response.doc | <code>Object</code> |  |
 
-<a name="Credentials+verifyDisclosureResponse"></a>
+<a name="Credentials+authenticateDisclosureResponse"></a>
 
-### credentials.verifyDisclosureResponse(token, [callbackUrl]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
+### credentials.authenticateDisclosureResponse(token, [callbackUrl]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
 Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from uPort
  client as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
 
@@ -235,7 +232,7 @@ Authenticates [Selective Disclosure Response JWT](https://github.com/uport-proje
 **Example**  
 ```js
 const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
- credentials.verifyDisclosureResponse(resToken).then(res => {
+ credentials.authenticateDisclosureResponse(resToken).then(res => {
      const credentials = res.verified
      const name =  res.name
      ...
@@ -248,7 +245,7 @@ const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
 ### credentials.verifyDisclosure(token) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
 Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
 
-The main difference between this and `verifyDisclosureResponse()` is that it does not verify the challenge.
+The main difference between this and `authenticateDisclosureResponse()` is that it does not verify the challenge.
 This can be used to verify user profiles that have been shared through other methods such as QR codes and messages.
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
