@@ -248,8 +248,8 @@ class Credentials {
         reject(new Error('Missing payload url for sending to users device'))
       }
       const iss = decodeJWT(token).payload.iss
-      const PUTUTU_URL = iss.match(/did/) ? 'https://api.uport.me' : 'https://pututu.uport.me'
-      let endpoint = iss.match(/did/) ? '/pututu/sns' : '/api/v2/sns'
+      const PUTUTU_URL = 'https://api.uport.me'
+      let endpoint = '/pututu/sns'
       const plaintext = padMessage(JSON.stringify(payload))
       const enc = encryptMessage(plaintext, pubEncKey)
       payload = { message: JSON.stringify(enc) }
