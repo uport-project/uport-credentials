@@ -1,5 +1,13 @@
 # uport-credentials
 
+**Required Upgrade to uport-credentials@1.0.0 or uport@^0.6.3**
+
+**^0.6.3 (uport) to support new both new uPort Mobile Clients and legacy uPort Mobile Clients - [View Details](https://github.com/uport-project/uport-js/releases/tag/v0.6.3)**
+
+**v1.0.0 (uport-credentials) to support only new uPort Mobile Clients and to use new features and fixes. In the future only v1.0.0 onwards will be supported.**
+
+:bangbang: :warning: **v1.0.0** is released at the npm next tag at **uport-credentials@next**. While **^0.6.3** remains at **uport** on npm.  Only the newest uPort Mobile Client release will work with **v1.0.0**. It will become the default release once the newest uPort Mobile Client release is widely adopted (~ 2 weeks). Reference master branch for docs and info on current default release **^0.6.3**. Documentation for **v1.0.0** can only be found here and in the docs folder. The [developer site](https://developer.uport.me) will not contain **v1.0.0** documentation until it is the default release :warning: :bangbang:
+
 ## Integrate uPort in your javascript application
 
 uPort provides a set of tools for creating and managing identities that conform to the [decentralized identifier (DID) specification](), and requesting and exchanging verified data between them.  This library simplifies the process of identity creation within javascript applications, and allows apps to easily sign pieces of data and verify data signed by other identities to facilitate secure communication between parties.  These pieces of data take the form of *signed [JSON web tokens](https://jwt.io/introduction/) (JWTs)* with specific fields designed for use with uPort clients, and described in the uPort [specifications](https://github.com/uport-project/specs), collectively referred to as *verifications*.
