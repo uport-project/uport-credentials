@@ -1,5 +1,5 @@
 ---
-title: "uPort Credentials Landing"
+title: "uPort Credentials"
 index: 0
 category: "uport-credentials"
 type: "landing"
