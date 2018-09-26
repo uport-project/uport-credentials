@@ -95,18 +95,8 @@ const ContractFactory = (extend) => (contractABI) => {
   return output;
 };
 
-const buildRequestURI = (txObject, {callbackUrl, type} = {}) => {
-  if (!isMNID(txObject.to)) throw new Error('To address must be MNID')
-  const uri = `me.uport:${txObject.to}`
-
-  const pairs = []
-  if (txObject.value)    pairs.push(['value', parseInt(txObject.value, 16)])
-  if (txObject.function) pairs.push(['function', txObject.function])
-  if (callbackUrl)       pairs.push(['callback_url', callbackUrl])
-  if (txObject.gasPrice) pairs.push(['gasPrice', txObject.gasPrice])
-  if (type)              pairs.push(['type',type])
-
-  return `${uri}?${pairs.map(kv => `${kv[0]}=${encodeURIComponent(kv[1])}`).join('&')}`
+const buildRequestURI = (txObject) => {
+  return `me.uport:${txObject.to}?function=${txObject.function}`
 }
 
 const Contract = ContractFactory(buildRequestURI)
