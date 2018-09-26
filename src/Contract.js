@@ -95,10 +95,4 @@ const ContractFactory = (extend) => (contractABI) => {
   return output;
 };
 
-const buildRequestURI = (txObject) => {
-  return `me.uport:${txObject.to}?function=${txObject.function}`
-}
-
-const Contract = ContractFactory(buildRequestURI)
-
-export { ContractFactory, Contract }
+export { ContractFactory }

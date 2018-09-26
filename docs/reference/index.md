@@ -198,7 +198,7 @@ credentials.createDisclosureResponse({own: {name: 'Lourdes Valentina Gomez'}}).t
      ...
  })
 
-
+ 
 ```
 <a name="Credentials+processDisclosurePayload"></a>
 

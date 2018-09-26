@@ -1,4 +1,10 @@
-import {Contract, ContractFactory } from '../Contract'
+import {ContractFactory } from '../Contract'
+
+
+const buildRequestURI = (txObject) => {
+  return `me.uport:${txObject.to}?function=${txObject.function}`
+}
+const Contract = ContractFactory(buildRequestURI)
 
 
 const address = '0x41566e3a081f5032bdcad470adb797635ddfe1f0'
