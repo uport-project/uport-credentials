@@ -13,10 +13,11 @@ import { ContractFactory } from './Contract.js'
 const secp256k1 = new EC('secp256k1')
 
 const Types = {
-  SHARE_REQ: 'shareReq',
-  SHARE_RESP: 'shareResp',
-  VER_REQ: 'verReq',
-  ETH_TX: 'ethtx'
+  DISCLOSURE_REQUEST: 'shareReq',
+  DISCLOSURE_RESPONSE: 'shareResp',
+  TYPED_DATA_SIGNATURE_REQUEST: 'signTypedDataReq',
+  VERIFICATION_SIGNATURE_REQUEST: 'verReq',
+  ETH_TX_REQUEST: 'ethtx'
 }
 
 /**
@@ -184,7 +185,7 @@ class Credentials {
     if (params.exp) {
       payload.exp = params.exp
     }
-    return this.signJWT({...payload, type: Types.SHARE_REQ}, params.exp ? undefined : expiresIn)
+    return this.signJWT({...payload, type: Types.DISCLOSURE_REQUEST}, params.exp ? undefined : expiresIn)
   }
 
   /**
@@ -238,7 +239,7 @@ class Credentials {
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
   createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl} = {}) {
-    return this.signJWT({unsignedClaim, sub, riss, aud, callback: callbackUrl, type: Types.VER_REQ})
+    return this.signJWT({unsignedClaim, sub, riss, aud, callback: callbackUrl, type: Types.VERIFICATION_SIGNATURE_REQUEST})
   }
 
   /**
@@ -319,7 +320,7 @@ class Credentials {
     if (callbackUrl) payload.callback = callbackUrl
     if (networkId) payload.net = networkId
     if (label) payload.label = label
-    return this.signJWT({...payload, ...txObj, type: Types.ETH_TX}, exp )
+    return this.signJWT({...payload, ...txObj, type: Types.ETH_TX_REQUEST}, exp )
   }
 
   /**
@@ -349,7 +350,7 @@ class Credentials {
         payload.aud = verified.issuer
       }
     }
-    return this.signJWT({...payload, type: Types.SHARE_RESP}, expiresIn)
+    return this.signJWT({...payload, type: Types.DISCLOSURE_RESPONSE}, expiresIn)
   }
 
   /**
