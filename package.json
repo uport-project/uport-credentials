@@ -57,7 +57,9 @@
     "jsdoc-to-markdown": "^4.0.1",
     "json-loader": "^0.5.4",
     "mockdate": "^2.0.1",
+    "ngrok": "^3.1.0",
     "nock": "^9.4.3",
+    "uport-transports": "^0.0.66",
     "webpack": "^4.16.2",
     "webpack-cli": "^2.0.15"
   }
