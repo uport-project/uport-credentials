@@ -52,7 +52,7 @@ $ node
 
 ## Creator service
 
-In the file `createcredential.js` we have a simple node `express` server. In the setup phase we will use the private key and DID we created above or alternatively there is already an example keypair available. We then create a `Credentials` object.
+In the file `createcredential.js` we have a simple node `express` server. In the setup phase we will use the private key and DID we created above or alternatively there is already an example keypair available. Now let's create a `Credentials` object.
 
 ```js
 var credentials = new uport.Credentials({
