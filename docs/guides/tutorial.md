@@ -8,9 +8,9 @@ source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/gu
 
 # Server-side Credentials
 
-Here we will demonstrate how to create and sign a custom credential on a server (called the Creator) and present this to a uPort identity. The user of the uPort app will add this credential to her list of credentials. Then we'll show how another service (called the Requestor) can request this credential and validate the corresponding JSON Web Token. This example can be found in the the [uport-credentials repo](github.com/uport-project/uport-credentials).
+Here we will demonstrate how to create and sign a custom credential on a server (called the Creator) and present this to a uPort identity. The user of the uPort app will add this credential to her list of credentials. Then we'll show how another service (called the Requestor) can request this credential and validate the corresponding JSON Web Token. This example can be found in the the [uport-credentials repository](github.com/uport-project/uport-credentials).
 
-To start, download repo, install and build, then find the code for this example in the examples folder:
+To start, clone the uport-credentials [repository](github.com/uport-project/uport-credentials). After installing dependencies and building, find the code for this example in the examples folder:
 
 ``` bash
 $ git clone https://github.com/uport-project/uport-credentials.git
