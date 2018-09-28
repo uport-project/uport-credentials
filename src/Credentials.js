@@ -15,7 +15,7 @@ const secp256k1 = new EC('secp256k1')
 const Types = {
   DISCLOSURE_REQUEST: 'shareReq',
   DISCLOSURE_RESPONSE: 'shareResp',
-  TYPED_DATA_SIGNATURE_REQUEST: 'signTypedDataReq',
+  TYPED_DATA_SIGNATURE_REQUEST: 'eip712Req',
   VERIFICATION_SIGNATURE_REQUEST: 'verReq',
   ETH_TX_REQUEST: 'ethtx'
 }
