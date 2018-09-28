@@ -1,9 +1,9 @@
 ---
-title: "uPort Credentials Landing"
+title: "uPort Credentials"
 index: 0
 category: "uport-credentials"
 type: "landing"
-source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/landing.md"
+source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/index.md"
 ---
 # uPort Credentials 
 
