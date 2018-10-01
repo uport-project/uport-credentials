@@ -13,10 +13,11 @@ import { ContractFactory } from './Contract.js'
 const secp256k1 = new EC('secp256k1')
 
 const Types = {
-  SHARE_REQ: 'shareReq',
-  SHARE_RESP: 'shareResp',
-  VER_REQ: 'verReq',
-  ETH_TX: 'ethtx'
+  DISCLOSURE_REQUEST: 'shareReq',
+  DISCLOSURE_RESPONSE: 'shareResp',
+  TYPED_DATA_SIGNATURE_REQUEST: 'eip712Req',
+  VERIFICATION_SIGNATURE_REQUEST: 'verReq',
+  ETH_TX_REQUEST: 'ethtx'
 }
 
 /**
@@ -151,7 +152,7 @@ class Credentials {
    *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
    *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
    *  @param    {String}             params.networkId      network id of Ethereum chain of identity eg. 0x4 for rinkeby
-   *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", "devicekey" or "none"
+   *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", or "none"
    *  @param    {Number}             expiresIn             Seconds until expiry
    *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
    */
@@ -184,7 +185,7 @@ class Credentials {
     if (params.exp) {
       payload.exp = params.exp
     }
-    return this.signJWT({...payload, type: Types.SHARE_REQ}, params.exp ? undefined : expiresIn)
+    return this.signJWT({...payload, type: Types.DISCLOSURE_REQUEST}, params.exp ? undefined : expiresIn)
   }
 
   /**
@@ -238,7 +239,58 @@ class Credentials {
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
   createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl} = {}) {
-    return this.signJWT({unsignedClaim, sub, riss, aud, callback: callbackUrl, type: Types.VER_REQ})
+    return this.signJWT({unsignedClaim, sub, riss, aud, callback: callbackUrl, type: Types.VERIFICATION_SIGNATURE_REQUEST})
+  }
+
+  /**
+   * Create a JWT requesting a signature on a piece of structured/typed data conforming to
+   * the ERC712 specification
+   * @example
+   * // A ERC712 Greeting Structure
+   * const data = {
+   *   types: {
+   *     EIP712Domain: [
+   *       {name: 'name', type: 'string'},
+   *       {name: 'version', type: 'string'},
+   *       {name: 'chainId', type: 'uint256'},
+   *       {name: 'verifyingContract', type: 'address'},
+   *       {name: 'salt', type: 'bytes32'}
+   *     ],
+   *     Greeting: [
+   *       {name: 'text', type: 'string'},
+   *       {name: 'subject', type: 'string'},
+   *     ]
+   *   },
+   *   domain: {
+   *     name: 'My dapp', 
+   *     version: '1.0', 
+   *     chainId: 1, 
+   *     verifyingContract: '0xdeadbeef',
+   *     salt: '0x999999999910101010101010'
+   *   },
+   *   primaryType: 'Greeting',
+   *   message: {
+   *     text: 'Hello',
+   *     subject: 'World'
+   *   }
+   * }
+   * const sub = 'did:ethr:0xbeef1234' // Who the claim is "about"
+   * const aud = 'did:ethr:0xbeef4567' // Who you are asking to sign the claim
+   * const callbackUrl = 'https://my.cool.site/handleTheResponse'
+   * const signRequestJWT = credentials.createTypedDataSignatureRequest(data, {sub, aud, callbackUrl})
+   * // Send the JWT to a client 
+   * // ...
+   * 
+   * @param {Object} typedData              the ERC712 data to sign
+   * @param {Object} opts                   additional options for the jwt
+   *   @param {String} opts.sub             the subject of the JWT (arbitrary)
+   *   @param {String} opts.aud             the did of the identity you want to sign the typed data
+   *   @param {String} opts.callbackUrl     callback URL to handle the response
+   * @returns {Promise<Object, Error>}      a promise which resolves to a signed JWT or rejects with an error
+   */
+  createTypedDataSignatureRequest(typedData, {sub, aud, callbackUrl} = {}) {
+    // TODO: Check if the typedData is a valid ERC712 ?
+    return this.signJWT({typedData, sub, aud, callback: callbackUrl, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
   }
 
   /**
@@ -268,7 +320,7 @@ class Credentials {
     if (callbackUrl) payload.callback = callbackUrl
     if (networkId) payload.net = networkId
     if (label) payload.label = label
-    return this.signJWT({...payload, ...txObj, type: Types.ETH_TX}, exp )
+    return this.signJWT({...payload, ...txObj, type: Types.ETH_TX_REQUEST}, exp )
   }
 
   /**
@@ -298,7 +350,7 @@ class Credentials {
         payload.aud = verified.issuer
       }
     }
-    return this.signJWT({...payload, type: Types.SHARE_RESP}, expiresIn)
+    return this.signJWT({...payload, type: Types.DISCLOSURE_RESPONSE}, expiresIn)
   }
 
   /**
@@ -350,7 +402,7 @@ class Credentials {
       const challenge = await verifyJWT(payload.req)
       if (challenge.payload.iss !== this.did) {
         throw new Error(`Challenge issuer does not match current identity: ${challenge.payload.iss} !== ${this.did}`)
-      } else if (challenge.payload.type !== Types.SHARE_REQ) {
+      } else if (challenge.payload.type !== Types.DISCLOSURE_REQUEST) {
         throw new Error(`Challenge payload type invalid: ${challenge.payload.type}`)
       } else {
         return this.processDisclosurePayload({payload, doc})
