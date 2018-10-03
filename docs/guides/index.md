@@ -1,8 +1,51 @@
+---
+title: "Getting Started with uPort Credentials"
+index: 1
+category: "uport-credentials"
+type: "guide"
+source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/guides/index.md"
+---
+
 # Getting Started
+
+## Configure Your Application
  
+In your application, you must first configure your uPort object with an identifier and a private key (or signer function). There are several ways to instantiate a credentials object. The most common approach is to save a DID and private key on a server for your application and create a credentials instance from your application's unique private key. Signed JWTs for requests and verifications can then be passed to a client-side application, and presented to a user as a QR code, or sent via a [transport](http://github.com/uport-project/uport-transports).
+ 
+```javascript
+import { Credentials } from 'uport-credentials'
+ 
+// For ethereum based addresses (ethr-did)
+const credentials = new Credentials({
+  appName: 'App Name',
+  did: 'did:ethr:0x....',
+  privateKey: process.env.PRIVATE_KEY
+})
+```
+## Generate an Ethereum Keypair 
+ 
+At times, you might want identities to be created dynamically. This can be accomplished with the static `Credentials.createIdentity()` method, which generates an Ethereum keypair and returns an object containing the associated DID and private key.
+```javascript
+// Create a credentials object for a new identity
+const {did, privateKey} = Credentials.createIdentity()
+const credentials = new Credentials({
+  appName: 'App Name', did, privateKey
+})
+```
+ 
+Finally, we continue to support older uPort identities described by an [MNID](http://github.com/uport-project/mnid)-encoded Ethereum address. These identifiers can be expressed as a DID via the 'uport' DID method: `did:uport:<mnid>`
+```javascript
+// For legacy application identity created on App Manager
+const credentials = new Credentials({
+  appName: 'App Name',
+  address: '2nQtiQG...', // MNID Encoded uPort Address For Your App
+  privateKey: process.env.PRIVATE_KEY
+})
+```
+
 ## Requesting Information From Your Users
  
-Once you’ve completed the steps required to [Configure Your Application](https://github.com/uport-project/uport-credentials/blob/develop/README.md), you can request information from your user, by creating a Selective Disclosure Request JWT. When this is presented to a user via a QR code or another [transport](https://github.com/uport-project/uport-transports), they will be prompted to approve sharing the request attributes. All requests will return a user's `DID`.
+You can request information from your user, by creating a Selective Disclosure Request JWT. When this is presented to a user via a QR code or another [transport](https://github.com/uport-project/uport-transports), they will be prompted to approve sharing the request attributes. All requests will return a user's `DID`.
  
 ```javascript
 credentials.createDisclosureRequest().then(requestToken => {
