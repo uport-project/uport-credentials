@@ -3,7 +3,7 @@
 [![Join the chat at](https://img.shields.io/badge/Riot-Join%20chat-green.svg)](https://chat.uport.me/#/login)
 [![Twitter Follow](https://img.shields.io/twitter/follow/uport_me.svg?style=social&label=Follow)](https://twitter.com/uport_me)
 
-[DID Specification](https://w3c-ccg.github.io/did-spec/) | [Getting Started](https://github.com/uport-project/uport-credentials/blob/develop/docs/guides/index.md)
+[DID Specification](https://w3c-ccg.github.io/did-spec/) | [Getting Started](/docs/guides/index.md)
 
 # uPort Credentials Library
 
@@ -24,7 +24,7 @@ uPort Credentials simplifies the process of identity creation within JavaScript 
  
 To allow for maximum flexibility, uPort Credential’s only deals with creation and validation of verifications. To pass verifications between a JavaScript application and a user via the uPort mobile app, we have developed the [uPort Transports library](https://github.com/uport-project/uport-transports), use it in conjunction with uPort Credentials when necessary.
 
-To hit the ground running with uPort Credentials, visit the [Getting Started guide](https://github.com/uport-project/uport-credentials/blob/develop/docs/guides/index.md). 
+To hit the ground running with uPort Credentials, visit the [Getting Started guide](/docs/guides/index.md). 
 
 For details on uPort's underlying architecture, read our [spec repo](https://github.com/uport-project/specs) or check out the [uPort identity contracts](https://github.com/uport-project/uport-identity).
 
