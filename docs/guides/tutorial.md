@@ -52,7 +52,7 @@ $ node
 
 ## Creator Service
 
-In the file `createcredential.js`, we have a simple node `express` server. In the setup phase, we will use the private key, and the DID we created above; alternatively, there is already an example key pair already available. We then create a `Credentials` object.
+In the file `createcredential.js`, we have a simple node `express` server. In the setup phase, we will use the private key, and the DID we created above; there is already an example key pair available in the file, but this should be replaced with your own keypair for any real application. Following along in the code, the first step is to create a `Credentials` object which will encapsulate our newly created keypair.
 
 ```js
 var credentials = new uport.Credentials({
@@ -61,32 +61,36 @@ var credentials = new uport.Credentials({
 })
 ```
 
-When we hit the default route using `app.get('/')` we will call `credentials.createVerification()` in order to sign the credential. For the fields of the credential, the `sub` field is the subject. Set this to the uPort ID of the user that is supposed to receive the credential. For testing purposes, this would be the uPort identity shown on the mobile app of the reader. The `exp` field is the expiry of the token, in Unix time (seconds precision). As `claim` field, put your own custom object, with a single primary key defining the claim 'title'. The remainder of the claim is a serializable JavaScript (JSON) object, or a string: `{'Title': {'key':'value', 'another key': 'another value', ...}}` or simply `{'Title' : 'Value'}`.
+This `Credentials` object has the ability to create messages containing or requesting verified data.  At the default route, we have a handler set up with `app.get('/')`, which simply calls the `createDisclosureRequest()` method on our new credentials object.  The disclosure request is a JSON web token (JWT), signed by our newly created identity, that requests some specific information from the user.  In particular, we request the ability to send push notifications to the user by including the `notifications: true` key-value pair.  When the request is sent to a user's mobile app, they will be asked to approve the disclosure of the requested attributes, in addition to their Decentralized Identifer, or `did`.
 
-```js
+In order to get this request to the user's mobile app, we can use a number of "transports" provided by the `uport-transports` library.  We will not go into the details of all of the available transports in this tutorial, but there are helpers available for using QR codes, push notifications, mobile-specific URLs, custom messaging servers, and others.  In this case, we present the request to the user in the form of a QR code, using `transports.ui.getImageDataURI`, after converting the JWT into a request URI.  The QR code is injected into the  page that gets served to the user.
+
+_**Note:** Some of the details of the transport layer can get complicated, as there are many cases to consider.  This is outside of the scope of this tutorial, which is focused on the practical side of requesting and exchanging credentials. For more details, visit the [repository](https://github.com/uport-project/uport-transports). Additionally, we provide another library, [`uport-connect`](https://github.com/uport-project/uport-connect), which comes with multiple different transports preconfigured._ 
+
+When you scan this code with your mobile app, you should see an alert that you are about to add a credential.  Addtionally, the page contains a clickable link which will open the uPort mobile app from a mobile browser.
+
+Note that in the above disclosure request, we set the `callbackUrl` field to `/callback`.  This is the route to which we should navigate when the response is received from the mobile app.  When we hit that route the `app.post('/callback')` handler will call `credentials.createVerification()` to sign a verification in line `57`.  
+```javascript
 credentials.createVerification({
-  sub: '<uport Id of identity in mobile app>',
-  exp: 1552046024,
-  claim: {'My Title' : {'KeyOne' : 'ValueOne', 'KeyTwo' : 'Value2', 'Last Key' : 'Last Value'}}
+  sub: did, // did of the current user
+  exp: Time30Days(), // calculate the timestamp for 30 days from now
+  claim: {'My Title' : {'KeyOne' : 'ValueOne', 'KeyTwo' : 'Value2', 'Last Key' : 'Last Value'} }
+  // Note, the above is a complex claim. Also supported are simple claims:
+  // claim: {'Key' : 'Value'}
 })
 ```
+The verification requires three fields: `sub`, which identifies the *subject* of the claim; `exp`, which is the unix epoch timestamp (in seconds) at which the claim should no longer be considered valid; and `claim`, which contains the data being signed. The claim can be any (serializable) javascript object (i.e. JSON), so feel free to edit the keys and values of the claim to anything you would like to issue to your users.  Also, notice that we set the `sub` field of the claim to the `did` of the user, which we have just received when they scanned the QR code with the uPort mobile app. 
 
-The `createVerification()` function returns a promise that resolves to a JSON Web Token. We're going to present this token to the user through a URL that looks like this:
+The `createVerification()` function returns a promise that resolves to a JSON Web Token (JWT). This time, we will make use of another transport from the `uport-transports` library (specifically, `transports.push.send`) to send the JWT as a push notification, without requiring the user to scan another QR code.  This transport requires a public encryption key and push token of the user to which it is being sent, both of which are included in the initial disclosure response.
 
-```
-https://id.uport.me/req/eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NkstUiJ9.eyJpYXQiOjE1MzgwNjMyNzIsImV4cCI6MTUzODA2Mzg3MiwidmVyaWZpZWQiOlsiTXkgVGl0bGUiXSwicGVybWlzc2lvbnMiOlsibm90aWZpY2F0aW9ucyJdLCJjYWxsYmFjayI6Imh0dHBzOi8vNDkwNDEyMjYubmdyb2suaW8vY2FsbGJhY2siLCJ0eXBlIjoic2hhcmVSZXEiLCJpc3MiOiJkaWQ6ZXRocjoweGJjM2FlNTliYzc2Zjg5NDgyMjYyMmNkZWY3YTIwMThkYmUzNTM4NDAifQ.5RMznAoaenqxYgycxuqKfuka1XfAHIDKMucnVLGEqs8qI1xmB_XTXGWb1Rw2EJhQtHBG9Br_0siIFAwRQvfoRgE?callback_type=post
-```
+When the `/callback` page loads, a push notification should appear in the mobile app of the user that has just scanned the QR code, containing the credential that you have edited above!
 
-We present this to the user in the form of a QR code. When you scan this code with your mobile app, you should see an alert that you are about to add a credential. It should reference the Creator app as the identity giving you this credential. This will add the credential locally to your phone.
-
-We also create a clickable link. If you click on this link in a mobile browser, it will take you to the uport iOS app.
-
-Once you’ve completed editing the file, you can run the Creator service like so:
+Once any of your edits are complete, you can test out this flow by starting the server with:
 ```bash
 $ node createcredential.js
 ```
 
-Open your browser to the URL output in the console; you should see the QR code with the credential, which you may scan with the uPort app. Look for output and responses in the terminal console again.
+Open your browser to the URL output in the console; you should see the QR code, which you may scan with the uPort app, intiating the disclosure request, and then the creation and delivery of a new verification. To see the format of the JWTs being passed around, look for output in the terminal console!
 
 ## Requestor Service
 
@@ -94,20 +98,11 @@ The file `requestcredential.js` contains a simple node express server which will
 
 As with the Creator service we start by setting up the `Credentials` object using the private key and DID we created above (or using the example provided). We also set up `bodyParser` so that we can parse the JWT that we will get back from the user.
 
-When we load the app using `app.get('/')` we use `createDisclosureRequest()` in order to request a specific credential from the user. Here we will request the `My Title` credential. We will use `verified` to denote which credentials we are requesting.
+When we load the app at the default route, our handler `app.get('/')` will call `createDisclosureRequest()` much like before, but this time we will request a specific credential from the user.  In a disclsoure request, the  `verified` key to denotes a list of credentials that we are requesting -- as written, this is the `My Title` credential.  If you changed the primary key of the credential that you issued in the `createcredentials.js` service, be sure that you change the name of the key in the `verified` array.
 
-The `callbackUrl` field specifies where the mobile app user should send the credential, assuming they agree to share it. This must be a publicly available endpoint so that the uPort client can post the response to it. By default the example uses [ngrok]() to create an available endpoint on demand. You could also remove ngrok and deploy the app somewhere.
+Once again we use the `callbackUrl` field to specify where we should handle the response from the user, assuming they agree to share it.  This must be a publicly available endpoint so that the uPort client can post the response to it. Here as above, the example servers are wrapped with [ngrok]() to create a publicly available endpoint on demand from a server running on localhost.
 
-```js
-credentials.createDisclosureRequest({
-  verified: [<Title of the credential>],
-  callbackUrl: 'http://<Your endpoint>/callback',
-})
-```
-
-The `createDisclosureRequest()` function creates a signed JWT containing the request. The mobile app can then validate that signature over your app DID which signed it.
-
-To interact with the server, run:
+To interact with this service, run:
 
 ```bash
 $ node requestcredential.js
@@ -124,7 +119,6 @@ If everything checks out, you should see the following output in the console:
 ```js
 Credential verified.
 ```
-
-in the console. Congratulations, you have verified the credential!
+Congratulations, you have verified the credential!
 
 To test everything out, try checking for a different attestation and make sure it fails. Also, try waiting until the request expires to make sure that the response fails &mdash; it should throw an error in this case.

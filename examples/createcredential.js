@@ -32,7 +32,6 @@ const credentials = new uport.Credentials({
  */
 app.get('/', (req, res) => {
   credentials.createDisclosureRequest({
-    verified: ['My Title'],
     notifications: true,
     callbackUrl: endpoint + '/callback'
   }).then(requestToken => {
