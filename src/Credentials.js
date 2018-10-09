@@ -152,28 +152,20 @@ class Credentials {
    *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
    *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
    *  @param    {String}             params.networkId      network id of Ethereum chain of identity eg. 0x4 for rinkeby
+   *  @param    {String[]}           params.vc             An array of JWTs about the requester, signed by 3rd parties
    *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", or "none"
    *  @param    {Number}             expiresIn             Seconds until expiry
    *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
    */
   createDisclosureRequest (params = {}, expiresIn = 600) {
     const payload = {}
-
-    if (params.requested) {
-      payload.requested = params.requested
-    }
-    if (params.verified) {
-      payload.verified = params.verified
-    }
-    if (params.notifications) {
-      payload.permissions = ['notifications']
-    }
-    if (params.callbackUrl) {
-      payload.callback = params.callbackUrl
-    }
-    if (params.networkId) {
-      payload.net = params.networkId
-    }
+    if (params.requested) payload.requested = params.requested
+    if (params.verified) payload.verified = params.verified
+    if (params.notifications) payload.permissions = ['notifications']
+    if (params.callbackUrl) payload.callback = params.callbackUrl
+    if (params.network_id) payload.net = params.network_id
+    if (params.vc) payload.vc = params.vc
+    if (params.exp) payload.exp = params.exp
 
     if (params.accountType) {
       if (['general', 'segregated', 'keypair', 'none'].indexOf(params.accountType) >= 0) {
@@ -182,9 +174,7 @@ class Credentials {
         return Promise.reject(new Error(`Unsupported accountType ${params.accountType}`))
       }
     }
-    if (params.exp) {
-      payload.exp = params.exp
-    }
+
     return this.signJWT({...payload, type: Types.DISCLOSURE_REQUEST}, params.exp ? undefined : expiresIn)
   }
 
@@ -206,8 +196,8 @@ class Credentials {
    * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
-  createVerification ({sub, claim, exp}) {
-    return this.signJWT({sub: sub, claim, exp})
+  createVerification ({sub, claim, exp, vc}) {
+    return this.signJWT({sub, claim, exp, vc})
   }
 
   /**
@@ -236,10 +226,11 @@ class Credentials {
    * @param    {String}      [opts.sub]          The DID which the unsigned claim is about
    * @param    {String}      [opts.riss]         The DID of the identity you want to sign the Verified Claim
    * @param    {String}      [opts.callbackUrl]  The url to receive the response of this request
+   * @param    {Object[]}    [opts.vc]           An array of JWTs about the requester, signed by 3rd parties
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl} = {}) {
-    return this.signJWT({unsignedClaim, sub, riss, aud, callback: callbackUrl, type: Types.VERIFICATION_SIGNATURE_REQUEST})
+  createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl, vc} = {}) {
+    return this.signJWT({unsignedClaim, sub, riss, aud, vc, callback: callbackUrl, type: Types.VERIFICATION_SIGNATURE_REQUEST})
   }
 
   /**

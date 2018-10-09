@@ -180,6 +180,10 @@ describe('createDisclosureRequest()', () => {
     return expect(response).toMatchSnapshot()
   })
 
+  it('includes vc in payload', async () => {
+    expect(createAndVerify({vc: ['woop']})).toMatchSnapshot()
+  })
+
   it('has correct payload in JWT for a request', async () => {
     const response = await createAndVerify({requested: ['name', 'phone']})
     return expect(response).toMatchSnapshot()
