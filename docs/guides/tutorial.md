@@ -1,12 +1,10 @@
 ---
-title: "Get Started with Uport-Credentials"
-index: 1
+title: "Server-side examples"
+index: 2
 category: "uport-credentials"
 type: "tutorial"
 source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/guides/tutorial.md"
 ---
-
-# Server-side Credentials
 
 In this toutorial, we will demonstrate how to create and sign a custom credential on a server (called the Creator) and present it to a uPort identity. The user of the uPort app will add this credential to their list of credentials. Later, we'll show you how another service (called the Requestor) can request this credential and validate the corresponding JSON Web Token. This example is available in the [uport-credentials repo](github.com/uport-project/uport-credentials).
 
@@ -50,7 +48,7 @@ $ node
 
 *Please note that in practice the signing key for the identity should remain private!*
 
-## Creator Service
+## Create Verification Service
 
 In the file `createcredential.js`, we have a simple node `express` server. In the setup phase, we will use the private key, and the DID we created above; there is already an example key pair available in the file, but this should be replaced with your own keypair for any real application. Following along in the code, the first step is to create a `Credentials` object which will encapsulate our newly created keypair.
 
@@ -90,9 +88,9 @@ Once any of your edits are complete, you can test out this flow by starting the 
 $ node createcredential.js
 ```
 
-Open your browser to the URL output in the console; you should see the QR code, which you may scan with the uPort app, intiating the disclosure request, and then the creation and delivery of a new verification. To see the format of the JWTs being passed around, look for output in the terminal console!
+Open your browser to the URL output in the console; you should see the QR code, which you may scan with the uPort app, initiating the disclosure request, and then the creation and delivery of a new verification. To see the format of the JWTs being passed around, look for output in the terminal console!
 
-## Requestor Service
+## Request Verification Service
 
 The file `requestcredential.js` contains a simple node express server which will request the same credential that the Creator service gave out. The Requestor server will then validate that the identity who is providing the credential is the same identity that received the credential from the Creator service.
 

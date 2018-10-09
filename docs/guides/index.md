@@ -10,7 +10,7 @@ source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/gu
 
 ## Configure Your Application
  
-In your application, you must first configure your uPort object with an identifier and a private key (or signer function). There are several ways to instantiate a credentials object. The most common approach is to save a DID and private key on a server for your application and create a credentials instance from your application's unique private key. Signed JWTs for requests and verifications can then be passed to a client-side application, and presented to a user as a QR code, or sent via a [transport](http://github.com/uport-project/uport-transports).
+In your application, you must first configure your uPort object with an identifier and a private key (or signer function). There are several ways to instantiate a credentials object. The most common approach is to save a DID and private key on a server for your application and create a credentials instance from your application's unique private key. Signed JWTs for requests and verifications can then be passed to a client-side application, and presented to a user using a QR code or via another [transport](http://github.com/uport-project/uport-transports).
  
 ```javascript
 import { Credentials } from 'uport-credentials'
@@ -38,7 +38,7 @@ Finally, we continue to support older uPort identities described by an [MNID](ht
 // For legacy application identity created on App Manager
 const credentials = new Credentials({
   appName: 'App Name',
-  address: '2nQtiQG...', // MNID Encoded uPort Address For Your App
+  did: 'did:uport:2nQtiQG...',  //append MNID encoded address using did:uport method 
   privateKey: process.env.PRIVATE_KEY
 })
 ```
