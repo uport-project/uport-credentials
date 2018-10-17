@@ -87,16 +87,7 @@ class Credentials {
    * @param       {UportLite}         [settings.registry]      DEPRECATED a registry object from UportLite
    * @return      {Credentials}                                self
    */
-  constructor({
-    did,
-    address,
-    privateKey,
-    signer,
-    networks,
-    registry,
-    ethrConfig,
-    muportConfig,
-  } = {}) {
+  constructor({ did, address, privateKey, signer, networks, registry, ethrConfig, muportConfig } = {}) {
     if (signer) {
       this.signer = signer
     } else if (privateKey) {
@@ -122,17 +113,11 @@ class Credentials {
       createJWT(payload, {
         issuer: this.did,
         signer: this.signer,
-        alg:
-          this.did.match('^did:uport:') || isMNID(this.did)
-            ? 'ES256K'
-            : 'ES256K-R',
+        alg: this.did.match('^did:uport:') || isMNID(this.did) ? 'ES256K' : 'ES256K-R',
         expiresIn,
       })
 
-    UportDIDResolver(
-      registry ||
-        UportLite({ networks: networks ? configNetworks(networks) : {} }),
-    )
+    UportDIDResolver(registry || UportLite({ networks: networks ? configNetworks(networks) : {} }))
     EthrDIDResolver(ethrConfig || {})
     MuportDIDResolver(muportConfig || {})
     HttpsDIDResolver()
@@ -191,23 +176,14 @@ class Credentials {
     if (params.exp) payload.exp = params.exp
 
     if (params.accountType) {
-      if (
-        ['general', 'segregated', 'keypair', 'none'].indexOf(
-          params.accountType,
-        ) >= 0
-      ) {
+      if (['general', 'segregated', 'keypair', 'none'].indexOf(params.accountType) >= 0) {
         payload.act = params.accountType
       } else {
-        return Promise.reject(
-          new Error(`Unsupported accountType ${params.accountType}`),
-        )
+        return Promise.reject(new Error(`Unsupported accountType ${params.accountType}`))
       }
     }
 
-    return this.signJWT(
-      { ...payload, type: Types.DISCLOSURE_REQUEST },
-      params.exp ? undefined : expiresIn,
-    )
+    return this.signJWT({ ...payload, type: Types.DISCLOSURE_REQUEST }, params.exp ? undefined : expiresIn)
   }
 
   /**
@@ -261,10 +237,7 @@ class Credentials {
    * @param    {Object[]}    [opts.vc]           An array of JWTs about the requester, signed by 3rd parties
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(
-    unsignedClaim,
-    { aud, sub, riss, callbackUrl, vc } = {},
-  ) {
+  createVerificationSignatureRequest(unsignedClaim, { aud, sub, riss, callbackUrl, vc } = {}) {
     return this.signJWT({
       unsignedClaim,
       sub,
@@ -360,10 +333,7 @@ class Credentials {
     if (callbackUrl) payload.callback = callbackUrl
     if (networkId) payload.net = networkId
     if (label) payload.label = label
-    return this.signJWT(
-      { ...payload, ...txObj, type: Types.ETH_TX_REQUEST },
-      exp,
-    )
+    return this.signJWT({ ...payload, ...txObj, type: Types.ETH_TX_REQUEST }, exp)
   }
 
   /**
@@ -393,10 +363,7 @@ class Credentials {
         payload.aud = verified.issuer
       }
     }
-    return this.signJWT(
-      { ...payload, type: Types.DISCLOSURE_RESPONSE },
-      expiresIn,
-    )
+    return this.signJWT({ ...payload, type: Types.DISCLOSURE_RESPONSE }, expiresIn)
   }
 
   /**
@@ -410,9 +377,7 @@ class Credentials {
     const credentials = {
       ...(doc.uportProfile || {}),
       ...(payload.own || {}),
-      ...(payload.capabilities && payload.capabilities.length === 1
-        ? { pushToken: payload.capabilities[0] }
-        : {}),
+      ...(payload.capabilities && payload.capabilities.length === 1 ? { pushToken: payload.capabilities[0] } : {}),
       did: payload.iss,
       boxPub: payload.boxPub,
     }
@@ -424,9 +389,7 @@ class Credentials {
       credentials.deviceKey = payload.dad
     }
     if (payload.verified) {
-      const verified = await Promise.all(
-        payload.verified.map(token => verifyJWT(token, { audience: this.did })),
-      )
+      const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, { audience: this.did })))
       return {
         ...credentials,
         verified: verified.map(v => ({ ...v.payload, jwt: v.jwt })),
@@ -464,15 +427,9 @@ class Credentials {
     if (payload.req) {
       const challenge = await verifyJWT(payload.req)
       if (challenge.payload.iss !== this.did) {
-        throw new Error(
-          `Challenge issuer does not match current identity: ${
-            challenge.payload.iss
-          } !== ${this.did}`,
-        )
+        throw new Error(`Challenge issuer does not match current identity: ${challenge.payload.iss} !== ${this.did}`)
       } else if (challenge.payload.type !== Types.DISCLOSURE_REQUEST) {
-        throw new Error(
-          `Challenge payload type invalid: ${challenge.payload.type}`,
-        )
+        throw new Error(`Challenge payload type invalid: ${challenge.payload.type}`)
       } else {
         return this.processDisclosurePayload({ payload, doc })
       }
@@ -527,9 +484,7 @@ const configNetworks = nets => {
     if (typeof net === 'object') {
       ;['registry', 'rpcUrl'].forEach(key => {
         if (!net.hasOwnProperty(key))
-          throw new Error(
-            `Malformed network config object, object must have '${key}' key specified.`,
-          )
+          throw new Error(`Malformed network config object, object must have '${key}' key specified.`)
       })
     } else {
       throw new Error(`Network configuration object required`)
