@@ -5,6 +5,7 @@ import { toEthereumAddress } from 'did-jwt/lib/Digest'
 import UportDIDResolver from 'uport-did-resolver'
 import MuportDIDResolver from 'muport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
+import HttpsDIDResolver from 'https-did-resolver'
 import UportLite from 'uport-lite'
 import { isMNID, decode as mnidDecode } from 'mnid'
 
@@ -17,7 +18,7 @@ const Types = {
   DISCLOSURE_RESPONSE: 'shareResp',
   TYPED_DATA_SIGNATURE_REQUEST: 'eip712Req',
   VERIFICATION_SIGNATURE_REQUEST: 'verReq',
-  ETH_TX_REQUEST: 'ethtx'
+  ETH_TX_REQUEST: 'ethtx',
 }
 
 /**
@@ -25,7 +26,7 @@ const Types = {
  * credentials and signed mobile app requests (ex. selective disclosure requests
  * for private data). It also provides signature verification over signed payloads.
  */
- 
+
 class Credentials {
   /**
    * Instantiates a new uPort Credentials object
@@ -86,7 +87,16 @@ class Credentials {
    * @param       {UportLite}         [settings.registry]      DEPRECATED a registry object from UportLite
    * @return      {Credentials}                                self
    */
-  constructor ({did, address, privateKey, signer, networks, registry, ethrConfig, muportConfig} = {}) {
+  constructor({
+    did,
+    address,
+    privateKey,
+    signer,
+    networks,
+    registry,
+    ethrConfig,
+    muportConfig,
+  } = {}) {
     if (signer) {
       this.signer = signer
     } else if (privateKey) {
@@ -108,11 +118,24 @@ class Credentials {
       this.did = `did:ethr:${address}`
     }
 
-    this.signJWT = (payload, expiresIn) => createJWT(payload, {issuer: this.did, signer: this.signer, alg: this.did.match('^did:uport:') || isMNID(this.did) ? 'ES256K' : 'ES256K-R', expiresIn })
+    this.signJWT = (payload, expiresIn) =>
+      createJWT(payload, {
+        issuer: this.did,
+        signer: this.signer,
+        alg:
+          this.did.match('^did:uport:') || isMNID(this.did)
+            ? 'ES256K'
+            : 'ES256K-R',
+        expiresIn,
+      })
 
-    UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
+    UportDIDResolver(
+      registry ||
+        UportLite({ networks: networks ? configNetworks(networks) : {} }),
+    )
     EthrDIDResolver(ethrConfig || {})
     MuportDIDResolver(muportConfig || {})
+    HttpsDIDResolver()
   }
 
   /**
@@ -126,13 +149,13 @@ class Credentials {
    *           - {String} keypair.did         An ethr-did string for the new identity
    *           - {String} keypair.privateKey  The identity's private key, as a string
    */
-  static createIdentity () {
+  static createIdentity() {
     const kp = secp256k1.genKeyPair()
     const publicKey = kp.getPublic('hex')
     const privateKey = kp.getPrivate('hex')
     const address = toEthereumAddress(publicKey)
     const did = `did:ethr:${address}`
-    return {did, privateKey}
+    return { did, privateKey }
   }
 
   /**
@@ -157,7 +180,7 @@ class Credentials {
    *  @param    {Number}             expiresIn             Seconds until expiry
    *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createDisclosureRequest (params = {}, expiresIn = 600) {
+  createDisclosureRequest(params = {}, expiresIn = 600) {
     const payload = {}
     if (params.requested) payload.requested = params.requested
     if (params.verified) payload.verified = params.verified
@@ -168,14 +191,23 @@ class Credentials {
     if (params.exp) payload.exp = params.exp
 
     if (params.accountType) {
-      if (['general', 'segregated', 'keypair', 'none'].indexOf(params.accountType) >= 0) {
+      if (
+        ['general', 'segregated', 'keypair', 'none'].indexOf(
+          params.accountType,
+        ) >= 0
+      ) {
         payload.act = params.accountType
       } else {
-        return Promise.reject(new Error(`Unsupported accountType ${params.accountType}`))
+        return Promise.reject(
+          new Error(`Unsupported accountType ${params.accountType}`),
+        )
       }
     }
 
-    return this.signJWT({...payload, type: Types.DISCLOSURE_REQUEST}, params.exp ? undefined : expiresIn)
+    return this.signJWT(
+      { ...payload, type: Types.DISCLOSURE_REQUEST },
+      params.exp ? undefined : expiresIn,
+    )
   }
 
   /**
@@ -196,8 +228,8 @@ class Credentials {
    * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
-  createVerification ({sub, claim, exp, vc}) {
-    return this.signJWT({sub, claim, exp, vc})
+  createVerification({ sub, claim, exp, vc }) {
+    return this.signJWT({ sub, claim, exp, vc })
   }
 
   /**
@@ -229,8 +261,19 @@ class Credentials {
    * @param    {Object[]}    [opts.vc]           An array of JWTs about the requester, signed by 3rd parties
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl, vc} = {}) {
-    return this.signJWT({unsignedClaim, sub, riss, aud, vc, callback: callbackUrl, type: Types.VERIFICATION_SIGNATURE_REQUEST})
+  createVerificationSignatureRequest(
+    unsignedClaim,
+    { aud, sub, riss, callbackUrl, vc } = {},
+  ) {
+    return this.signJWT({
+      unsignedClaim,
+      sub,
+      riss,
+      aud,
+      vc,
+      callback: callbackUrl,
+      type: Types.VERIFICATION_SIGNATURE_REQUEST,
+    })
   }
 
   /**
@@ -253,9 +296,9 @@ class Credentials {
    *     ]
    *   },
    *   domain: {
-   *     name: 'My dapp', 
-   *     version: '1.0', 
-   *     chainId: 1, 
+   *     name: 'My dapp',
+   *     version: '1.0',
+   *     chainId: 1,
    *     verifyingContract: '0xdeadbeef',
    *     salt: '0x999999999910101010101010'
    *   },
@@ -269,9 +312,9 @@ class Credentials {
    * const aud = 'did:ethr:0xbeef4567' // Who you are asking to sign the claim
    * const callbackUrl = 'https://my.cool.site/handleTheResponse'
    * const signRequestJWT = credentials.createTypedDataSignatureRequest(data, {sub, aud, callbackUrl})
-   * // Send the JWT to a client 
+   * // Send the JWT to a client
    * // ...
-   * 
+   *
    * @param {Object} typedData              the ERC712 data to sign
    * @param {Object} opts                   additional options for the jwt
    *   @param {String} opts.sub             the subject of the JWT (arbitrary)
@@ -279,9 +322,15 @@ class Credentials {
    *   @param {String} opts.callbackUrl     callback URL to handle the response
    * @returns {Promise<Object, Error>}      a promise which resolves to a signed JWT or rejects with an error
    */
-  createTypedDataSignatureRequest(typedData, {sub, aud, callbackUrl} = {}) {
+  createTypedDataSignatureRequest(typedData, { sub, aud, callbackUrl } = {}) {
     // TODO: Check if the typedData is a valid ERC712 ?
-    return this.signJWT({typedData, sub, aud, callback: callbackUrl, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
+    return this.signJWT({
+      typedData,
+      sub,
+      aud,
+      callback: callbackUrl,
+      type: Types.TYPED_DATA_SIGNATURE_REQUEST,
+    })
   }
 
   /**
@@ -311,7 +360,10 @@ class Credentials {
     if (callbackUrl) payload.callback = callbackUrl
     if (networkId) payload.net = networkId
     if (label) payload.label = label
-    return this.signJWT({...payload, ...txObj, type: Types.ETH_TX_REQUEST}, exp )
+    return this.signJWT(
+      { ...payload, ...txObj, type: Types.ETH_TX_REQUEST },
+      exp,
+    )
   }
 
   /**
@@ -334,14 +386,17 @@ class Credentials {
    *  @param    {Array}              payload.capabilities   An array of capability JWT's to include
    *  @return   {Promise<Object, Error>}                    a promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  async createDisclosureResponse (payload = {}, expiresIn = 600 ) {
+  async createDisclosureResponse(payload = {}, expiresIn = 600) {
     if (payload.req) {
       const verified = await verifyJWT(payload.req)
       if (verified.issuer) {
         payload.aud = verified.issuer
       }
     }
-    return this.signJWT({...payload, type: Types.DISCLOSURE_RESPONSE}, expiresIn)
+    return this.signJWT(
+      { ...payload, type: Types.DISCLOSURE_RESPONSE },
+      expiresIn,
+    )
   }
 
   /**
@@ -351,8 +406,16 @@ class Credentials {
    * @param     {Object}             response.payload   A selective disclosure response payload, with associated did doc
    * @param     {Object}             response.doc
    */
-  async processDisclosurePayload ({doc, payload}) {
-    const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), did: payload.iss, boxPub: payload.boxPub}
+  async processDisclosurePayload({ doc, payload }) {
+    const credentials = {
+      ...(doc.uportProfile || {}),
+      ...(payload.own || {}),
+      ...(payload.capabilities && payload.capabilities.length === 1
+        ? { pushToken: payload.capabilities[0] }
+        : {}),
+      did: payload.iss,
+      boxPub: payload.boxPub,
+    }
     if (payload.nad) {
       credentials.mnid = payload.nad
       credentials.address = mnidDecode(payload.nad).address
@@ -361,8 +424,13 @@ class Credentials {
       credentials.deviceKey = payload.dad
     }
     if (payload.verified) {
-      const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.did})))
-      return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
+      const verified = await Promise.all(
+        payload.verified.map(token => verifyJWT(token, { audience: this.did })),
+      )
+      return {
+        ...credentials,
+        verified: verified.map(v => ({ ...v.payload, jwt: v.jwt })),
+      }
     } else {
       return credentials
     }
@@ -386,17 +454,27 @@ class Credentials {
    *  @param    {String}                  [callbackUrl=null]    callbackUrl
    *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
    */
-  async authenticateDisclosureResponse (token, callbackUrl = null) {
-    const { payload, doc } = await verifyJWT(token, {audience: this.did, callbackUrl, auth: true})
+  async authenticateDisclosureResponse(token, callbackUrl = null) {
+    const { payload, doc } = await verifyJWT(token, {
+      audience: this.did,
+      callbackUrl,
+      auth: true,
+    })
 
     if (payload.req) {
       const challenge = await verifyJWT(payload.req)
       if (challenge.payload.iss !== this.did) {
-        throw new Error(`Challenge issuer does not match current identity: ${challenge.payload.iss} !== ${this.did}`)
+        throw new Error(
+          `Challenge issuer does not match current identity: ${
+            challenge.payload.iss
+          } !== ${this.did}`,
+        )
       } else if (challenge.payload.type !== Types.DISCLOSURE_REQUEST) {
-        throw new Error(`Challenge payload type invalid: ${challenge.payload.type}`)
+        throw new Error(
+          `Challenge payload type invalid: ${challenge.payload.type}`,
+        )
       } else {
-        return this.processDisclosurePayload({payload, doc})
+        return this.processDisclosurePayload({ payload, doc })
       }
     } else {
       throw new Error('Challenge was not included in response')
@@ -420,8 +498,8 @@ class Credentials {
    *  @param    {String}                  token                 a response token
    *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
    */
-  async verifyDisclosure (token) {
-    const { payload, doc } = await verifyJWT(token, {audience: this.did})
+  async verifyDisclosure(token) {
+    const { payload, doc } = await verifyJWT(token, { audience: this.did })
     return this.processDisclosurePayload({ payload, doc })
   }
 
@@ -433,7 +511,7 @@ class Credentials {
    *  @param    {Object}       abi          contract ABI
    *  @return   {Object}                    contract object
    */
-  contract (abi) {
+  contract(abi) {
     const txObjHandler = (txObj, opts) => {
       if (txObj.function) txObj.fn = txObj.function
       delete txObj['function']
@@ -443,12 +521,15 @@ class Credentials {
   }
 }
 
-const configNetworks = (nets) => {
-  Object.keys(nets).forEach((key) => {
+const configNetworks = nets => {
+  Object.keys(nets).forEach(key => {
     const net = nets[key]
     if (typeof net === 'object') {
-      ['registry', 'rpcUrl'].forEach((key) => {
-        if (!net.hasOwnProperty(key)) throw new Error(`Malformed network config object, object must have '${key}' key specified.`)
+      ;['registry', 'rpcUrl'].forEach(key => {
+        if (!net.hasOwnProperty(key))
+          throw new Error(
+            `Malformed network config object, object must have '${key}' key specified.`,
+          )
       })
     } else {
       throw new Error(`Network configuration object required`)
@@ -456,6 +537,5 @@ const configNetworks = (nets) => {
   })
   return nets
 }
-
 
 export default Credentials
