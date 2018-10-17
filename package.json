@@ -19,7 +19,7 @@
     "build:docs:md": "./node_modules/jsdoc-to-markdown/bin/cli.js -f src/* --template \"./template.hbs\" -c js2doc.conf > docs/reference/index.md; echo",
     "build:docs": "yarn build:docs:html && yarn build:docs:md",
     "prepublish": "yarn build",
-    "prepare": "yarn build"
+    "prepare": "yarn build:es5"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "license": "Apache-2.0",
