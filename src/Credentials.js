@@ -1,100 +1,164 @@
-import { SimpleSigner, decodeJWT } from 'did-jwt'
-import { createJWT, verifyJWT } from './JWT'
-const MNID = require('mnid')
 import { ec as EC } from 'elliptic'
-const secp256k1 = new EC('secp256k1')
 
+import { createJWT, verifyJWT, SimpleSigner } from 'did-jwt'
+import { toEthereumAddress } from 'did-jwt/lib/Digest'
 import UportDIDResolver from 'uport-did-resolver'
 import MuportDIDResolver from 'muport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
-
 import UportLite from 'uport-lite'
-import nets from 'nets'
-import nacl from 'tweetnacl'
-import naclutil from 'tweetnacl-util'
+import { isMNID, decode as mnidDecode } from 'mnid'
+
+import { ContractFactory } from './Contract.js'
+
+const secp256k1 = new EC('secp256k1')
+
+const Types = {
+  DISCLOSURE_REQUEST: 'shareReq',
+  DISCLOSURE_RESPONSE: 'shareResp',
+  TYPED_DATA_SIGNATURE_REQUEST: 'eip712Req',
+  VERIFICATION_SIGNATURE_REQUEST: 'verReq',
+  ETH_TX_REQUEST: 'ethtx'
+}
 
 /**
-*    The Credentials class allows you to easily create the signed payloads used in uPort inlcuding
-*    credentials and signed mobile app requests (ex. selective disclosure requests
-*    for private data). It also provides signature verification over signed payloads and
-*    allows you to send push notifications to users.
-*/
+ * The Credentials class allows you to easily create the signed payloads used in uPort including
+ * credentials and signed mobile app requests (ex. selective disclosure requests
+ * for private data). It also provides signature verification over signed payloads.
+ */
+ 
 class Credentials {
-
   /**
    * Instantiates a new uPort Credentials object
    *
-   * @example
-   * import { Credentials, SimpleSigner } from 'uport'
-   * const networks = {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x0101.... }}
-   * const setttings = { networks, address: '5A8bRWU3F7j3REx3vkJ...', signer: new SimpleSigner(process.env.PRIVATE_KEY)}
-   * const credentials = new Credentials(settings)
+   * The following example is just for testing purposes. *You should never store a private key in source code.*
    *
    * @example
-   * import { Credentials } from 'uport'
-   * const credentials = new Credentials()
+   * import { Credentials } from 'uport-credentials'
+   * const credentials = new Credentials({
+   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
+   * })
    *
-   * @param       {Object}            [settings]             setttings
-   * @param       {Object}            settings.networks      networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
-   * @param       {UportLite}         settings.registry      a registry object from UportLite
-   * @param       {SimpleSigner}      settings.signer        a signer object, see SimpleSigner.js
-   * @param       {Address}           settings.address       your uPort address (may be the address of your application's uPort identity)
-   * @return      {Credentials}                              self
+   * The above example derives the public key used to generate the did, so only a private key is needed.
+   * Generating a public key from a private key is slow. It is recommended to configure the `did` option as well.
+   *
+   * @example
+   * import { Credentials } from 'uport-credentials'
+   * const credentials = new Credentials({
+   *   did: 'did:ethr:0xbc3ae59bc76f894822622cdef7a2018dbe353840',
+   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
+   * })
+   *
+   * It is recommended to store the address and private key in environment variables for your server application
+   *
+   * @example
+   * import { Credentials, SimpleSigner } from 'uport-credentials'
+   * const credentials = new Credentials({
+   *   did: process.env.APPLICATION_DID,
+   *   signer: SimpleSigner(process.env.PRIVATE_KEY)
+   * })
+   *
+   * Instead of a private key you can pass in a [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions) to
+   * present UX or call a HSM.
+   *
+   * @example
+   * import { Credentials } from 'uport-credentials'
+   *
+   * function mySigner (data) {
+   *   return new Promise((resolve, reject) => {
+   *     const signature = /// sign it
+   *     resolve(signature)
+   *   })
+   * }
+   *
+   * const credentials = new Credentials({
+   *   did: process.env.APPLICATION_DID,
+   *   signer: mySigner
+   * })
+   *
+   * @param       {Object}            [settings]               optional setttings
+   * @param       {DID}               [settings.did]           Application [DID](https://w3c-ccg.github.io/did-spec/#decentralized-identifiers-dids) (unique identifier) for your application
+   * @param       {String}            [settings.privateKey]    A hex encoded 32 byte private key
+   * @param       {SimpleSigner}      [settings.signer]        a signer object, see [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions)
+   * @param       {Object}            [settings.ethrConfig]    Configuration object for ethr did resolver. See [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver)
+   * @param       {Object}            [settings.muportConfig]  Configuration object for muport did resolver. See [muport-did-resolver](https://github.com/uport-project/muport-did-resolver)
+   * @param       {Address}           [settings.address]       DEPRECATED your uPort address (may be the address of your application's uPort identity)
+   * @param       {Object}            [settings.networks]      DEPRECATED networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
+   * @param       {UportLite}         [settings.registry]      DEPRECATED a registry object from UportLite
+   * @return      {Credentials}                                self
    */
-  constructor ({networks, registry, signer, address, ethrConfig, muportConfig} = {}) {
-    this.settings = {}
-    if (signer) this.settings.signer = signer
-
-    if (address) {
-      if (/did/.test(address)) throw new Error('Only MNID/hex app identities supported')
-      // legacy hex app ids are on ropsten, but need mnid here for did jwt
-      this.settings.address = MNID.isMNID(address) ? address : MNID.encode({network: '0x3', address })
+  constructor ({did, address, privateKey, signer, networks, registry, ethrConfig, muportConfig} = {}) {
+    if (signer) {
+      this.signer = signer
+    } else if (privateKey) {
+      this.signer = SimpleSigner(privateKey)
     }
 
-    this.signJWT = (payload, expiresIn) => createJWT({ issuer: this.settings.address, signer: this.settings.signer, expiresIn }, payload)
-
-    // backwards compatibility
-    this.settings.networks = networks ? configNetworks(networks) : {}
-    if (!this.settings.registry) {
-      const registry = UportLite({networks: this.settings.networks})
-      this.settings.registry = (address) => new Promise((resolve, reject) => {
-        registry(address, (error, profile) => {
-          if (error) return reject(error)
-          resolve(profile)
-        })
-      })
+    if (did) {
+      this.did = did
+    } else if (address) {
+      if (isMNID(address)) {
+        this.did = `did:uport:${address}`
+      }
+      if (address.match('^0x[0-9a-fA-F]{40}$')) {
+        this.did = `did:ethr:${address}`
+      }
+    } else if (privateKey) {
+      const kp = secp256k1.keyFromPrivate(privateKey)
+      const address = toEthereumAddress(kp.getPublic('hex'))
+      this.did = `did:ethr:${address}`
     }
+
+    this.signJWT = (payload, expiresIn) => createJWT(payload, {issuer: this.did, signer: this.signer, alg: this.did.match('^did:uport:') || isMNID(this.did) ? 'ES256K' : 'ES256K-R', expiresIn })
+
     UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
     EthrDIDResolver(ethrConfig || {})
     MuportDIDResolver(muportConfig || {})
   }
 
-/**
- *  Creates a signed request token (JWT) given a request params object.
- *
- *  @example
- *  const req = { requested: ['name', 'country'],
- *                callbackUrl: 'https://myserver.com',
- *                notifications: true }
- *  credentials.createRequest(req).then(jwt => {
- *      ...
- *  })
- requested: ['name','phone','identity_no'],
-    callbackUrl: 'https://....' // URL to send the response of the request to
-    notifications: true
+  /**
+   * Generate a DID and private key, effectively creating a new identity that can sign and verify data
+   *
+   * @example
+   * const {did, privateKey} = Credentials.createIdentity()
+   * const credentials = new Credentials({did, privateKey, ...})
+   *
+   * @returns {Object} keypair
+   *           - {String} keypair.did         An ethr-did string for the new identity
+   *           - {String} keypair.privateKey  The identity's private key, as a string
+   */
+  static createIdentity () {
+    const kp = secp256k1.genKeyPair()
+    const publicKey = kp.getPublic('hex')
+    const privateKey = kp.getPrivate('hex')
+    const address = toEthereumAddress(publicKey)
+    const did = `did:ethr:${address}`
+    return {did, privateKey}
+  }
 
- *
- *  @param    {Object}             [params={}]           request params object
- *  @param    {Array}              params.requested      an array of attributes for which you are requesting credentials to be shared for
- *  @param    {Array}              params.verified       an array of attributes for which you are requesting verified credentials to be shared for
- *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
- *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
- *  @param    {String}             params.network_id     network id of Ethereum chain of identity eg. 0x4 for rinkeby
- *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", "devicekey" or "none"
- *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
- */
-  createRequest (params = {}, expiresIn = 600) {
+  /**
+   *  Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/specs/blob/develop/messages/sharereq.md)
+   *
+   *  @example
+   *  const req = { requested: ['name', 'country'],
+   *                callbackUrl: 'https://myserver.com',
+   *                notifications: true }
+   *  credentials.createDisclosureRequest(req).then(jwt => {
+   *      ...
+   *  })
+   *
+   *  @param    {Object}             [params={}]           request params object
+   *  @param    {Array}              params.requested      an array of attributes for which you are requesting credentials to be shared for
+   *  @param    {Array}              params.verified       an array of attributes for which you are requesting verified credentials to be shared for
+   *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
+   *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
+   *  @param    {String}             params.networkId      network id of Ethereum chain of identity eg. 0x4 for rinkeby
+   *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", or "none"
+   *  @param    {Number}             expiresIn             Seconds until expiry
+   *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
+   */
+  createDisclosureRequest (params = {}, expiresIn = 600) {
     const payload = {}
+
     if (params.requested) {
       payload.requested = params.requested
     }
@@ -107,87 +171,206 @@ class Credentials {
     if (params.callbackUrl) {
       payload.callback = params.callbackUrl
     }
-    if (params.network_id) {
-      payload.net = params.network_id
+    if (params.networkId) {
+      payload.net = params.networkId
     }
+
     if (params.accountType) {
-      if (['general', 'segregated', 'keypair', 'devicekey', 'none'].indexOf(params.accountType) >= 0) {
+      if (['general', 'segregated', 'keypair', 'none'].indexOf(params.accountType) >= 0) {
         payload.act = params.accountType
       } else {
         return Promise.reject(new Error(`Unsupported accountType ${params.accountType}`))
       }
     }
-
-    if (params.exp) { // checks for expiration on requests, if none is provided the default is 10 min
+    if (params.exp) {
       payload.exp = params.exp
     }
-    return createJWT({address: this.settings.address, signer: this.settings.signer}, {...payload, type: 'shareReq'})
-    //return this.signJWT({...payload, type: 'shareReq'}, params.exp ? undefined : expiresIn)
+    return this.signJWT({...payload, type: Types.DISCLOSURE_REQUEST}, params.exp ? undefined : expiresIn)
   }
 
-/**
- *  Creates a signed request for the user to attest a list of claims.
- *
- *  @example
- *  const unsignedClaim = {
- *    claim: {
- *      "Citizen of city X": {
- *        "Allowed to vote": true,
- *        "Document": "QmZZBBKPS2NWc6PMZbUk9zUHCo1SHKzQPPX4ndfwaYzmPW"
- *      }
- *    },
- *    sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
- *  }
- *  credentials.createVerificationRequest(unsignedClaim).then(jwt => {
- *    ...
- *  })
- *
- *  @param    {Object}              unsignedClaim       an object that is an unsigned claim which you want the user to attest
- *  @param    {String}             sub                  the DID of the identity you want to sign the attestation
- *  @return   {Promise<Object, Error>}                  a promise which resolves with a signed JSON Web Token or rejects with an error
- */
-  createVerificationRequest (unsignedClaim, sub) {
-    return createJWT({address: this.settings.address, signer: this.settings.signer}, {unsignedClaim, sub, type: 'verReq'})
+  /**
+   *  Create a credential (a signed JSON Web Token)
+   *
+   *  @example
+   *  credentials.createVerification({
+   *   sub: '5A8bRWU3F7j3REx3vkJ...', // uPort address of user, likely a MNID
+   *   exp: <future timestamp>,
+   *   claim: { name: 'John Smith' }
+   *  }).then( credential => {
+   *   ...
+   *  })
+   *
+   * @param    {Object}            [credential]           a unsigned claim object
+   * @param    {String}            credential.sub         subject of credential (a valid DID)
+   * @param    {String}            credential.claim       claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
+   * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
+   * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
+   */
+  createVerification ({sub, claim, exp}) {
+    return this.signJWT({sub: sub, claim, exp})
   }
 
-/**
-  *  Receive signed response token from mobile app. Verifies and parses the given response token.
-  *
-  *  @example
-  *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
-  *  credentials.receive(resToken).then(res => {
-  *      const credentials = res.verified
-         const name =  res.name
-  *      ...
-  *  })
-  *
-  *  @param    {String}                  token                 a response token
-  *  @param    {String}                  [callbackUrl=null]    callbackUrl
-  *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
-  */
-  receive (token, callbackUrl = null) {
-    return this.authenticate(token, callbackUrl)
+  /**
+   *  Creates a request a for a DID to [sign a verification](https://github.com/uport-project/specs/blob/develop/messages/verificationreq.md)
+   *
+   *  @example
+   *  const unsignedClaim = {
+   *    claim: {
+   *      "Citizen of city X": {
+   *        "Allowed to vote": true,
+   *        "Document": "QmZZBBKPS2NWc6PMZbUk9zUHCo1SHKzQPPX4ndfwaYzmPW"
+   *      }
+   *    },
+   *    sub: "2oTvBxSGseWFqhstsEHgmCBi762FbcigK5u"
+   *  }
+   *  const aud = '0x123...'
+   *  const sub = '0x456...'
+   *  const callbackUrl = 'https://my.cool.site/handleTheResponse'
+   *  credentials.createVerificationSignatureRequest(unsignedClaim, {aud, sub, callbackUrl}).then(jwt => {
+   *    // ...
+   *  })
+   *
+   * @param    {Object}      unsignedClaim       Unsigned claim object which you want the user to attest
+   * @param    {Object}      [opts]
+   * @param    {String}      [opts.aud]          The DID of the identity you want to sign the attestation
+   * @param    {String}      [opts.sub]          The DID which the unsigned claim is about
+   * @param    {String}      [opts.riss]         The DID of the identity you want to sign the Verified Claim
+   * @param    {String}      [opts.callbackUrl]  The url to receive the response of this request
+   * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
+   */
+  createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl} = {}) {
+    return this.signJWT({unsignedClaim, sub, riss, aud, callback: callbackUrl, type: Types.VERIFICATION_SIGNATURE_REQUEST})
   }
 
+  /**
+   * Create a JWT requesting a signature on a piece of structured/typed data conforming to
+   * the ERC712 specification
+   * @example
+   * // A ERC712 Greeting Structure
+   * const data = {
+   *   types: {
+   *     EIP712Domain: [
+   *       {name: 'name', type: 'string'},
+   *       {name: 'version', type: 'string'},
+   *       {name: 'chainId', type: 'uint256'},
+   *       {name: 'verifyingContract', type: 'address'},
+   *       {name: 'salt', type: 'bytes32'}
+   *     ],
+   *     Greeting: [
+   *       {name: 'text', type: 'string'},
+   *       {name: 'subject', type: 'string'},
+   *     ]
+   *   },
+   *   domain: {
+   *     name: 'My dapp', 
+   *     version: '1.0', 
+   *     chainId: 1, 
+   *     verifyingContract: '0xdeadbeef',
+   *     salt: '0x999999999910101010101010'
+   *   },
+   *   primaryType: 'Greeting',
+   *   message: {
+   *     text: 'Hello',
+   *     subject: 'World'
+   *   }
+   * }
+   * const sub = 'did:ethr:0xbeef1234' // Who the claim is "about"
+   * const aud = 'did:ethr:0xbeef4567' // Who you are asking to sign the claim
+   * const callbackUrl = 'https://my.cool.site/handleTheResponse'
+   * const signRequestJWT = credentials.createTypedDataSignatureRequest(data, {sub, aud, callbackUrl})
+   * // Send the JWT to a client 
+   * // ...
+   * 
+   * @param {Object} typedData              the ERC712 data to sign
+   * @param {Object} opts                   additional options for the jwt
+   *   @param {String} opts.sub             the subject of the JWT (arbitrary)
+   *   @param {String} opts.aud             the did of the identity you want to sign the typed data
+   *   @param {String} opts.callbackUrl     callback URL to handle the response
+   * @returns {Promise<Object, Error>}      a promise which resolves to a signed JWT or rejects with an error
+   */
+  createTypedDataSignatureRequest(typedData, {sub, aud, callbackUrl} = {}) {
+    // TODO: Check if the typedData is a valid ERC712 ?
+    return this.signJWT({typedData, sub, aud, callback: callbackUrl, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
+  }
+
+  /**
+   *  Given a transaction object, similarly defined as the web3 transaction object,
+   *  it creates a JWT transaction request and appends addtional request options.
+   *
+   *  @example
+   *  const txObject = {
+   *    to: '0xc3245e75d3ecd1e81a9bfb6558b6dafe71e9f347',
+   *    value: '0.1',
+   *    fn: "setStatus(string 'hello', bytes32 '0xc3245e75d3ecd1e81a9bfb6558b6dafe71e9f347')",
+   *  }
+   *  connect.createTxRequest(txObject, {callbackUrl: 'http://mycb.domain'}).then(jwt => {
+   *    ...
+   *  })
+   *
+   *  @param    {Object}    txObj               A web3 style transaction object
+   *  @param    {Object}    [opts]
+   *  @param    {String}    [opts.callbackUrl]  The url to receive the response of this request
+   *  @param    {String}    [opts.exp]          Time at which this request expires and is no longer valid (seconds since epoch)
+   *  @param    {String}    [opts.networkId]    Network ID for which this transaction request is for
+   *  @param    {String}    [opts.label]
+   *  @return   {String}                        a transaction request jwt
+   */
+  createTxRequest(txObj, { callbackUrl, exp = 600, networkId, label } = {}) {
+    const payload = {}
+    if (callbackUrl) payload.callback = callbackUrl
+    if (networkId) payload.net = networkId
+    if (label) payload.label = label
+    return this.signJWT({...payload, ...txObj, type: Types.ETH_TX_REQUEST}, exp )
+  }
+
+  /**
+   * Creates a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
+   *
+   * This can either be used to share information about the signing identity or as the response to a
+   * [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md),
+   * where it can be used to authenticate the identity.
+   *
+   *  @example
+   *  credentials.createDisclosureResponse({own: {name: 'Lourdes Valentina Gomez'}}).then(jwt => {
+   *      ...
+   *  })
+   *
+   *  @param    {Object}             [payload={}]           request params object
+   *  @param    {JWT}                payload.req            A selective disclosure Request JWT if this is returned as part of an authentication flow
+   *  @param    {Object}             payload.own            An object of self attested claims about the signer (eg. name etc)
+   *  @param    {Array}              payload.verified       An array of attestation JWT's to include
+   *  @param    {MNID}               payload.nad            An ethereum address encoded as an [MNID](https://github.com/uport-project/mnid)
+   *  @param    {Array}              payload.capabilities   An array of capability JWT's to include
+   *  @return   {Promise<Object, Error>}                    a promise which resolves with a signed JSON Web Token or rejects with an error
+   */
+  async createDisclosureResponse (payload = {}, expiresIn = 600 ) {
+    if (payload.req) {
+      const verified = await verifyJWT(payload.req)
+      if (verified.issuer) {
+        payload.aud = verified.issuer
+      }
+    }
+    return this.signJWT({...payload, type: Types.DISCLOSURE_RESPONSE}, expiresIn)
+  }
+
+  /**
+   * Parse a selective disclosure response, and verify signatures on each signed claim ("verification") included.
+   *
+   * @param     {Object}             response       A selective disclosure response payload, with associated did doc
+   * @param     {Object}             response.payload   A selective disclosure response payload, with associated did doc
+   * @param     {Object}             response.doc
+   */
   async processDisclosurePayload ({doc, payload}) {
-    const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), address: payload.iss, did: payload.iss}
+    const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), did: payload.iss, boxPub: payload.boxPub}
     if (payload.nad) {
-      credentials.networkAddress = payload.nad
+      credentials.mnid = payload.nad
+      credentials.address = mnidDecode(payload.nad).address
     }
     if (payload.dad) {
       credentials.deviceKey = payload.dad
     }
-
-    // Backwards support
-    try {
-      if (doc.publicKey[0].publicKeyHex) credentials.publicKey = '0x' + doc.publicKey[0].publicKeyHex
-      if (doc.publicKey[1].publicKeyBase64) credentials.publicEncKey = doc.publicKey[1].publicKeyBase64
-    } catch (err) {}
-
-    if (!credentials.publicEncKey) credentials.publicEncKey = payload.publicEncKey
-
     if (payload.verified) {
-      const verified = await Promise.all(payload.verified.map(token => verifyJWT({adress: this.settings.address, signer: this.settings.signer}, token)))
+      const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.did})))
       return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
     } else {
       return credentials
@@ -195,135 +378,78 @@ class Credentials {
   }
 
   /**
-  *  Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from mobile
-  *  app as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
-  *
-  *  It Verifies and parses the given response token and verifies the challenge response flow.
-  *
-  *  @example
-  *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
-  *  credentials.authenticate(resToken).then(res => {
-  *      const credentials = res.verified
-  *       const name =  res.name
-  *      ...
-  *  })
-  *
-  *  @param    {String}                  token                 a response token
-  *  @param    {String}                  [callbackUrl=null]    callbackUrl
-  *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
-  */
-  async authenticate (token, callbackUrl = null) {
-    const { payload, doc } = await verifyJWT({ address: this.settings.address }, token, callbackUrl)
+   *  Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from uPort
+   *  client as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
+   *
+   *  It Verifies and parses the given response token and verifies the challenge response flow.
+   *
+   *  @example
+   *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
+   *  credentials.authenticateDisclosureResponse(resToken).then(res => {
+   *      const credentials = res.verified
+   *      const name =  res.name
+   *      ...
+   *  })
+   *
+   *  @param    {String}                  token                 a response token
+   *  @param    {String}                  [callbackUrl=null]    callbackUrl
+   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
+   */
+  async authenticateDisclosureResponse (token, callbackUrl = null) {
+    const { payload, doc } = await verifyJWT(token, {audience: this.did, callbackUrl, auth: true})
 
     if (payload.req) {
-      const challenge = await verifyJWT({ address: this.settings.address }, payload.req, callbackUrl)
-      if (challenge.payload.iss === this.settings.address && challenge.payload.type === 'shareReq') {
+      const challenge = await verifyJWT(payload.req)
+      if (challenge.payload.iss !== this.did) {
+        throw new Error(`Challenge issuer does not match current identity: ${challenge.payload.iss} !== ${this.did}`)
+      } else if (challenge.payload.type !== Types.DISCLOSURE_REQUEST) {
+        throw new Error(`Challenge payload type invalid: ${challenge.payload.type}`)
+      } else {
         return this.processDisclosurePayload({payload, doc})
       }
     } else {
-      return this.processDisclosurePayload({payload, doc})
+      throw new Error('Challenge was not included in response')
     }
   }
 
-/**
-  *  Send a push notification to a user, consumes a token which allows you to send push notifications
-  *  and a url/uri request you want to send to the user.
-  *
-  *  @param    {String}                  token              a push notification token (get a pn token by requesting push permissions in a request)
-  *  @param    {Object}                  payload            push notification payload
-  *  @param    {String}                  payload.url        a uport request url
-  *  @param    {String}                  payload.message    a message to display to the user
-  *  @param    {String}                  pubEncKey          the public encryption key of the receiver, encoded as a base64 string
-  *  @return   {Promise<Object, Error>}              a promise which resolves with successful status or rejects with an error
-  */
-  push (token, pubEncKey, payload) {
-    return new Promise((resolve, reject) => {
-      if (!token) {
-        reject(new Error('Missing push notification token'))
-      }
-      if (!pubEncKey || pubEncKey.url) {
-        reject(new Error('Missing public encryption key of the receiver'))
-      }
-      if (!payload || !payload.url) {
-        reject(new Error('Missing payload url for sending to users device'))
-      }
-      const iss = decodeJWT(token).payload.iss
-      const PUTUTU_URL = 'https://api.uport.me'
-      let endpoint = '/pututu/sns'
-      const plaintext = padMessage(JSON.stringify(payload))
-      const enc = encryptMessage(plaintext, pubEncKey)
-      payload = { message: JSON.stringify(enc) }
-
-      nets({
-        uri: PUTUTU_URL + endpoint,
-        json: payload,
-        method: 'POST',
-        withCredentials: false,
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      },
-      (error, res, body) => {
-        if (error) return reject(error)
-        if (res.statusCode === 200) {
-          resolve(body)
-        }
-        if (res.statusCode === 403) {
-          return reject(new Error('Error sending push notification to user: Invalid Token'))
-        }
-        reject(new Error(`Error sending push notification to user: ${res.statusCode} ${body.toString()}`))
-      })
-    })
+  /**
+   *  Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
+   *
+   * The main difference between this and `authenticateDisclosureResponse()` is that it does not verify the challenge.
+   * This can be used to verify user profiles that have been shared through other methods such as QR codes and messages.
+   *
+   *  @example
+   *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
+   *  credentials.verifyDisclosure(resToken).then(profile => {
+   *      const credentials = profile.verified
+   *      const name =  profile.name
+   *      ...
+   *  })
+   *
+   *  @param    {String}                  token                 a response token
+   *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
+   */
+  async verifyDisclosure (token) {
+    const { payload, doc } = await verifyJWT(token, {audience: this.did})
+    return this.processDisclosurePayload({ payload, doc })
   }
 
-/**
-  *  Create a credential (a signed JSON Web Token)
-  *
-  *  @example
-  *  credentials.attest({
-  *   sub: '5A8bRWU3F7j3REx3vkJ...', // uPort address of user, likely a MNID
-  *   exp: <future timestamp>,
-  *   claim: { name: 'John Smith' }
-  *  }).then( credential => {
-  *   ...
-  *  })
-  *
-  * @param    {Object}            [credential]           a unsigned credential object
-  * @param    {String}            credential.sub         subject of credential (a uPort address)
-  * @param    {String}            credential.claim       claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
-  * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
-  * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
-  */
-  attest ({sub, claim, exp}) {
-    return createJWT({address: this.settings.address, signer: this.settings.signer}, {sub: sub, claim, exp})
+  /**
+   *  Builds and returns a contract object which can be used to interact with
+   *  a given contract. Similar to web3.eth.contract but with promises. Once specifying .at(address)
+   *  you can call the contract functions with this object. Each call will create a request.
+   *
+   *  @param    {Object}       abi          contract ABI
+   *  @return   {Object}                    contract object
+   */
+  contract (abi) {
+    const txObjHandler = (txObj, opts) => {
+      if (txObj.function) txObj.fn = txObj.function
+      delete txObj['function']
+      return this.createTxRequest(txObj, opts)
+    }
+    return ContractFactory(txObjHandler.bind(this))(abi)
   }
-
-/**
-  *  Look up a profile in the registry for a given uPort address. Address must be MNID encoded.
-  *
-  *  @example
-  *  credentials.lookup('5A8bRWU3F7j3REx3vkJ...').then(profile => {
-  *     const name = profile.name
-  *     const pubkey = profile.pubkey
-  *     ...
-  *   })
-  *
-  * @param    {String}            address             a MNID encoded address
-  * @return   {Promise<Object, Error>}                a promise which resolves with parsed profile or rejects with an error
-  */
-  lookup (address) {
-    return this.settings.registry(address)
-  }
-
-  // createJWT ({address, signer}, payload) {
-  //   return createJWT(
-  //     payload, { issuer: address,
-  //       signer: signer})
-  // }
-
-  // verifyJWT ({registry, address}, jwt, callbackUrl = null) {
-  //   return verifyJWT(jwt, {audience: address, callbackUrl: callbackUrl})
-  // }
 }
 
 const configNetworks = (nets) => {
@@ -340,40 +466,5 @@ const configNetworks = (nets) => {
   return nets
 }
 
-/**
- *  Adds padding to a string
- *
- *  @param      {String}        the message to be padded
- *  @return     {String}        the padded message
- *  @private
- */
-const padMessage = (message) => {
-  const INTERVAL_LENGTH = 50
-  const padLength = INTERVAL_LENGTH - message.length % INTERVAL_LENGTH
-
-  return message + ' '.repeat(padLength)
-}
-
-/**
- *  Encrypts a message
- *
- *  @param      {String}        the message to be encrypted
- *  @param      {String}        the public encryption key of the receiver, encoded as base64
- *  @return     {String}        the encrypted message, encoded as base64
- *  @private
- */
-const encryptMessage = (message, receiverKey) => {
-  const tmpKp = nacl.box.keyPair()
-  const decodedKey = naclutil.decodeBase64(receiverKey)
-  const decodedMsg = naclutil.decodeUTF8(message)
-  const nonce = nacl.randomBytes(24)
-
-  const ciphertext = nacl.box(decodedMsg, nonce, decodedKey, tmpKp.secretKey)
-  return {
-    from: naclutil.encodeBase64(tmpKp.publicKey),
-    nonce: naclutil.encodeBase64(nonce),
-    ciphertext: naclutil.encodeBase64(ciphertext)
-  }
-}
 
 export default Credentials
