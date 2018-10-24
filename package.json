@@ -19,7 +19,9 @@
     "build:docs:md": "./node_modules/jsdoc-to-markdown/bin/cli.js -f src/* --template \"./template.hbs\" -c js2doc.conf > docs/reference/index.md; echo",
     "build:docs": "npm run build:docs:html && npm run build:docs:md",
     "prepublish": "npm run build",
-    "prepare": "npm run build:es5"
+    "prepare": "npm run build:es5",
+    "lint": "eslint ./src",
+    "format": "eslint --fix ./src"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "license": "Apache-2.0",
@@ -45,6 +47,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
+    "babel-eslint": "^10.0.1",
     "babel-jest": "^22.4.3",
     "babel-loader": "^7.1.4",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
@@ -54,6 +57,15 @@
     "babel-polyfill": "^6.22.0",
     "babel-preset-env": "^1.6.1",
     "body-parser": "^1.18.3",
+    "eslint": "^5.7.0",
+    "eslint-config-prettier": "^3.1.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-config-uport": "0.0.1",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-prettier": "^3.0.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0",
     "express": "^4.16.3",
     "jest": "^22.4.3",
     "jsdoc-to-markdown": "^4.0.1",
@@ -61,6 +73,7 @@
     "mockdate": "^2.0.1",
     "ngrok": "^3.1.0",
     "nock": "^9.4.3",
+    "prettier": "^1.14.3",
     "uport-transports": "^0.0.66",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.1"
