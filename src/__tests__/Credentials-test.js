@@ -273,7 +273,7 @@ describe('createTypedDataSignatureRequest()', () => {
   }
 
   it('creates a valid JWT for a typed data request', async () => {
-    const jwt = await uport.createTypedDataSignatureRequest(typedData, {aud: 'did:ethr:deadbeef', sub: 'did:ethr:deadbeef'})
+    const jwt = await uport.createTypedDataSignatureRequest(typedData, {riss: 'did:ethr:deadbeef'})
     expect(jwt).toMatchSnapshot()
   })
 })

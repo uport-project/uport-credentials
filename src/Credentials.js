@@ -276,12 +276,15 @@ class Credentials {
    * @param {Object} opts                   additional options for the jwt
    *   @param {String} opts.sub             the subject of the JWT (arbitrary)
    *   @param {String} opts.aud             the did of the identity you want to sign the typed data
-   *   @param {String} opts.callbackUrl     callback URL to handle the response
+   *   @param {String} opts.callback        callback URL to handle the response
    * @returns {Promise<Object, Error>}      a promise which resolves to a signed JWT or rejects with an error
    */
-  createTypedDataSignatureRequest(typedData, {sub, aud, callbackUrl} = {}) {
+  createTypedDataSignatureRequest(typedData, {riss, callback} = {}) {
     // TODO: Check if the typedData is a valid ERC712 ?
-    return this.signJWT({typedData, sub, aud, callback: callbackUrl, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
+    for (const prop of ['types', 'primaryType', 'message', 'domain']) { 
+      if (!typedData[prop]) throw new Error(`Invalid EIP712 Request, must include ${prop}`)
+    }
+    return this.signJWT({typedData, riss, callback, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
   }
 
   /**
