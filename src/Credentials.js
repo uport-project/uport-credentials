@@ -19,6 +19,7 @@ const Types = {
   TYPED_DATA_SIGNATURE_REQUEST: 'eip712Req',
   VERIFICATION_SIGNATURE_REQUEST: 'verReq',
   ETH_TX_REQUEST: 'ethtx',
+  PERSONAL_SIGN_REQUEST: 'personalSigReq'
 }
 
 /**
@@ -301,6 +302,19 @@ class Credentials {
       if (!typedData[prop]) throw new Error(`Invalid EIP712 Request, must include ${prop}`)
     }
     return this.signJWT({typedData, riss, callback, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
+  }
+
+  /**
+   * Create a JWT requesting an eth_sign/personal_sign from a user.
+   * @param {String} data hex encoded data to sign
+   * @param {Object} opts Additional options for request
+   * @returns {Promise<Object, Error>}
+   */
+  createPersonalSignRequest(data, {riss, callback} = {}) {
+    if (!data.startsWith('0x')) {
+      data = `0x${data}`
+    }
+    return this.signJWT({data, riss, callback, type: Types.PERSONAL_SIGN_REQUEST})
   }
 
   /**
