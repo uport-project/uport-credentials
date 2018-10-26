@@ -1,6 +1,6 @@
 {
   "name": "uport-credentials",
-  "version": "1.1.0-alpha-2",
+  "version": "1.1.0-alpha.3",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
   "files": [
