@@ -279,16 +279,24 @@ describe('createTypedDataSignatureRequest()', () => {
 })
 
 describe('createPersonalSignRequest()', () => {
-  const data = '0xdeadbeef'
 
   it('creates a valid JWT for a personal sign request', async () => {
     const riss = 'did:ethr:0xdeadbeef'
+    const data = '0xdeadbeef'
     const jwt = await uport.createPersonalSignRequest(data, {riss})
     expect(jwt).toMatchSnapshot()
     const {data: decodedData, riss: decodedRiss, type} = decodeJWT(jwt).payload
     expect(decodedData).toEqual(data)
     expect(decodedRiss).toEqual(riss)
     expect(type).toEqual('personalSigReq')
+  })
+
+  it('appends a `0x` if not provided in data', async () => {
+    const riss = 'did:ethr:0xdeadbeef'
+    const jwt = await uport.createPersonalSignRequest('deadbeef', {riss})
+    expect(jwt).toMatchSnapshot()
+    const {data: decodedData} = decodeJWT(jwt).payload
+    expect(decodedData).toEqual(`0xdeadbeef`)
   })
 })
 
