@@ -374,9 +374,8 @@ class Credentials {
    * @param     {Object}             response.doc
    */
   async processDisclosurePayload({ doc, payload }) {
-    console.log('processDisclosurePayload', payload)
     // Extract known key-value pairs from payload
-    const { own={}, capabilities=[], req, iat, exp, type, nad: mnid, dad: deviceKey, iss: did, boxPub, verified, ...rest } = payload
+    const { own={}, capabilities=[], aud, req, iat, exp, type, nad: mnid, dad: deviceKey, iss: did, boxPub, verified, ...rest } = payload
     const { uportProfile={} } = doc
 
     // Combine doc and payload into a single object, changing the names of some keys
@@ -386,15 +385,14 @@ class Credentials {
       ...own,
       ...uportProfile, 
       ...rest,
+      // aud, req, iat, exp are intentionally left out  
     }
+    
+    if (deviceKey) processed.deviceKey = deviceKey
 
     if (mnid) {
       processed.mnid = mnid
       processed.address = mnidDecode(mnid).address
-    }
-
-    if (deviceKey) {
-      processed.deviceKey = deviceKey
     }
 
     // Push notifications are the only supported capability at the moment
