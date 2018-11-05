@@ -1,8 +1,7 @@
 ---
 title: "Server-side examples"
-index: 2
 category: "uport-credentials"
-type: "tutorial"
+type: "content"
 source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/guides/tutorial.md"
 ---
 
