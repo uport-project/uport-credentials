@@ -379,35 +379,49 @@ class Credentials {
 
   /**
    * Parse a selective disclosure response, and verify signatures on each signed claim ("verification") included.
-   *
-   * @param     {Object}             response       A selective disclosure response payload, with associated did doc
+   * This function renames and applies special handling to certain recognized key-value pairs, and preserves others
+   * untouched.
+   * 
+   * @private @deprecated
+   * @param     {Object}             response           A selective disclosure response payload, with associated did doc
    * @param     {Object}             response.payload   A selective disclosure response payload, with associated did doc
    * @param     {Object}             response.doc
    */
   async processDisclosurePayload({ doc, payload }) {
-    const credentials = {
-      ...(doc.uportProfile || {}),
-      ...(payload.own || {}),
-      ...(payload.capabilities && payload.capabilities.length === 1 ? { pushToken: payload.capabilities[0] } : {}),
-      did: payload.iss,
-      boxPub: payload.boxPub,
+    // Extract known key-value pairs from payload
+    const { own={}, capabilities=[], aud, req, iat, exp, type, nad: mnid, dad: deviceKey, iss: did, boxPub, verified, ...rest } = payload
+    const { uportProfile={} } = doc
+
+    // Combine doc and payload into a single object, changing the names of some keys
+    const processed = {
+      did,
+      boxPub,
+      ...own,
+      ...uportProfile, 
+      ...rest,
+      // aud, req, iat, exp are intentionally left out  
     }
-    if (payload.nad) {
-      credentials.mnid = payload.nad
-      credentials.address = mnidDecode(payload.nad).address
+    
+    if (deviceKey) processed.deviceKey = deviceKey
+
+    if (mnid) {
+      processed.mnid = mnid
+      processed.address = mnidDecode(mnid).address
     }
-    if (payload.dad) {
-      credentials.deviceKey = payload.dad
+
+    // Push notifications are the only supported capability at the moment
+    if (capabilities.length === 1) {
+      processed.pushToken = capabilities[0]
+    } 
+
+    // Verify and decode each jwt included in the `verified` array, 
+    // and return the verified property as an array of decoded objects
+    if (verified) {
+      processed.verified = (await Promise.all(verified.map(token => verifyJWT(token, { audience: this.did }))))
+        .map(({payload, jwt}) => ({ ...payload, jwt}))
     }
-    if (payload.verified) {
-      const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, { audience: this.did })))
-      return {
-        ...credentials,
-        verified: verified.map(v => ({ ...v.payload, jwt: v.jwt })),
-      }
-    } else {
-      return credentials
-    }
+
+    return processed
   }
 
   /**
