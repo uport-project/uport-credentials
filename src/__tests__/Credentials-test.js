@@ -382,7 +382,13 @@ describe('verifyDisclosure()', () => {
 
     expect(profile.verified.length).toEqual(1)
     expect(profile.invalid.length).toEqual(1)
-    expect(response).toMatchSnapshot()
+    expect(profile).toMatchSnapshot()
+  })
+
+  it('passes through a dad', async () => {
+    const jwt = await uport.createDisclosureResponse({dad: 'hi dad'})
+    const profile = await uport.verifyDisclosure(jwt)
+    expect(profile).toMatchSnapshot()
   })
 })
 
