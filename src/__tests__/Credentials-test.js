@@ -398,6 +398,18 @@ describe('verifyDisclosure()', () => {
     const profile = await uport.verifyDisclosure(jwt)
     expect(profile).toMatchSnapshot()
   })
+
+  it('declines to verify invalid jwts without crashing', async () => {
+    const goodjwt = await uport.createVerification(claim)
+    const badjwt = 'not.a.jwt'
+
+    const response = await uport.createDisclosureResponse({verified: [goodjwt, badjwt]})
+    const profile = await uport.verifyDisclosure(response)
+
+    expect(profile.verified.length).toEqual(1)
+    expect(profile.invalid.length).toEqual(1)
+    expect(response).toMatchSnapshot()
+  })
 })
 
 describe('txRequest()', () => {
