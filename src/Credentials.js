@@ -21,6 +21,13 @@ const Types = {
 }
 
 /**
+ * Convert a date to seconds since unix epoch, rounded down to the nearest whole second
+ * @param   {Date}   date 
+ * @returns {Number}
+ */
+const toSeconds = date => Math.floor(date / 1000)
+
+/**
  * The Credentials class allows you to easily create the signed payloads used in uPort including
  * credentials and signed mobile app requests (ex. selective disclosure requests
  * for private data). It also provides signature verification over signed payloads.
@@ -238,8 +245,18 @@ class Credentials {
    * @param    {String}      [opts.callbackUrl]  The url to receive the response of this request
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim, {aud, sub, riss, callbackUrl} = {}) {
-    return this.signJWT({unsignedClaim, sub, riss, aud, callback: callbackUrl, type: Types.VERIFICATION_SIGNATURE_REQUEST})
+  createVerificationSignatureRequest(unsignedClaim, { aud, sub, riss, callbackUrl, vc, exp } = {}) {
+    // FIXME: did-jwt only accepts expiresIn, and does the reverse of this
+    const expiresIn = exp - toSeconds(Date.now())
+    return this.signJWT({
+      unsignedClaim,
+      sub,
+      riss,
+      aud,
+      vc,
+      callback: callbackUrl,
+      type: Types.VERIFICATION_SIGNATURE_REQUEST,
+    }, expiresIn)
   }
 
   /**

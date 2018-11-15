@@ -5,6 +5,8 @@ import { registerMethod } from 'did-resolver'
 
 MockDate.set(1485321133 * 1000)
 
+const toSeconds = date => Math.floor(date / 1000)
+
 const privateKey = '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
 const signer = SimpleSigner(privateKey)
 const address = '0xbc3ae59bc76f894822622cdef7a2018dbe353840'
@@ -236,6 +238,13 @@ describe('createVerificationSignatureRequest()', () => {
   it('creates a valid JWT for a request', async () => {
     const jwt = await uport.createVerificationSignatureRequest({claim: { test: {prop1: 1, prop2: 2}}}, {sub: 'did:uport:223ab45'})
     return expect(await verifyJWT(jwt, {audience: did})).toMatchSnapshot()
+  })
+
+  it('allows setting an expiration', async () => {
+    const fakeuport = new Credentials({privateKey, did})
+    // temporarily mock the signJWT method
+    fakeuport.signJWT = (_, expiresIn) => expect(expiresIn).toBeLessThanOrEqual(10)
+    return await uport.createVerificationSignatureRequest({claim: {test: 'test'}}, {exp: toSeconds(Date.now()) + 10 })
   })
 })
 
