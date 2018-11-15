@@ -361,17 +361,38 @@ class Credentials {
    * @param     {Object}             response.doc
    */
   async processDisclosurePayload ({doc, payload}) {
-    const credentials = {...doc.uportProfile || {}, ...(payload.own || {}), ...(payload.capabilities && payload.capabilities.length === 1 ? {pushToken: payload.capabilities[0]} : {}), did: payload.iss, boxPub: payload.boxPub}
-    if (payload.nad) {
-      credentials.mnid = payload.nad
-      credentials.address = mnidDecode(payload.nad).address
+    const {nad, dad, verified, iss, boxPub, own, capabilities} = payload
+    
+    const credentials = {
+      ...(doc.uportProfile || {}), 
+      ...(own || {}), 
+      ...(capabilities && capabilities.length === 1 ? {pushToken: capabilities[0]} : {}), 
+      did: iss, 
+      boxPub: boxPub
     }
-    if (payload.dad) {
-      credentials.deviceKey = payload.dad
+
+    if (nad) {
+      credentials.mnid = nad
+      credentials.address = mnidDecode(nad).address
     }
-    if (payload.verified) {
-      const verified = await Promise.all(payload.verified.map(token => verifyJWT(token, {audience: this.did})))
-      return {...credentials, verified: verified.map(v => ({...v.payload, jwt: v.jwt}))}
+    // Is this deprecated?
+    if (dad) {
+      credentials.deviceKey = dad
+    }
+
+    if (verified) {
+      const invalid = []
+      const verifying = verified.map(token => verifyJWT(token, {audience: this.did}).catch(() => {
+        invalid.push(token)
+        return Promise.resolve(null)
+      }))
+
+      // Format payloads and remove invalid JWTs
+      const verifiedAndDecoded = (await Promise.all(verifying))
+        .map(v => v ? ({...v.payload, jwt: v.jwt}) : null)
+        .reduce((list, item) => item ? [...list, item] : list, [])
+
+      return {...credentials, verified: verifiedAndDecoded, invalid}
     } else {
       return credentials
     }
