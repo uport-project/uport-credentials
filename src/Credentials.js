@@ -389,8 +389,25 @@ class Credentials {
    */
   async processDisclosurePayload({ doc, payload }) {
     // Extract known key-value pairs from payload
-    const { own={}, capabilities=[], aud, req, iat, exp, type, nad: mnid, dad: deviceKey, iss: did, boxPub, verified, ...rest } = payload
-    const { uportProfile={} } = doc
+    const { 
+      own={}, 
+      capabilities=[], 
+      aud, // ignored
+      req, // ignored
+      iat, // ignored
+      exp, // ignored
+      type, 
+      nad: mnid, 
+      dad: deviceKey, 
+      iss: did, 
+      boxPub, 
+      verified, 
+      ...rest 
+    } = payload
+
+    const { 
+      uportProfile={} 
+    } = doc
 
     // Combine doc and payload into a single object, changing the names of some keys
     const processed = {
@@ -415,10 +432,21 @@ class Credentials {
     } 
 
     // Verify and decode each jwt included in the `verified` array, 
-    // and return the verified property as an array of decoded objects
+    // and return the verified property as an array of decoded objects.
+    // Return invalid jwts in the `invalid` array
     if (verified) {
-      processed.verified = (await Promise.all(verified.map(token => verifyJWT(token, { audience: this.did }))))
-        .map(({payload, jwt}) => ({ ...payload, jwt}))
+      const invalid = []
+      const verifying = verified.map(token => verifyJWT(token, {audience: this.did}).catch(() => {
+        invalid.push(token)
+        return Promise.resolve(null)
+      }))
+
+      // Format payloads and remove invalid JWTs
+      processed.verified = (await Promise.all(verifying))
+        .map(v => v ? ({...v.payload, jwt: v.jwt}) : null)
+        .reduce((list, item) => item ? [...list, item] : list, [])
+
+      processed.invalid = invalid
     }
 
     return processed
