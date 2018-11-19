@@ -242,9 +242,10 @@ describe('createVerificationSignatureRequest()', () => {
 
   it('allows setting an expiration', async () => {
     const fakeuport = new Credentials({privateKey, did})
+    const expiresIn = 1000
     // temporarily mock the signJWT method
-    fakeuport.signJWT = (_, expiresIn) => expect(expiresIn).toBeLessThanOrEqual(10)
-    return await uport.createVerificationSignatureRequest({claim: {test: 'test'}}, {exp: toSeconds(Date.now()) + 10 })
+    fakeuport.signJWT = (_, exp) => expect(exp).toEqual(expiresIn)
+    return await uport.createVerificationSignatureRequest({claim: {test: 'test'}}, {expiresIn})
   })
 })
 

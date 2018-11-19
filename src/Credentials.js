@@ -245,9 +245,7 @@ class Credentials {
    * @param    {String}      [opts.callbackUrl]  The url to receive the response of this request
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim, { aud, sub, riss, callbackUrl, vc, exp } = {}) {
-    // FIXME: did-jwt only accepts expiresIn, and does the reverse of this
-    const expiresIn = exp - toSeconds(Date.now())
+  createVerificationSignatureRequest(unsignedClaim, { aud, sub, riss, callbackUrl, vc, expiresIn} = {}) {
     return this.signJWT({
       unsignedClaim,
       sub,
