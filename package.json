@@ -31,7 +31,6 @@
     "https-did-resolver": "^0.0.3",
     "jsontokens": "^0.7.8",
     "mnid": "^0.1.1",
-    "muport-did-resolver": "^0.1.0",
     "uport-did-resolver": "^0.0.2",
     "uport-lite": "^1.0.2"
   },
