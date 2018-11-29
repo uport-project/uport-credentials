@@ -3,7 +3,6 @@ import { ec as EC } from 'elliptic'
 import { createJWT, verifyJWT, SimpleSigner } from 'did-jwt'
 import { toEthereumAddress } from 'did-jwt/lib/Digest'
 import UportDIDResolver from 'uport-did-resolver'
-import MuportDIDResolver from 'muport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
 import UportLite from 'uport-lite'
 import { isMNID, decode as mnidDecode } from 'mnid'
@@ -87,13 +86,12 @@ class Credentials {
    * @param       {String}            [settings.privateKey]    A hex encoded 32 byte private key
    * @param       {SimpleSigner}      [settings.signer]        a signer object, see [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions)
    * @param       {Object}            [settings.ethrConfig]    Configuration object for ethr did resolver. See [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver)
-   * @param       {Object}            [settings.muportConfig]  Configuration object for muport did resolver. See [muport-did-resolver](https://github.com/uport-project/muport-did-resolver)
    * @param       {Address}           [settings.address]       DEPRECATED your uPort address (may be the address of your application's uPort identity)
    * @param       {Object}            [settings.networks]      DEPRECATED networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
    * @param       {UportLite}         [settings.registry]      DEPRECATED a registry object from UportLite
    * @return      {Credentials}                                self
    */
-  constructor ({did, address, privateKey, signer, networks, registry, ethrConfig, muportConfig} = {}) {
+  constructor ({did, address, privateKey, signer, networks, registry, ethrConfig} = {}) {
     if (signer) {
       this.signer = signer
     } else if (privateKey) {
@@ -119,7 +117,6 @@ class Credentials {
 
     UportDIDResolver(registry || UportLite({networks: networks ? configNetworks(networks) : {}}))
     EthrDIDResolver(ethrConfig || {})
-    MuportDIDResolver(muportConfig || {})
   }
 
   /**
