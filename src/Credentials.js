@@ -311,9 +311,6 @@ class Credentials {
    * @returns {Promise<Object, Error>}
    */
   createPersonalSignRequest(data, {riss, callback} = {}) {
-    if (!data.startsWith('0x')) {
-      data = `0x${data}`
-    }
     return this.signJWT({data, riss, callback, type: Types.PERSONAL_SIGN_REQUEST})
   }
 
