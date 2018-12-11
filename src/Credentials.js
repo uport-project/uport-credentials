@@ -300,12 +300,12 @@ class Credentials {
    *   @param {String} opts.callback        callback URL to handle the response
    * @returns {Promise<Object, Error>}      a promise which resolves to a signed JWT or rejects with an error
    */
-  createTypedDataSignatureRequest(typedData, {riss, callback} = {}) {
+  createTypedDataSignatureRequest(typedData, {from, callback} = {}) {
     // Check if the typedData is a valid ERC712 request
     for (const prop of ['types', 'primaryType', 'message', 'domain']) { 
       if (!typedData[prop]) throw new Error(`Invalid EIP712 Request, must include ${prop}`)
     }
-    return this.signJWT({typedData, riss, callback, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
+    return this.signJWT({typedData, from, callback, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
   }
 
   /**
@@ -314,8 +314,8 @@ class Credentials {
    * @param {Object} opts Additional options for request
    * @returns {Promise<Object, Error>}
    */
-  createPersonalSignRequest(data, {riss, callback} = {}) {
-    return this.signJWT({data, riss, callback, type: Types.PERSONAL_SIGN_REQUEST})
+  createPersonalSignRequest(data, {from, callback} = {}) {
+    return this.signJWT({data, from, callback, type: Types.PERSONAL_SIGN_REQUEST})
   }
 
   /**
