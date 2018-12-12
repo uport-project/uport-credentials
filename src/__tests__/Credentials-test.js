@@ -283,7 +283,7 @@ describe('createTypedDataSignatureRequest()', () => {
   }
 
   it('creates a valid JWT for a typed data request', async () => {
-    const jwt = await uport.createTypedDataSignatureRequest(typedData, {from: '0xdeadbeef'})
+    const jwt = await uport.createTypedDataSignatureRequest(typedData, {from: '0xdeadbeef', net: 0x1})
     expect(jwt).toMatchSnapshot()
   })
 })
@@ -292,11 +292,12 @@ describe('createPersonalSignRequest()', () => {
   it('creates a valid JWT for a personal sign request', async () => {
     const did = '0xdeadbeef'
     const data = '0xdeadbeef'
-    const jwt = await uport.createPersonalSignRequest(data, {from: did})
+    const jwt = await uport.createPersonalSignRequest(data, {from: did, net: 0x1})
     expect(jwt).toMatchSnapshot()
-    const {data: decodedData, from, type} = decodeJWT(jwt).payload
+    const {data: decodedData, from, net, type} = decodeJWT(jwt).payload
     expect(decodedData).toEqual(data)
     expect(from).toEqual(did)
+    expect(net).toEqual(0x1)
     expect(type).toEqual('personalSigReq')
   })
 })
