@@ -73,9 +73,7 @@ describe('configuration', () => {
   describe('configNetworks', () => {
     it('should accept a valid network setting', () => {
       const networks = {'0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c' }}
-      const credentials =  new Credentials({networks})
-      // What is the opposite of toThrow()??
-      expect(true).toBeTruthy()
+    expect(() => new Credentials({networks})).not.toThrow()
     })
 
     it('should require a registry address', () => {
