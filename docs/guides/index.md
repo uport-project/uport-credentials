@@ -1,8 +1,7 @@
 ---
 title: "Getting Started with uPort Credentials"
-index: 1
 category: "uport-credentials"
-type: "guide"
+type: "content"
 source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/guides/index.md"
 ---
 

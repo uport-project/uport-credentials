@@ -182,6 +182,10 @@ describe('createDisclosureRequest()', () => {
     return expect(response).toMatchSnapshot()
   })
 
+  it('includes vc in payload', async () => {
+    expect(createAndVerify({vc: ['woop']})).toMatchSnapshot()
+  })
+
   it('has correct payload in JWT for a request', async () => {
     const response = await createAndVerify({requested: ['name', 'phone']})
     return expect(response).toMatchSnapshot()
@@ -279,8 +283,22 @@ describe('createTypedDataSignatureRequest()', () => {
   }
 
   it('creates a valid JWT for a typed data request', async () => {
-    const jwt = await uport.createTypedDataSignatureRequest(typedData, {aud: 'did:ethr:deadbeef', sub: 'did:ethr:deadbeef'})
+    const jwt = await uport.createTypedDataSignatureRequest(typedData, {from: '0xdeadbeef', net: 0x1})
     expect(jwt).toMatchSnapshot()
+  })
+})
+
+describe('createPersonalSignRequest()', () => {
+  it('creates a valid JWT for a personal sign request', async () => {
+    const did = '0xdeadbeef'
+    const data = '0xdeadbeef'
+    const jwt = await uport.createPersonalSignRequest(data, {from: did, net: 0x1})
+    expect(jwt).toMatchSnapshot()
+    const {data: decodedData, from, net, type} = decodeJWT(jwt).payload
+    expect(decodedData).toEqual(data)
+    expect(from).toEqual(did)
+    expect(net).toEqual(0x1)
+    expect(type).toEqual('personalSigReq')
   })
 })
 
@@ -392,13 +410,7 @@ describe('verifyDisclosure()', () => {
 
     expect(profile.verified.length).toEqual(1)
     expect(profile.invalid.length).toEqual(1)
-    expect(profile).toMatchSnapshot()
-  })
-
-  it('passes through a dad', async () => {
-    const jwt = await uport.createDisclosureResponse({dad: 'hi dad'})
-    const profile = await uport.verifyDisclosure(jwt)
-    expect(profile).toMatchSnapshot()
+    expect(response).toMatchSnapshot()
   })
 })
 
