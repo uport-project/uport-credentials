@@ -22,6 +22,13 @@ const Types = {
 }
 
 /**
+ * Convert a date to seconds since unix epoch, rounded down to the nearest whole second
+ * @param   {Date}   date 
+ * @returns {Number}
+ */
+const toSeconds = date => Math.floor(date / 1000)
+
+/**
  * The Credentials class allows you to easily create the signed payloads used in uPort including
  * credentials and signed mobile app requests (ex. selective disclosure requests
  * for private data). It also provides signature verification over signed payloads.
@@ -235,7 +242,7 @@ class Credentials {
    * @param    {Object[]}    [opts.vc]           An array of JWTs about the requester, signed by 3rd parties
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim, { aud, sub, riss, callbackUrl, vc } = {}) {
+  createVerificationSignatureRequest(unsignedClaim, { aud, sub, riss, callbackUrl, vc, expiresIn} = {}) {
     return this.signJWT({
       unsignedClaim,
       sub,
@@ -244,7 +251,7 @@ class Credentials {
       vc,
       callback: callbackUrl,
       type: Types.VERIFICATION_SIGNATURE_REQUEST,
-    })
+    }, expiresIn)
   }
 
   /**
@@ -293,12 +300,12 @@ class Credentials {
    *   @param {String} opts.callback        callback URL to handle the response
    * @returns {Promise<Object, Error>}      a promise which resolves to a signed JWT or rejects with an error
    */
-  createTypedDataSignatureRequest(typedData, {riss, callback} = {}) {
+  createTypedDataSignatureRequest(typedData, {from, net, callback} = {}) {
     // Check if the typedData is a valid ERC712 request
     for (const prop of ['types', 'primaryType', 'message', 'domain']) { 
       if (!typedData[prop]) throw new Error(`Invalid EIP712 Request, must include ${prop}`)
     }
-    return this.signJWT({typedData, riss, callback, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
+    return this.signJWT({typedData, from, net, callback, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
   }
 
   /**
@@ -307,8 +314,8 @@ class Credentials {
    * @param {Object} opts Additional options for request
    * @returns {Promise<Object, Error>}
    */
-  createPersonalSignRequest(data, {riss, callback} = {}) {
-    return this.signJWT({data, riss, callback, type: Types.PERSONAL_SIGN_REQUEST})
+  createPersonalSignRequest(data, {from, net, callback} = {}) {
+    return this.signJWT({data, from, net, callback, type: Types.PERSONAL_SIGN_REQUEST})
   }
 
   /**
