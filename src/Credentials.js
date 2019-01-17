@@ -93,7 +93,7 @@ class Credentials {
    * @param       {UportLite}         [settings.registry]      DEPRECATED a registry object from UportLite
    * @return      {Credentials}                                self
    */
-  constructor({did, address, privateKey, signer, networks, registry, ethrConfig} = {}) {
+  constructor({ did, address, privateKey, signer, networks, registry, ethrConfig } = {}) {
     if (signer) {
       this.signer = signer
     } else if (privateKey) {
