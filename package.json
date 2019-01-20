@@ -1,6 +1,6 @@
 {
   "name": "uport-credentials",
-  "version": "1.2.0-alpha1",
+  "version": "1.2.0-alpha2",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",

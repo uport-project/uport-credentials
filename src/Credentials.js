@@ -7,8 +7,6 @@ import HttpsDIDResolver from 'https-did-resolver'
 import UportLite from 'uport-lite'
 import { isMNID, decode as mnidDecode } from 'mnid'
 
-import { ContractFactory } from './Contract.js'
-
 const secp256k1 = new EC('secp256k1')
 
 const Types = {
@@ -511,23 +509,6 @@ class Credentials {
   async verifyDisclosure(token) {
     const { payload, doc } = await verifyJWT(token, { audience: this.did })
     return this.processDisclosurePayload({ payload, doc })
-  }
-
-  /**
-   *  Builds and returns a contract object which can be used to interact with
-   *  a given contract. Similar to web3.eth.contract but with promises. Once specifying .at(address)
-   *  you can call the contract functions with this object. Each call will create a request.
-   *
-   *  @param    {Object}       abi          contract ABI
-   *  @return   {Object}                    contract object
-   */
-  contract(abi) {
-    const txObjHandler = (txObj, opts) => {
-      if (txObj.function) txObj.fn = txObj.function
-      delete txObj['function']
-      return this.createTxRequest(txObj, opts)
-    }
-    return ContractFactory(txObjHandler.bind(this))(abi)
   }
 }
 

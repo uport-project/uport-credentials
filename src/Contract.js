@@ -44,7 +44,7 @@ const encodeMethodReadable = (methodObject, methodArgs) => {
   return dataString += `)`
 }
 
-const ContractFactory = (extend) => (contractABI) => {
+export const ContractFactory = (extend) => (contractABI) => {
   const output = {};
   output.at = function atContract(address) {
 
@@ -95,4 +95,21 @@ const ContractFactory = (extend) => (contractABI) => {
   return output;
 };
 
-export { ContractFactory }
+
+/**
+ *  Builds and returns a contract object which can be used to interact with
+ *  a given contract. Similar to web3.eth.contract but with promises. Once specifying .at(address)
+ *  you can call the contract functions with this object. Each call will create a request.
+ *
+ *  @param    {Credentials}  credentials  Initialized Credentials object
+ *  @param    {Object}       abi          contract ABI
+ *  @return   {Object}                    contract object
+ */
+export function createContract (credentials, abi) {
+  const txObjHandler = (txObj, opts) => {
+    if (txObj.function) txObj.fn = txObj.function
+    delete txObj['function']
+    return credentials.createTxRequest(txObj, opts)
+  }
+  return ContractFactory(txObjHandler)(abi)
+}

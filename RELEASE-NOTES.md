@@ -1,5 +1,9 @@
 # Release Notes
 
+## Version 1.2.0-alpha2
+* Improved support for treeshaking allowing for smaller modules when leaving your development pipeline
+* Moved `Credentials.contract()` to `createContract()`. WARNING This is a BREAKING change and is added to allow apps not using ethereum to not include contract dependencies.
+
 ## Version 1.1.0
 * New method `Credentials.createPersonalSignRequest()` for creating a message to request a `personal_sign` RPC call from a uPort mobile wallet
 * New method `Credentials.createTypedDataSignatureRequest()` for creating a message to request a `eth_signTypedData` RPC call from a uPort mobile wallet

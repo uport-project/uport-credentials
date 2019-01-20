@@ -1,4 +1,5 @@
 import Credentials from '../Credentials'
+import { createContract } from '../Contract'
 import { SimpleSigner, createJWT, verifyJWT, decodeJWT } from 'did-jwt'
 import MockDate from 'mockdate'
 import { registerMethod } from 'did-resolver'
@@ -419,7 +420,7 @@ describe('txRequest()', () => {
 
   const abi = [{"constant":false,"inputs":[{"name":"status","type":"string"}],"name":"updateStatus","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"addr","type":"address"}],"name":"getStatus","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"}]
   const address = '0x70A804cCE17149deB6030039798701a38667ca3B'
-  const statusContract = uport.contract(abi).at(address)
+  const statusContract = createContract(uport, abi).at(address)
 
   it('creates a valid JWT for a request', async () => {
     const jwt = await statusContract.updateStatus('hello')

@@ -130,8 +130,16 @@ As with a verification request, you will want to send this JWT to your user. You
 Finally, as uPort is based in the Ethereum blockchain, uPort Credentials can be used to request that a user call a particular Ethereum smart contract function.  Smart contracts live on the blockchain at a certain address and expose public functions that can be called according to their ABI.  Using the `Credentials.contract` method, you can create an object from a contract abi that will create transaction request JWTs for each contract method, that can be presented to a user's mobile application like any other JWT described above.  This is just a wrapper around `Credentials.createTxRequest()`, which generates the txObject for a particular contract method call.
  
 ```javascript
+import { Credentials, createContract } from 'uport-credentials'
 import abi from './myContractAbi.json'
-const myContract = Credentials.contract(abi).at(contractAddress)
+
+const credentials = new Credentials({
+  appName: 'App Name',
+  did: 'did:ethr:0x....',
+  privateKey: process.env.PRIVATE_KEY
+})
+
+const myContract = createContract(credentials, abi).at(contractAddress)
 // creates a request for the user to call the transfer() function on the smart contract
 const txRequest = myContract.transfer(...).then(txRequestToken => {
   // send tx request token to user
