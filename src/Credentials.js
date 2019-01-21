@@ -181,7 +181,9 @@ class Credentials {
     if (params.rpcUrl) {
       if (params.networkId) {
         payload.rpc = params.rpcUrl
-      } else return Promise.reject(new Error(`rpcUrl was specified but no network_id`))
+      } else {
+        return Promise.reject(new Error(`rpcUrl was specified but no networkId`))
+      }
     }
     if (params.vc) payload.vc = params.vc
     if (params.exp) payload.exp = params.exp
@@ -216,6 +218,7 @@ class Credentials {
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
   createVerification({ sub, claim, exp, vc, callbackUrl }, expiresIn) {
+    if (exp && expiresIn) throw new Error('Cannot specify both credential.exp and parameter expiresIn')
     return this.signJWT({ sub, claim, exp, vc, callbackUrl }, expiresIn)
   }
 
