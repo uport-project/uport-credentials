@@ -310,24 +310,12 @@ describe('createPersonalSignRequest()', () => {
 
 describe('createVerification()', () => {
   beforeAll(() => mockresolver())
-  describe('use explicit expiry time', () => {
-    it('has correct payload in JWT for an attestation', async () => {
-      return uport.createVerification({sub: 'did:uport:223ab45', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133 + 1}).then(async (jwt) => {
-        const decoded = await verifyJWT(jwt)
-        return expect(decoded).toMatchSnapshot()
-      })
+  it('has correct payload in JWT for an attestation', async () => {
+    return uport.createVerification({sub: 'did:uport:223ab45', claim: {email: 'bingbangbung@email.com'}, exp: 1485321133 + 1}).then(async (jwt) => {
+      const decoded = await verifyJWT(jwt)
+      return expect(decoded).toMatchSnapshot()
     })
   })
-
-  describe('use expiresIn', () => {
-    it('has correct payload in JWT for an attestation', async () => {
-      return uport.createVerification({sub: 'did:uport:223ab45', claim: {email: 'bingbangbung@email.com'}}, 60).then(async (jwt) => {
-        const decoded = await verifyJWT(jwt)
-        return expect(decoded).toMatchSnapshot()
-      })
-    })
-  })
-
 })
 
 describe('authenticateDisclosureResponse()', () => {

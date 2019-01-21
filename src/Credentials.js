@@ -205,21 +205,20 @@ class Credentials {
    *  @example
    *  credentials.createVerification({
    *   sub: '5A8bRWU3F7j3REx3vkJ...', // uPort address of user, likely a MNID
+   *   exp: <future timestamp>,
    *   claim: { name: 'John Smith' }
-   *  }, 14*24*60*60 ).then( credential => {
+   *  }).then( credential => {
    *   ...
    *  })
    *
    * @param    {Object}            [credential]           a unsigned claim object
    * @param    {String}            credential.sub         subject of credential (a valid DID)
    * @param    {String}            credential.claim       claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
-   * @param    {number}            credential.exp         Optional time at which this claim expires and is no longer valid (seconds since epoch)
-   * @param    {number}            expiresIn              Optional validity time in seconds. Use either this or credential.exp
+   * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
-  createVerification({ sub, claim, exp, vc, callbackUrl }, expiresIn) {
-    if (exp && expiresIn) throw new Error('Cannot specify both credential.exp and parameter expiresIn')
-    return this.signJWT({ sub, claim, exp, vc, callbackUrl }, expiresIn)
+  createVerification({ sub, claim, exp, vc, callbackUrl }) {
+    return this.signJWT({ sub, claim, exp, vc, callbackUrl })
   }
 
   /**
