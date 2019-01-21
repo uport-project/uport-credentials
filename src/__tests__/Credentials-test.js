@@ -160,10 +160,16 @@ describe('createDisclosureRequest()', () => {
     const response = await createAndVerify({networkId: '0x4'})
     return expect(response).toMatchSnapshot()
   })
+  
+  describe('private chains', () => {
+    it('has correct payload in JWT requesting a specific networkId with rpcUrl', async () => {
+      const response = await createAndVerify({networkId: '0x64', rpcUrl: 'https://dai.poa.network/'})
+      return expect(response).toMatchSnapshot()
+    })      
 
-  it('has correct payload in JWT requesting a specific networkId', async () => {
-    const response = await createAndVerify({networkId: '0x4'})
-    return expect(response).toMatchSnapshot()
+    it('missing network id', async () => {
+      await expect(createAndVerify({rpcUrl: 'https://dai.poa.network/'})).rejects.toMatchSnapshot()      
+    })      
   })
 
   for (let accountType of ['general', 'segregated', 'keypair', 'none']) {
