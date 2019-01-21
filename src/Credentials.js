@@ -209,8 +209,8 @@ class Credentials {
    * @param    {number}            expiresIn              Optional validity time in seconds. Use either this or credential.exp
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
-  createVerification({ sub, claim, exp, vc }, expiresIn) {
-    return this.signJWT({ sub, claim, exp, vc }, expiresIn)
+  createVerification({ sub, claim, exp, vc, callbackUrl }, expiresIn) {
+    return this.signJWT({ sub, claim, exp, vc, callbackUrl }, expiresIn)
   }
 
   /**
