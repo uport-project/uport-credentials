@@ -3,7 +3,6 @@ import { ec as EC } from 'elliptic'
 import { createJWT, verifyJWT, SimpleSigner } from 'did-jwt'
 import { toEthereumAddress } from 'did-jwt/lib/Digest'
 import UportDIDResolver from 'uport-did-resolver'
-import MuportDIDResolver from 'muport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
 import HttpsDIDResolver from 'https-did-resolver'
 import UportLite from 'uport-lite'
@@ -21,6 +20,13 @@ const Types = {
   ETH_TX_REQUEST: 'ethtx',
   PERSONAL_SIGN_REQUEST: 'personalSigReq'
 }
+
+/**
+ * Convert a date to seconds since unix epoch, rounded down to the nearest whole second
+ * @param   {Date}   date 
+ * @returns {Number}
+ */
+const toSeconds = date => Math.floor(date / 1000)
 
 /**
  * The Credentials class allows you to easily create the signed payloads used in uPort including
@@ -82,13 +88,12 @@ class Credentials {
    * @param       {String}            [settings.privateKey]    A hex encoded 32 byte private key
    * @param       {SimpleSigner}      [settings.signer]        a signer object, see [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions)
    * @param       {Object}            [settings.ethrConfig]    Configuration object for ethr did resolver. See [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver)
-   * @param       {Object}            [settings.muportConfig]  Configuration object for muport did resolver. See [muport-did-resolver](https://github.com/uport-project/muport-did-resolver)
    * @param       {Address}           [settings.address]       DEPRECATED your uPort address (may be the address of your application's uPort identity)
    * @param       {Object}            [settings.networks]      DEPRECATED networks config object, ie. {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
    * @param       {UportLite}         [settings.registry]      DEPRECATED a registry object from UportLite
    * @return      {Credentials}                                self
    */
-  constructor({ did, address, privateKey, signer, networks, registry, ethrConfig, muportConfig } = {}) {
+  constructor({ did, address, privateKey, signer, networks, registry, ethrConfig } = {}) {
     if (signer) {
       this.signer = signer
     } else if (privateKey) {
@@ -120,7 +125,6 @@ class Credentials {
 
     UportDIDResolver(registry || UportLite({ networks: networks ? configNetworks(networks) : {} }))
     EthrDIDResolver(ethrConfig || {})
-    MuportDIDResolver(muportConfig || {})
     HttpsDIDResolver()
   }
 
@@ -244,7 +248,7 @@ class Credentials {
    * @param    {Object[]}    [opts.vc]           An array of JWTs about the requester, signed by 3rd parties
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim, { aud, sub, riss, callbackUrl, vc } = {}) {
+  createVerificationSignatureRequest(unsignedClaim, { aud, sub, riss, callbackUrl, vc, expiresIn} = {}) {
     return this.signJWT({
       unsignedClaim,
       sub,
@@ -253,7 +257,7 @@ class Credentials {
       vc,
       callback: callbackUrl,
       type: Types.VERIFICATION_SIGNATURE_REQUEST,
-    })
+    }, expiresIn)
   }
 
   /**
@@ -302,12 +306,12 @@ class Credentials {
    *   @param {String} opts.callback        callback URL to handle the response
    * @returns {Promise<Object, Error>}      a promise which resolves to a signed JWT or rejects with an error
    */
-  createTypedDataSignatureRequest(typedData, {riss, callback} = {}) {
+  createTypedDataSignatureRequest(typedData, {from, net, callback} = {}) {
     // Check if the typedData is a valid ERC712 request
     for (const prop of ['types', 'primaryType', 'message', 'domain']) { 
       if (!typedData[prop]) throw new Error(`Invalid EIP712 Request, must include ${prop}`)
     }
-    return this.signJWT({typedData, riss, callback, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
+    return this.signJWT({typedData, from, net, callback, type: Types.TYPED_DATA_SIGNATURE_REQUEST})
   }
 
   /**
@@ -316,8 +320,8 @@ class Credentials {
    * @param {Object} opts Additional options for request
    * @returns {Promise<Object, Error>}
    */
-  createPersonalSignRequest(data, {riss, callback} = {}) {
-    return this.signJWT({data, riss, callback, type: Types.PERSONAL_SIGN_REQUEST})
+  createPersonalSignRequest(data, {from, net, callback} = {}) {
+    return this.signJWT({data, from, net, callback, type: Types.PERSONAL_SIGN_REQUEST})
   }
 
   /**
