@@ -1,4 +1,4 @@
-import { ec as EC } from 'elliptic'
+import { EC } from 'elliptic-lite'
 
 import { createJWT, verifyJWT, SimpleSigner, toEthereumAddress } from 'did-jwt'
 import UportDIDResolver from 'uport-did-resolver'
@@ -7,7 +7,7 @@ import HttpsDIDResolver from 'https-did-resolver'
 import UportLite from 'uport-lite'
 import { isMNID, decode as mnidDecode } from 'mnid'
 
-const secp256k1 = new EC('secp256k1')
+const secp256k1 = new EC()
 
 const Types = {
   DISCLOSURE_REQUEST: 'shareReq',
