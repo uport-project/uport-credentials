@@ -209,8 +209,8 @@ class Credentials {
    * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
-  createVerification({ sub, claim, exp, vc }) {
-    return this.signJWT({ sub, claim, exp, vc })
+  createVerification({ sub, claim, exp, vc, callbackUrl }) {
+    return this.signJWT({ sub, claim, exp, vc, callbackUrl })
   }
 
   /**
