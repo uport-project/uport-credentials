@@ -294,17 +294,18 @@ class Credentials {
    *     subject: 'World'
    *   }
    * }
-   * const sub = 'did:ethr:0xbeef1234' // Who the claim is "about"
-   * const aud = 'did:ethr:0xbeef4567' // Who you are asking to sign the claim
-   * const callbackUrl = 'https://my.cool.site/handleTheResponse'
-   * const signRequestJWT = credentials.createTypedDataSignatureRequest(data, {sub, aud, callbackUrl})
+
+   * const from = '0xbeef4567' // Eth account you are asking to sign the claim
+   * const net = '0x1' // The network on which this address exists
+   * const callback = 'https://my.cool.site/handleTheResponse'
+   * const signRequestJWT = credentials.createTypedDataSignatureRequest(data, {from, net, callback})
    * // Send the JWT to a client
    * // ...
    *
    * @param {Object} typedData              the ERC712 data to sign
    * @param {Object} opts                   additional options for the jwt
-   *   @param {String} opts.sub             the subject of the JWT (arbitrary)
-   *   @param {String} opts.aud             the did of the identity you want to sign the typed data
+   *   @param {String} opts.from            the ethereum address you want to sign the typed data
+   *   @param {Number|String} opts.net      the id of the network on which the {from} address exists
    *   @param {String} opts.callback        callback URL to handle the response
    * @returns {Promise<Object, Error>}      a promise which resolves to a signed JWT or rejects with an error
    */
