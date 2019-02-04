@@ -165,6 +165,7 @@ class Credentials {
    *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
    *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
    *  @param    {String}             params.networkId      network id of Ethereum chain of identity eg. 0x4 for rinkeby
+   *  @param    {String}             params.rpcUrl         JSON RPC url for use with account connecting to non standard (private or permissioned chain). The JSON-RPC url must match the `networkId`
    *  @param    {String[]}           params.vc             An array of JWTs about the requester, signed by 3rd parties
    *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", or "none"
    *  @param    {Number}             expiresIn             Seconds until expiry
@@ -176,7 +177,14 @@ class Credentials {
     if (params.verified) payload.verified = params.verified
     if (params.notifications) payload.permissions = ['notifications']
     if (params.callbackUrl) payload.callback = params.callbackUrl
-    if (params.network_id) payload.net = params.network_id
+    if (params.networkId) payload.net = params.networkId
+    if (params.rpcUrl) {
+      if (params.networkId) {
+        payload.rpc = params.rpcUrl
+      } else {
+        return Promise.reject(new Error(`rpcUrl was specified but no networkId`))
+      }
+    }
     if (params.vc) payload.vc = params.vc
     if (params.exp) payload.exp = params.exp
 
@@ -209,8 +217,8 @@ class Credentials {
    * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
-  createVerification({ sub, claim, exp, vc }) {
-    return this.signJWT({ sub, claim, exp, vc })
+  createVerification({ sub, claim, exp, vc, callbackUrl }) {
+    return this.signJWT({ sub, claim, exp, vc, callbackUrl })
   }
 
   /**
