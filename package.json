@@ -19,7 +19,9 @@
     "build:docs:md": "./node_modules/jsdoc-to-markdown/bin/cli.js -f src/* --template \"./template.hbs\" -c js2doc.conf > docs/reference/index.md; echo",
     "build:docs": "npm run build:docs:html && npm run build:docs:md",
     "prepublish": "npm run build",
-    "prepare": "npm run build:es5"
+    "prepare": "npm run build:es5",
+    "draft-release-notes": "GREN_GITHUB_TOKEN=$(vault read -field=value secret/mobile/release_token) gren release -d",
+    "publish-release-notes": "GREN_GITHUB_TOKEN=$(vault read -field=value secret/mobile/release_token) gren release"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "license": "Apache-2.0",
