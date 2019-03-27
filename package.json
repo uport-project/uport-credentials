@@ -60,7 +60,7 @@
     "mockdate": "^2.0.1",
     "ngrok": "^3.1.0",
     "nock": "^9.4.3",
-    "uport-transports": "^0.0.66",
+    "uport-transports": "^0.2.4",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.1"
   }
