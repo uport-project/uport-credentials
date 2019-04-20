@@ -9,6 +9,7 @@ import UportLite from 'uport-lite'
 import { isMNID, decode as mnidDecode } from 'mnid'
 
 import { ContractFactory, TransactionRequest, AbiParam, ContractABI, ContractInterface, Factory } from './Contract'
+import { PublicKey } from 'did-resolver';
 
 const secp256k1 = new EC('secp256k1')
 
@@ -50,7 +51,7 @@ interface Settings {
   signer?: Signer,
   networks?: Networks,
   registry?: (mnid: string) => Promise<Object>,
-  ethrConfig?: Object
+  ethrConfig?: any
 }
 
 interface Identity {
@@ -92,7 +93,7 @@ interface DisclosureRequestPayload extends JWTPayload{
 
 interface DisclosureResponsePayload extends JWTPayload {
   req?: string
-  own?: Object
+  own?: any
   verified?: string[]
   nad?: string
   dad?: string
@@ -106,7 +107,7 @@ interface DisclosurePayload {
 }
 
 interface DisclosureResponse {
-  own: Object
+  own: any
   capabilities: string[]
   aud?: string
   req?: string
@@ -124,20 +125,20 @@ interface DisclosureResponse {
 }
 
 interface VerifiedJWT {
-  payload: Object,
+  payload: any,
   doc: DIDDocument,
   issuer: string,
-  signer: Object,
+  signer: PublicKey,
   jwt: string
 }
 interface Verification extends JWTPayload {
-  claims: Object
+  claims: any
   jwt?: string
 }
 
 interface VerificationParam {
   sub: string,
-  claim: Object,
+  claim: any,
   exp?: number,
   vc?: string[],
   callbackUrl?: string
@@ -169,7 +170,7 @@ interface EIP712Object {
   types: EIP712Types
   domain: EIP712Domain
   primaryType: string
-  message: Object
+  message: any
 }
 
 interface NetworkRequest {

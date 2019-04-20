@@ -85,20 +85,20 @@ describe('configuration', () => {
     })
 
     // TODO Investigate how to override type system to allow this
-    // it('should require a registry address', () => {
-    //   const networks = {'0x94365e3b': { rpcUrl: 'https://private.chain/rpc' }}
-    //   expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
-    // })
+    it('should require a registry address', () => {
+      const networks : any = {'0x94365e3b': { rpcUrl: 'https://private.chain/rpc' }}
+      expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
+    })
 
-    // it('should require a rpcUrl', () => {
-    //   const networks = {'0x94365e3b': { registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c' }}
-    //   expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
-    // })
+    it('should require a rpcUrl', () => {
+      const networks : any = {'0x94365e3b': { registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c' }}
+      expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
+    })
 
-    // it('if networks key is passed in it must contain configuration object', () => {
-    //   const networks = {'0x94365e3b': 'hey'}
-    //   expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
-    // })
+    it('if networks key is passed in it must contain configuration object', () => {
+      const networks : any = {'0x94365e3b': 'hey'}
+      expect(() => new Credentials({networks})).toThrowErrorMatchingSnapshot()
+    })
   })
 })
 
