@@ -12,7 +12,7 @@ export interface TransactionRequest {
   function?: string
 }
 
-enum AbiEntryType {
+export enum AbiEntryType {
   Function = 'function',
   Event = 'event',
   Constructor = 'constructor',
@@ -39,7 +39,7 @@ interface AbiEntry {
 }
 
 export interface AbiFunction extends AbiEntry {
-  type: AbiEntryType.Function | AbiEntryType.Constructor | AbiEntryType.Constructor,
+  // type: AbiEntryType.Function | AbiEntryType.Constructor | AbiEntryType.Constructor,
   outputs?: AbiParam[],
   stateMutability?: StateMutability,
   payable?: true
@@ -51,7 +51,7 @@ interface AbiEventParam extends AbiParam {
 }
 
 export interface AbiEvent extends AbiEntry {
-  type: AbiEntryType.Event,
+  // type: AbiEntryType.Event,
   inputs?: AbiEventParam[],
   anonymous?: boolean
 }
@@ -114,9 +114,9 @@ export interface ContractInterface {
 interface DynamicABI {
   [method: string]: () => TransactionRequest
 }
-export const ContractFactory = (extend?: object) => (contractABI: ContractABI): Factory => {
+export const ContractFactory = (encoder?: (tx: any, params? : any) => any) => (contractABI: ContractABI): Factory => {
   return {
-    at: (address: string) : ContractInterface => {
+    at: (address: string) : any => {
       const functionCalls : DynamicABI = {}
       getCallableMethodsFromABI(contractABI).forEach((methodObject) => {
         if (methodObject.name) {
@@ -134,11 +134,10 @@ export const ContractFactory = (extend?: object) => (contractABI: ContractABI): 
               to: address,
               function: encodeMethodReadable(methodObject, methodArgs)
             }
+            if (!encoder) return methodTxObject
 
-            if (!extend) return methodTxObject
-
-            const extendArgs = methodArgs.slice(nArgs)
-            return {...methodTxObject, ...extendArgs}
+            const extendArgs = methodArgs[methodArgs.length - 1]
+            return encoder(methodTxObject, extendArgs)
           }  
         }
       })

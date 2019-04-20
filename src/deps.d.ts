@@ -45,15 +45,38 @@ declare module 'did-jwt' {
     callbackUrl?: string
   }
   interface Verified {
-    payload: Object,
+    payload: any,
     doc: DIDDocument,
     issuer: string,
     signer: Object,
     jwt: string
   }
+
+  interface JWTPayload {
+    iss?: string
+    sub?: string
+    aud?: string
+    iat?: number
+    type?: string
+    exp?: number
+  }
+
+  interface JWTHeader {
+    alg: string
+    type: 'JWT'
+  }
+  
+  interface JWTDecoded {
+    header: JWTHeader
+    payload: JWTPayload
+    signature: string
+    data: string
+  }
+
   export function SimpleSigner(hexPrivateKey: string): (data: string) => Promise<EcdsaSignature>
   export function createJWT(payload: Object, options: JWTOptions): Promise<string>
   export function verifyJWT(jwt: string, options?: JWTVerifyOptions): Promise<Verified>
+  export function decodeJWT(jwt: string): JWTDecoded
 }
 
 declare module 'did-jwt/lib/Digest' {

@@ -1,4 +1,4 @@
-import {ContractFactory } from '../Contract'
+import { ContractFactory, ContractABI, AbiEntryType } from '../Contract'
 
 
 const buildRequestURI = (txObject) => {
@@ -8,7 +8,7 @@ const Contract = ContractFactory(buildRequestURI)
 
 
 const address = '0x41566e3a081f5032bdcad470adb797635ddfe1f0'
-const abiToken = [
+const abiToken : ContractABI = [
   {
     "constant": true,
     "inputs": [],
@@ -20,7 +20,7 @@ const abiToken = [
       }
     ],
     "payable": false,
-    "type": "function"
+    "type": AbiEntryType.Function
   },
   {
     "constant": false,
@@ -42,7 +42,7 @@ const abiToken = [
       }
     ],
     "payable": false,
-    "type": "function"
+    "type": AbiEntryType.Function
   },
   {
     "constant": true,
@@ -55,7 +55,7 @@ const abiToken = [
       }
     ],
     "payable": false,
-    "type": "function"
+    "type": AbiEntryType.Function
   },
   {
     "constant": false,
@@ -81,7 +81,7 @@ const abiToken = [
       }
     ],
     "payable": false,
-    "type": "function"
+    "type": AbiEntryType.Function
   },
   {
     "constant": true,
@@ -94,7 +94,7 @@ const abiToken = [
       }
     ],
     "payable": false,
-    "type": "function"
+    "type": AbiEntryType.Function
   },
   {
     "constant": true,
@@ -107,7 +107,7 @@ const abiToken = [
       }
     ],
     "payable": false,
-    "type": "function"
+    "type": AbiEntryType.Function
   },
   {
     "constant": true,
@@ -125,7 +125,7 @@ const abiToken = [
       }
     ],
     "payable": false,
-    "type": "function"
+    "type": AbiEntryType.Function
   },
   {
     "constant": true,
@@ -138,7 +138,7 @@ const abiToken = [
       }
     ],
     "payable": false,
-    "type": "function"
+    "type": AbiEntryType.Function
   },
   {
     "constant": false,
@@ -160,7 +160,7 @@ const abiToken = [
       }
     ],
     "payable": false,
-    "type": "function"
+    "type": AbiEntryType.Function
   },
   {
     "constant": false,
@@ -186,7 +186,7 @@ const abiToken = [
       }
     ],
     "payable": false,
-    "type": "function"
+    "type": AbiEntryType.Function
   },
   {
     "constant": true,
@@ -208,7 +208,7 @@ const abiToken = [
       }
     ],
     "payable": false,
-    "type": "function"
+    "type": AbiEntryType.Function
   },
   {
     "inputs": [
@@ -229,11 +229,11 @@ const abiToken = [
         "type": "string"
       }
     ],
-    "type": "constructor"
+    "type": AbiEntryType.Constructor
   },
   {
     "payable": false,
-    "type": "fallback"
+    "type": AbiEntryType.Fallback
   },
   {
     "anonymous": false,
@@ -255,7 +255,7 @@ const abiToken = [
       }
     ],
     "name": "Transfer",
-    "type": "event"
+    "type": AbiEntryType.Event
   },
   {
     "anonymous": false,
@@ -277,7 +277,7 @@ const abiToken = [
       }
     ],
     "name": "Approval",
-    "type": "event"
+    "type": AbiEntryType.Event
   },
 ]
 
@@ -304,24 +304,6 @@ describe('Contract', () => {
     expect(tokenContract.approveAndCall).toBeDefined()
   });
 
-  it('returns a contract object with the given contract event names available', () => {
-    expect(tokenContract.Transfer).toBeDefined()
-    expect(tokenContract.Approval).toBeDefined()
-  });
-
-  it('returns a contract object with the given contract constant names available', () => {
-    expect(tokenContract.totalSupply).toBeDefined()
-    expect(tokenContract.balanceOf).toBeDefined()
-  });
-
-  it('throws an error if an event is called', () => {
-    expect(tokenContract.Transfer).toThrowError(Error)
-  });
-
-  it('throws an error if a constant is called', () => {
-    expect(tokenContract.totalSupply).toThrowError(Error)
-  });
-
   it('returns a well formed uri on contract function calls', () => {
     const uri = tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)
     expect(uri).toEqual("me.uport:0x41566e3a081f5032bdcad470adb797635ddfe1f0?function=transfer(address 0x41566e3a081f5032bdcad470adb797635ddfe1f0, uint256 10)")
@@ -334,7 +316,7 @@ describe('ContractFactory', () => {
     let txObject
 
     beforeAll(() => {
-      const tokenContract = ContractFactory()(abiToken).at(address)
+      const tokenContract : any = ContractFactory()(abiToken).at(address)
       txObject = tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)
     })
 
@@ -350,34 +332,18 @@ describe('ContractFactory', () => {
 
   describe('With an extend function', () => {
     it('allows the Contract object functions to be extended if given a function', () => {
-      const extend = (txObject) => { return 'hello'}
+      const extend = (_) => { return 'hello'}
       const Contract = ContractFactory(extend)
-      const tokenContract = Contract(abiToken).at(address)
-      // expect(tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)).toEqual('hello')
+      const tokenContract : any = Contract(abiToken).at(address)
+      expect(tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)).toEqual('hello')
     });
 
     it('passes additional args on Contract object function calls to the extend function', () => {
       const str = 'ether'
-      const extend = (txObject, str) => { return str}
+      const extend = (_, arg) => arg
       const Contract = ContractFactory(extend)
-      const tokenContract = Contract(abiToken).at(address)
+      const tokenContract : any = Contract(abiToken).at(address)
       expect(tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10, str)).toEqual(str)
     });
-
-    it('passes additional args beyond a transaction object to the extend function', () => {
-      const extend = (txObj, id, sendOpts) => ({txObj, id, sendOpts})
-      const Contract = ContractFactory(extend)
-      const tokenContract = Contract(abiToken).at(address)
-
-      const txObj = {gas: '10000000'}
-      const id = 'WOOP'
-      const sendOpts = {woop: 'woop'}
-
-      const result = tokenContract.transfer('0xdeadbeef', 10, txObj, id, sendOpts)
-
-      expect(result.txObj).toMatchObject(txObj)
-      expect(result.id).toEqual(id)
-      expect(result.sendOpts).toEqual(sendOpts)
-    })
   });
 });

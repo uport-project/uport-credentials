@@ -68,6 +68,7 @@
   "devDependencies": {
     "@types/elliptic": "^6.4.6",
     "@types/jest": "^24.0.11",
+    "@types/mockdate": "^2.0.0",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-jest": "^22.4.3",

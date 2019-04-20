@@ -8,7 +8,7 @@ import HttpsDIDResolver from 'https-did-resolver'
 import UportLite from 'uport-lite'
 import { isMNID, decode as mnidDecode } from 'mnid'
 
-import { ContractFactory, TransactionRequest, AbiParam, ContractABI, ContractInterface, Factory } from './Contract.js'
+import { ContractFactory, TransactionRequest, AbiParam, ContractABI, ContractInterface, Factory } from './Contract'
 
 const secp256k1 = new EC('secp256k1')
 
@@ -28,11 +28,13 @@ enum Types {
  */
 const toSeconds = (date: number): number => Math.floor(date / 1000)
 
-/**
- * The Credentials class allows you to easily create the signed payloads used in uPort including
- * credentials and signed mobile app requests (ex. selective disclosure requests
- * for private data). It also provides signature verification over signed payloads.
- */
+interface Network {
+  registry: string
+  rpcUrl: string
+}
+interface Networks {
+  [net: string]: Network
+}
 
 interface EcdsaSignature {
   r: string,
@@ -142,9 +144,9 @@ interface VerificationParam {
 }
 
 interface VerificationRequest {
-  aud: string,
+  aud?: string,
   sub: string,
-  riss: string,
+  riss?: string,
   expiresIn?: number,
   vc?: string[],
   callbackUrl?: string
@@ -189,15 +191,18 @@ interface TxReqPayload {
   label?: string
 }
 
-interface Network {
-  registry: string
-  rpcUrl: string
-}
-interface Networks {
-  [net: string]: Network
+interface PersonalSignPayload {
+  callback?: string
+  from?: string
+  net?: string
+  data: string
 }
 
-
+/**
+ * The Credentials class allows you to easily create the signed payloads used in uPort including
+ * credentials and signed mobile app requests (ex. selective disclosure requests
+ * for private data). It also provides signature verification over signed payloads.
+ */
 class Credentials {
   readonly did?: string
   readonly signer?: Signer
