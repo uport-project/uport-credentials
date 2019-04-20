@@ -1,7 +1,64 @@
 
 // A derivative work of Nick Dodson's eths-contract https://github.com/ethjs/ethjs-contract/blob/master/src/index.js
 
-const isTransactionObject = (txObj) => {
+export interface TransactionRequest {
+  from?: string,
+  to?: string,
+  data?: string,
+  value?: string | number,
+  gasPrice?: string | number,
+  gas?: string | number
+  fn?: string
+  function?: string
+}
+
+enum AbiEntryType {
+  Function = 'function',
+  Event = 'event',
+  Constructor = 'constructor',
+  Fallback = 'fallback'
+}
+
+enum StateMutability {
+  Pure = 'pure',
+  View = 'view',
+  NonPayable = 'nonpayable',
+  Payable = 'payable'
+}
+
+export interface AbiParam {
+  name: string,
+  type: string,
+  components?: AbiParam[]
+}
+
+interface AbiEntry {
+  type: AbiEntryType,
+  name?: string,
+  inputs?: AbiParam[],
+}
+
+export interface AbiFunction extends AbiEntry {
+  type: AbiEntryType.Function | AbiEntryType.Constructor | AbiEntryType.Constructor,
+  outputs?: AbiParam[],
+  stateMutability?: StateMutability,
+  payable?: true
+  constant?: true
+}
+
+interface AbiEventParam extends AbiParam {
+  indexed?: boolean
+}
+
+export interface AbiEvent extends AbiEntry {
+  type: AbiEntryType.Event,
+  inputs?: AbiEventParam[],
+  anonymous?: boolean
+}
+
+export type ContractABI = (AbiEvent|AbiFunction)[]
+
+const isTransactionObject = (txObj: TransactionRequest) => {
   const txObjectProperties = ['from', 'to', 'data', 'value', 'gasPrice', 'gas']
   if (typeof txObj !== 'object') return false
   // Return true for empty object
@@ -14,20 +71,21 @@ const isTransactionObject = (txObj) => {
   return false;
 }
 
-const getCallableMethodsFromABI = (contractABI) => {
-  return contractABI.filter((json) => ((json.type === 'function' || json.type === 'event') && json.name.length > 0));
+const getCallableMethodsFromABI = (contractABI: ContractABI): AbiFunction[] => {
+  return <AbiFunction[]>contractABI.filter((entry) => (entry.type === AbiEntryType.Function && entry.name && (!(<AbiFunction>entry).constant)));
 }
 
-const encodeMethodReadable = (methodObject, methodArgs) => {
+const encodeMethodReadable = (methodObject: AbiFunction, methodArgs: any[]) => {
   let dataString = `${methodObject.name}(`
+  const inputs = methodObject.inputs || []
 
-  for (let i = 0; i < methodObject.inputs.length; i++) {
-    const input = methodObject.inputs[i]
+  for (let i = 0; i < inputs.length; i++) {
+    const input = inputs[i]
     let argString = `${input.type} `
 
     if (input.type === 'string') {
       argString += `"${methodArgs[i]}"`
-    } else if (input.type === ( 'bytes32' || 'bytes')) {
+    } else if (input.type === ('bytes32' || 'bytes')) {
       // TODO don't assume hex input? or throw error if not hex
       // argString += `0x${new Buffer(methodArgs[i], 'hex')}`
       argString += `${methodArgs[i]}`
@@ -37,38 +95,35 @@ const encodeMethodReadable = (methodObject, methodArgs) => {
 
     dataString += argString
 
-    if ((methodObject.inputs.length - 1) !== i) {
+    if ((inputs.length - 1) !== i) {
       dataString += `, `
     }
   }
   return dataString += `)`
 }
 
-const ContractFactory = (extend) => (contractABI) => {
-  const output = {};
-  output.at = function atContract(address) {
+export interface Factory {
+  at(address: string): ContractInterface
+}
 
-    function Contract() {
-      const self = this;
-      self.abi = contractABI || [];
-      self.address = address || '0x';
+export interface ContractInterface {
+  abi: ContractABI
+  address: string
+}
 
+interface DynamicABI {
+  [method: string]: () => TransactionRequest
+}
+export const ContractFactory = (extend?: object) => (contractABI: ContractABI): Factory => {
+  return {
+    at: (address: string) : ContractInterface => {
+      const functionCalls : DynamicABI = {}
       getCallableMethodsFromABI(contractABI).forEach((methodObject) => {
-        self[methodObject.name] = function contractMethod() {
-
-          if (methodObject.constant === true) {
-            throw new Error('A call does not return the txobject, no transaction necessary.')
-          }
-
-          if (methodObject.type === 'event') {
-            throw new Error('An event does not return the txobject, events not supported')
-          }
-
-          let providedTxObject = {};
-          const methodArgs = [].slice.call(arguments);
-          const nArgs = methodObject.inputs.length
-
-          if (methodObject.type === 'function') {
+        if (methodObject.name) {
+          functionCalls[methodObject.name] = function contractMethod() {
+            let providedTxObject = {};
+            const methodArgs = [].slice.call(arguments);
+            const nArgs = (methodObject.inputs || []).length
             // Remove transaction object if provided
             if (isTransactionObject(methodArgs[nArgs])) {
               providedTxObject = methodArgs.splice(nArgs, 1)[0]
@@ -76,23 +131,19 @@ const ContractFactory = (extend) => (contractABI) => {
 
             const methodTxObject = {
               ...providedTxObject,
-              to: self.address,
+              to: address,
               function: encodeMethodReadable(methodObject, methodArgs)
             }
 
             if (!extend) return methodTxObject
 
             const extendArgs = methodArgs.slice(nArgs)
-            return extend(methodTxObject, ...extendArgs)
-          }
-        };
-      });
+            return {...methodTxObject, ...extendArgs}
+          }  
+        }
+      })
+      return {...functionCalls, abi: contractABI, address}
     }
+  }
+}
 
-    return new Contract();
-  };
-
-  return output;
-};
-
-export { ContractFactory }

@@ -43,13 +43,30 @@
     "uport-lite": "^1.0.5"
   },
   "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
     "coverageDirectory": "./coverage/",
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/*.d.ts",
+      "!**/node_modules/**"
+    ],
     "unmockedModulePathPatterns": [
       "<rootDir>/node_modules/nock"
     ],
     "testEnvironment": "node"
   },
   "devDependencies": {
+    "@types/elliptic": "^6.4.6",
     "@types/jest": "^24.0.11",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
