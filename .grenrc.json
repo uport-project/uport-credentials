@@ -1,0 +1,8 @@
+{
+    "dataSource": "commits",
+    "prefix": "",
+    "includeMessages": "commits",
+    "changelogFilename": "RELEASES.md",
+    "ignoreTagsWith": ["-rc", "-alpha", "-beta"],
+    "ignoreCommitesWith": ["WIP", "Work in progress", "work in progress"]
+}
