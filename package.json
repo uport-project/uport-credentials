@@ -20,7 +20,7 @@
     "build:js": "./node_modules/.bin/microbundle",
     "build:browser": "./node_modules/.bin/webpack --config webpack.config.js",
     "build": "npm run build:js && npm run test:ci && npm run build:browser",
-    "build:docs": "./node_modules/.bin/typedoc --theme markdown --out docs/reference src/index.ts src/deps.d.ts",
+    "build:docs": "./node_modules/.bin/typedoc --theme markdown --mode file --out docs/reference src/index.ts src/deps.d.ts",
     "prepublish": "npm run build",
     "prepare": "npm run build",
     "draft-release-notes": "GREN_GITHUB_TOKEN=$(vault read -field=value secret/mobile/release_token) gren release -d",

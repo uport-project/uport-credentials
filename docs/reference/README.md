@@ -31,11 +31,219 @@ This library is part of a suite of tools maintained by the uPort Project, a Cons
 
 ## Index
 
-### External modules
+### Enumerations
 
-* ["Contract"](modules/_contract_.md)
-* ["Credentials"](modules/_credentials_.md)
-* ["index"](modules/_index_.md)
+* [AbiEntryType](enums/abientrytype.md)
+* [StateMutability](enums/statemutability.md)
+* [Types](enums/types.md)
+
+### Classes
+
+* [Credentials](classes/credentials.md)
+
+### Interfaces
+
+* [AbiEntry](interfaces/abientry.md)
+* [AbiEvent](interfaces/abievent.md)
+* [AbiEventParam](interfaces/abieventparam.md)
+* [AbiFunction](interfaces/abifunction.md)
+* [AbiParam](interfaces/abiparam.md)
+* [ContractInterface](interfaces/contractinterface.md)
+* [DisclosurePayload](interfaces/disclosurepayload.md)
+* [DisclosureRequestParams](interfaces/disclosurerequestparams.md)
+* [DisclosureRequestPayload](interfaces/disclosurerequestpayload.md)
+* [DisclosureResponse](interfaces/disclosureresponse.md)
+* [DisclosureResponsePayload](interfaces/disclosureresponsepayload.md)
+* [DynamicABI](interfaces/dynamicabi.md)
+* [EIP712Domain](interfaces/eip712domain.md)
+* [EIP712Object](interfaces/eip712object.md)
+* [EIP712Types](interfaces/eip712types.md)
+* [EcdsaSignature](interfaces/ecdsasignature.md)
+* [Factory](interfaces/factory.md)
+* [Identity](interfaces/identity.md)
+* [JWTPayload](interfaces/jwtpayload.md)
+* [Network](interfaces/network.md)
+* [NetworkRequest](interfaces/networkrequest.md)
+* [Networks](interfaces/networks.md)
+* [PersonalSignPayload](interfaces/personalsignpayload.md)
+* [Settings](interfaces/settings.md)
+* [TransactionRequest](interfaces/transactionrequest.md)
+* [TxReqOptions](interfaces/txreqoptions.md)
+* [TxReqPayload](interfaces/txreqpayload.md)
+* [Verification](interfaces/verification.md)
+* [VerificationParam](interfaces/verificationparam.md)
+* [VerificationRequest](interfaces/verificationrequest.md)
+* [VerifiedJWT](interfaces/verifiedjwt.md)
+
+### Type aliases
+
+* [ContractABI](#contractabi)
+* [Signer](#signer)
+
+### Variables
+
+* [secp256k1](#secp256k1)
+
+### Functions
+
+* [ContractFactory](#contractfactory)
+* [configNetworks](#confignetworks)
+* [encodeMethodReadable](#encodemethodreadable)
+* [getCallableMethodsFromABI](#getcallablemethodsfromabi)
+* [isTransactionObject](#istransactionobject)
+* [toSeconds](#toseconds)
 
 ---
+
+## Type aliases
+
+<a id="contractabi"></a>
+
+###  ContractABI
+
+**Ƭ ContractABI**: *([AbiEvent](interfaces/abievent.md) \| [AbiFunction](interfaces/abifunction.md))[]*
+
+*Defined in [Contract.ts:59](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L59)*
+
+___
+<a id="signer"></a>
+
+###  Signer
+
+**Ƭ Signer**: *`function`*
+
+*Defined in [Credentials.ts:45](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L45)*
+
+#### Type declaration
+▸(data: *`string`*): `Promise`<[EcdsaSignature](interfaces/ecdsasignature.md)>
+
+**Parameters:**
+
+| Name | Type |
+| ------ | ------ |
+| data | `string` |
+
+**Returns:** `Promise`<[EcdsaSignature](interfaces/ecdsasignature.md)>
+
+___
+
+## Variables
+
+<a id="secp256k1"></a>
+
+### `<Const>` secp256k1
+
+**● secp256k1**: *`ec`* =  new EC('secp256k1')
+
+*Defined in [Credentials.ts:14](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L14)*
+
+___
+
+## Functions
+
+<a id="contractfactory"></a>
+
+### `<Const>` ContractFactory
+
+▸ **ContractFactory**(encoder?: *`function`*): `(Anonymous function)`
+
+*Defined in [Contract.ts:117](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L117)*
+
+**Parameters:**
+
+| Name | Type |
+| ------ | ------ |
+| `Optional` encoder | `function` |
+
+**Returns:** `(Anonymous function)`
+
+___
+<a id="confignetworks"></a>
+
+###  configNetworks
+
+▸ **configNetworks**(nets: *[Networks](interfaces/networks.md)*): [Networks](interfaces/networks.md)
+
+*Defined in [Credentials.ts:727](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L727)*
+
+**Parameters:**
+
+| Name | Type |
+| ------ | ------ |
+| nets | [Networks](interfaces/networks.md) |
+
+**Returns:** [Networks](interfaces/networks.md)
+
+___
+<a id="encodemethodreadable"></a>
+
+### `<Const>` encodeMethodReadable
+
+▸ **encodeMethodReadable**(methodObject: *[AbiFunction](interfaces/abifunction.md)*, methodArgs: *`any`[]*): `string`
+
+*Defined in [Contract.ts:78](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L78)*
+
+**Parameters:**
+
+| Name | Type |
+| ------ | ------ |
+| methodObject | [AbiFunction](interfaces/abifunction.md) |
+| methodArgs | `any`[] |
+
+**Returns:** `string`
+
+___
+<a id="getcallablemethodsfromabi"></a>
+
+### `<Const>` getCallableMethodsFromABI
+
+▸ **getCallableMethodsFromABI**(contractABI: *[ContractABI](#contractabi)*): [AbiFunction](interfaces/abifunction.md)[]
+
+*Defined in [Contract.ts:74](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L74)*
+
+**Parameters:**
+
+| Name | Type |
+| ------ | ------ |
+| contractABI | [ContractABI](#contractabi) |
+
+**Returns:** [AbiFunction](interfaces/abifunction.md)[]
+
+___
+<a id="istransactionobject"></a>
+
+### `<Const>` isTransactionObject
+
+▸ **isTransactionObject**(txObj: *[TransactionRequest](interfaces/transactionrequest.md)*): `boolean`
+
+*Defined in [Contract.ts:61](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L61)*
+
+**Parameters:**
+
+| Name | Type |
+| ------ | ------ |
+| txObj | [TransactionRequest](interfaces/transactionrequest.md) |
+
+**Returns:** `boolean`
+
+___
+<a id="toseconds"></a>
+
+### `<Const>` toSeconds
+
+▸ **toSeconds**(date: *`number`*): `number`
+
+*Defined in [Credentials.ts:30](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L30)*
+
+Convert a date to seconds since unix epoch, rounded down to the nearest whole second
+
+**Parameters:**
+
+| Name | Type | Description |
+| ------ | ------ | ------ |
+| date | `number` |  \- |
+
+**Returns:** `number`
+
+___
 
