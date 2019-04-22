@@ -438,6 +438,7 @@ class Credentials {
   /**
    * Create a JWT requesting a signature on a piece of structured/typed data conforming to
    * the ERC712 specification
+   * 
    * ```javascript
    * // A ERC712 Greeting Structure
    * const data = {
@@ -468,7 +469,6 @@ class Credentials {
    *   }
    * }
    * 
-
    * const from = '0xbeef4567' // Eth account you are asking to sign the claim
    * const net = '0x1' // The network on which this address exists
    * const callback = 'https://my.cool.site/handleTheResponse'
