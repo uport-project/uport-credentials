@@ -21,16 +21,12 @@
 
 **Constructor**:  = "constructor"
 
-*Defined in [Contract.ts:18](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L18)*
-
 ___
 <a id="event"></a>
 
 ###  Event
 
 **Event**:  = "event"
-
-*Defined in [Contract.ts:17](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L17)*
 
 ___
 <a id="fallback"></a>
@@ -39,16 +35,12 @@ ___
 
 **Fallback**:  = "fallback"
 
-*Defined in [Contract.ts:19](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L19)*
-
 ___
 <a id="function"></a>
 
 ###  Function
 
 **Function**:  = "function"
-
-*Defined in [Contract.ts:16](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L16)*
 
 ___
 

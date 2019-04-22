@@ -26,8 +26,6 @@
 
 **● components**: *[AbiParam](abiparam.md)[]*
 
-*Defined in [Contract.ts:32](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L32)*
-
 ___
 <a id="name"></a>
 
@@ -35,16 +33,12 @@ ___
 
 **● name**: *`string`*
 
-*Defined in [Contract.ts:30](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L30)*
-
 ___
 <a id="type"></a>
 
 ###  type
 
 **● type**: *`string`*
-
-*Defined in [Contract.ts:31](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L31)*
 
 ___
 

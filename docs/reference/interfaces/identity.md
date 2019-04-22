@@ -23,16 +23,12 @@
 
 **● did**: *`string`*
 
-*Defined in [Credentials.ts:51](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L51)*
-
 ___
 <a id="privatekey"></a>
 
 ###  privateKey
 
 **● privateKey**: *`string`*
-
-*Defined in [Credentials.ts:52](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L52)*
 
 ___
 

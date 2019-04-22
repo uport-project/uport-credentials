@@ -27,16 +27,12 @@
 
 **● aud**: *`string`*
 
-*Defined in [Credentials.ts:141](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L141)*
-
 ___
 <a id="callbackurl"></a>
 
 ### `<Optional>` callbackUrl
 
 **● callbackUrl**: *`string`*
-
-*Defined in [Credentials.ts:146](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L146)*
 
 ___
 <a id="expiresin"></a>
@@ -45,16 +41,12 @@ ___
 
 **● expiresIn**: *`number`*
 
-*Defined in [Credentials.ts:144](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L144)*
-
 ___
 <a id="riss"></a>
 
 ### `<Optional>` riss
 
 **● riss**: *`string`*
-
-*Defined in [Credentials.ts:143](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L143)*
 
 ___
 <a id="sub"></a>
@@ -63,16 +55,12 @@ ___
 
 **● sub**: *`string`*
 
-*Defined in [Credentials.ts:142](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L142)*
-
 ___
 <a id="vc"></a>
 
 ### `<Optional>` vc
 
 **● vc**: *`string`[]*
-
-*Defined in [Credentials.ts:145](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L145)*
 
 ___
 

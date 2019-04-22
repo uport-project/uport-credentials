@@ -30,16 +30,12 @@
 
 **● accountType**: *"none" \| "segregated" \| "keypair" \| "none"*
 
-*Defined in [Credentials.ts:73](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L73)*
-
 ___
 <a id="callbackurl"></a>
 
 ### `<Optional>` callbackUrl
 
 **● callbackUrl**: *`string`*
-
-*Defined in [Credentials.ts:68](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L68)*
 
 ___
 <a id="exp"></a>
@@ -48,16 +44,12 @@ ___
 
 **● exp**: *`number`*
 
-*Defined in [Credentials.ts:72](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L72)*
-
 ___
 <a id="networkid"></a>
 
 ### `<Optional>` networkId
 
 **● networkId**: *`string`*
-
-*Defined in [Credentials.ts:69](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L69)*
 
 ___
 <a id="notifications"></a>
@@ -66,16 +58,12 @@ ___
 
 **● notifications**: *`boolean`*
 
-*Defined in [Credentials.ts:67](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L67)*
-
 ___
 <a id="requested"></a>
 
 ### `<Optional>` requested
 
 **● requested**: *`string`[]*
-
-*Defined in [Credentials.ts:65](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L65)*
 
 ___
 <a id="rpcurl"></a>
@@ -84,8 +72,6 @@ ___
 
 **● rpcUrl**: *`string`*
 
-*Defined in [Credentials.ts:70](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L70)*
-
 ___
 <a id="vc"></a>
 
@@ -93,16 +79,12 @@ ___
 
 **● vc**: *`string`[]*
 
-*Defined in [Credentials.ts:71](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L71)*
-
 ___
 <a id="verified"></a>
 
 ### `<Optional>` verified
 
 **● verified**: *`string`[]*
-
-*Defined in [Credentials.ts:66](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L66)*
 
 ___
 

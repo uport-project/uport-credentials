@@ -45,8 +45,6 @@ The Credentials class allows you to easily create the signed payloads used in uP
 
 ⊕ **new Credentials**(__namedParameters: *`object`*): [Credentials](credentials.md)
 
-*Defined in [Credentials.ts:202](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L202)*
-
 Instantiates a new uPort Credentials object
 
 The following example is just for testing purposes. _You should never store a private key in source code._
@@ -123,16 +121,12 @@ ___
 
 **● did**: *`string`*
 
-*Defined in [Credentials.ts:201](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L201)*
-
 ___
 <a id="signer"></a>
 
 ### `<Optional>` signer
 
 **● signer**: *[Signer](../#signer)*
-
-*Defined in [Credentials.ts:202](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L202)*
 
 ___
 
@@ -143,8 +137,6 @@ ___
 ###  authenticateDisclosureResponse
 
 ▸ **authenticateDisclosureResponse**(token: *`string`*, callbackUrl?: *`any`*): `Promise`<[DisclosureResponse](../interfaces/disclosureresponse.md)>
-
-*Defined in [Credentials.ts:671](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L671)*
 
 Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from uPort client as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
 
@@ -177,8 +169,6 @@ ___
 
 ▸ **contract**(abi: *[ContractABI](../#contractabi)*): [Factory](../interfaces/factory.md)
 
-*Defined in [Credentials.ts:724](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L724)*
-
 Builds and returns a contract object which can be used to interact with a given contract. Similar to web3.eth.contract but with promises. Once specifying .at(address) you can call the contract functions with this object. Each call will create a request.
 
 @param {Object} abi contract ABI @return {Object} contract object
@@ -197,8 +187,6 @@ ___
 ###  createDisclosureRequest
 
 ▸ **createDisclosureRequest**(params?: *[DisclosureRequestParams](../interfaces/disclosurerequestparams.md)*, expiresIn?: *`number`*): `Promise`<`string`>
-
-*Defined in [Credentials.ts:345](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L345)*
 
 Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/specs/blob/develop/messages/sharereq.md)
 
@@ -229,8 +217,6 @@ ___
 
 ▸ **createDisclosureResponse**(payload?: *[DisclosureResponsePayload](../interfaces/disclosureresponsepayload.md)*, expiresIn?: *`number`*): `Promise`<`string`>
 
-*Defined in [Credentials.ts:562](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L562)*
-
 Creates a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
 
 This can either be used to share information about the signing identity or as the response to a [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md), where it can be used to authenticate the identity.
@@ -259,8 +245,6 @@ ___
 
 ▸ **createPersonalSignRequest**(data: *`string`*, __namedParameters?: *`object`*): `Promise`<`string`>
 
-*Defined in [Credentials.ts:506](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L506)*
-
 Create a JWT requesting an eth\_sign/personal\_sign from a user.
 
 **Parameters:**
@@ -285,8 +269,6 @@ ___
 ###  createTxRequest
 
 ▸ **createTxRequest**(txObj: *[TransactionRequest](../interfaces/transactionrequest.md)*, __namedParameters?: *`object`*): `Promise`<`string`>
-
-*Defined in [Credentials.ts:533](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L533)*
 
 Given a transaction object, similarly defined as the web3 transaction object, it creates a JWT transaction request and appends addtional request options.
 
@@ -325,11 +307,44 @@ ___
 
 ▸ **createTypedDataSignatureRequest**(typedData: *[EIP712Object](../interfaces/eip712object.md)*, __namedParameters?: *`object`*): `Promise`<`string`>
 
-*Defined in [Credentials.ts:487](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L487)*
+Create a JWT requesting a signature on a piece of structured/typed data conforming to the ERC712 specification
 
-Create a JWT requesting a signature on a piece of structured/typed data conforming to the ERC712 specification `` ` ``javascript // A ERC712 Greeting Structure const data = { types: { EIP712Domain: \[ {name: 'name', type: 'string'}, {name: 'version', type: 'string'}, {name: 'chainId', type: 'uint256'}, {name: 'verifyingContract', type: 'address'}, {name: 'salt', type: 'bytes32'} \], Greeting: \[ {name: 'text', type: 'string'}, {name: 'subject', type: 'string'}, \] }, domain: { name: 'My dapp', version: '1.0', chainId: 1, verifyingContract: '0xdeadbeef', salt: '0x999999999910101010101010' }, primaryType: 'Greeting', message: { text: 'Hello', subject: 'World' } }
+```javascript
+const data = { // A ERC712 Greeting Structure
+  types: {
+    EIP712Domain: [
+      {name: 'name', type: 'string'},
+      {name: 'version', type: 'string'},
+      {name: 'chainId', type: 'uint256'},
+      {name: 'verifyingContract', type: 'address'},
+      {name: 'salt', type: 'bytes32'}
+    ],
+    Greeting: [
+      {name: 'text', type: 'string'},
+      {name: 'subject', type: 'string'},
+    ]
+  },
+  domain: {
+    name: 'My dapp',
+    version: '1.0',
+    chainId: 1,
+    verifyingContract: '0xdeadbeef',
+    salt: '0x999999999910101010101010'
+  },
+  primaryType: 'Greeting',
+  message: {
+    text: 'Hello',
+    subject: 'World'
+  }
+}
 
-const from = '0xbeef4567' // Eth account you are asking to sign the claim const net = '0x1' // The network on which this address exists const callback = '[https://my.cool.site/handleTheResponse'](https://my.cool.site/handleTheResponse') const signRequestJWT = credentials.createTypedDataSignatureRequest(data, {from, net, callback}) // Send the JWT to a client // ... `` ` ``
+const from = '0xbeef4567' // Eth account you are asking to sign the claim
+const net = '0x1' // The network on which this address exists
+const callback = 'https://my.cool.site/handleTheResponse'
+const signRequestJWT = credentials.createTypedDataSignatureRequest(data, {from, net, callback})
+// Send the JWT to a client
+// ...
+```
 
 **Parameters:**
 
@@ -354,8 +369,6 @@ ___
 ###  createVerification
 
 ▸ **createVerification**(__namedParameters: *`object`*): `Promise`<`string`>
-
-*Defined in [Credentials.ts:392](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L392)*
 
 Create a credential (a signed JSON Web Token)
 
@@ -390,8 +403,6 @@ ___
 ###  createVerificationSignatureRequest
 
 ▸ **createVerificationSignatureRequest**(unsignedClaim: *`Object`*, __namedParameters: *`object`*): `Promise`<`string`>
-
-*Defined in [Credentials.ts:426](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L426)*
 
 Creates a request a for a DID to [sign a verification](https://github.com/uport-project/specs/blob/develop/messages/verificationreq.md)
 
@@ -440,8 +451,6 @@ ___
 
 ▸ **processDisclosurePayload**(__namedParameters: *`object`*): `Promise`<[DisclosureResponse](../interfaces/disclosureresponse.md)>
 
-*Defined in [Credentials.ts:582](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L582)*
-
 Parse a selective disclosure response, and verify signatures on each signed claim ("verification") included. This function renames and applies special handling to certain recognized key-value pairs, and preserves others untouched.
 
 **Parameters:**
@@ -462,8 +471,6 @@ ___
 
 ▸ **signJWT**(payload: *`Object`*, expiresIn?: *`number`*): `Promise`<`string`>
 
-*Defined in [Credentials.ts:291](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L291)*
-
 **Parameters:**
 
 | Name | Type |
@@ -479,8 +486,6 @@ ___
 ###  verifyDisclosure
 
 ▸ **verifyDisclosure**(token: *`string`*): `Promise`<[DisclosureResponse](../interfaces/disclosureresponse.md)>
-
-*Defined in [Credentials.ts:711](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L711)*
 
 Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
 
@@ -511,8 +516,6 @@ ___
 ### `<Static>` createIdentity
 
 ▸ **createIdentity**(): [Identity](../interfaces/identity.md)
-
-*Defined in [Credentials.ts:312](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L312)*
 
 Generate a DID and private key, effectively creating a new identity that can sign and verify data
 

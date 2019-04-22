@@ -103,16 +103,12 @@ This library is part of a suite of tools maintained by the uPort Project, a Cons
 
 **Ƭ ContractABI**: *([AbiEvent](interfaces/abievent.md) \| [AbiFunction](interfaces/abifunction.md))[]*
 
-*Defined in [Contract.ts:59](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L59)*
-
 ___
 <a id="signer"></a>
 
 ###  Signer
 
 **Ƭ Signer**: *`function`*
-
-*Defined in [Credentials.ts:38](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L38)*
 
 #### Type declaration
 ▸(data: *`string`*): `Promise`<[EcdsaSignature](interfaces/ecdsasignature.md)>
@@ -135,16 +131,12 @@ ___
 
 **● SimpleSigner**: *`SimpleSigner`* =  S
 
-*Defined in [index.ts:6](https://github.com/uport-project/uport-credentials/blob/2b03873/src/index.ts#L6)*
-
 ___
 <a id="secp256k1"></a>
 
 ### `<Const>` secp256k1
 
 **● secp256k1**: *`ec`* =  new EC('secp256k1')
-
-*Defined in [Credentials.ts:14](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L14)*
 
 ___
 
@@ -155,8 +147,6 @@ ___
 ### `<Const>` ContractFactory
 
 ▸ **ContractFactory**(encoder?: *`function`*): `(Anonymous function)`
-
-*Defined in [Contract.ts:117](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L117)*
 
 **Parameters:**
 
@@ -173,8 +163,6 @@ ___
 
 ▸ **configNetworks**(nets: *[Networks](interfaces/networks.md)*): [Networks](interfaces/networks.md)
 
-*Defined in [Credentials.ts:734](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L734)*
-
 **Parameters:**
 
 | Name | Type |
@@ -189,8 +177,6 @@ ___
 ### `<Const>` encodeMethodReadable
 
 ▸ **encodeMethodReadable**(methodObject: *[AbiFunction](interfaces/abifunction.md)*, methodArgs: *`any`[]*): `string`
-
-*Defined in [Contract.ts:78](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L78)*
 
 **Parameters:**
 
@@ -208,8 +194,6 @@ ___
 
 ▸ **getCallableMethodsFromABI**(contractABI: *[ContractABI](#contractabi)*): [AbiFunction](interfaces/abifunction.md)[]
 
-*Defined in [Contract.ts:74](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L74)*
-
 **Parameters:**
 
 | Name | Type |
@@ -224,8 +208,6 @@ ___
 ### `<Const>` isTransactionObject
 
 ▸ **isTransactionObject**(txObj: *[TransactionRequest](interfaces/transactionrequest.md)*): `boolean`
-
-*Defined in [Contract.ts:61](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L61)*
 
 **Parameters:**
 

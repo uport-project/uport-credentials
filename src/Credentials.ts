@@ -440,8 +440,7 @@ class Credentials {
    * the ERC712 specification
    * 
    * ```javascript
-   * // A ERC712 Greeting Structure
-   * const data = {
+   * const data = { // A ERC712 Greeting Structure
    *   types: {
    *     EIP712Domain: [
    *       {name: 'name', type: 'string'},

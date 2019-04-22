@@ -25,7 +25,5 @@
 
 **● EIP712Domain**: *[AbiParam](abiparam.md)[]*
 
-*Defined in [Credentials.ts:158](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L158)*
-
 ___
 

@@ -21,16 +21,12 @@
 
 **NonPayable**:  = "nonpayable"
 
-*Defined in [Contract.ts:25](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L25)*
-
 ___
 <a id="payable"></a>
 
 ###  Payable
 
 **Payable**:  = "payable"
-
-*Defined in [Contract.ts:26](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L26)*
 
 ___
 <a id="pure"></a>
@@ -39,16 +35,12 @@ ___
 
 **Pure**:  = "pure"
 
-*Defined in [Contract.ts:23](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L23)*
-
 ___
 <a id="view"></a>
 
 ###  View
 
 **View**:  = "view"
-
-*Defined in [Contract.ts:24](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L24)*
 
 ___
 

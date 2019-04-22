@@ -28,8 +28,6 @@
 
 **● inputs**: *[AbiParam](abiparam.md)[]*
 
-*Defined in [Contract.ts:38](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L38)*
-
 ___
 <a id="name"></a>
 
@@ -37,16 +35,12 @@ ___
 
 **● name**: *`string`*
 
-*Defined in [Contract.ts:37](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L37)*
-
 ___
 <a id="type"></a>
 
 ###  type
 
 **● type**: *[AbiEntryType](../enums/abientrytype.md)*
-
-*Defined in [Contract.ts:36](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L36)*
 
 ___
 

@@ -25,16 +25,12 @@
 
 **● domain**: *[EIP712Domain](eip712domain.md)*
 
-*Defined in [Credentials.ts:164](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L164)*
-
 ___
 <a id="message"></a>
 
 ###  message
 
 **● message**: *`any`*
-
-*Defined in [Credentials.ts:166](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L166)*
 
 ___
 <a id="primarytype"></a>
@@ -43,16 +39,12 @@ ___
 
 **● primaryType**: *`string`*
 
-*Defined in [Credentials.ts:165](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L165)*
-
 ___
 <a id="types"></a>
 
 ###  types
 
 **● types**: *[EIP712Types](eip712types.md)*
-
-*Defined in [Credentials.ts:163](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L163)*
 
 ___
 
