@@ -33,7 +33,7 @@
 
 *Inherited from [JWTPayload](jwtpayload.md).[aud](jwtpayload.md#aud)*
 
-*Defined in [Credentials.ts:65](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L65)*
+*Defined in [Credentials.ts:58](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L58)*
 
 ___
 <a id="claims"></a>
@@ -42,7 +42,7 @@ ___
 
 **● claims**: *`any`*
 
-*Defined in [Credentials.ts:135](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L135)*
+*Defined in [Credentials.ts:128](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L128)*
 
 ___
 <a id="exp"></a>
@@ -53,7 +53,7 @@ ___
 
 *Inherited from [JWTPayload](jwtpayload.md).[exp](jwtpayload.md#exp)*
 
-*Defined in [Credentials.ts:68](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L68)*
+*Defined in [Credentials.ts:61](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L61)*
 
 ___
 <a id="iat"></a>
@@ -64,7 +64,7 @@ ___
 
 *Inherited from [JWTPayload](jwtpayload.md).[iat](jwtpayload.md#iat)*
 
-*Defined in [Credentials.ts:66](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L66)*
+*Defined in [Credentials.ts:59](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L59)*
 
 ___
 <a id="iss"></a>
@@ -75,7 +75,7 @@ ___
 
 *Inherited from [JWTPayload](jwtpayload.md).[iss](jwtpayload.md#iss)*
 
-*Defined in [Credentials.ts:63](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L63)*
+*Defined in [Credentials.ts:56](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L56)*
 
 ___
 <a id="jwt"></a>
@@ -84,7 +84,7 @@ ___
 
 **● jwt**: *`string`*
 
-*Defined in [Credentials.ts:136](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L136)*
+*Defined in [Credentials.ts:129](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L129)*
 
 ___
 <a id="sub"></a>
@@ -95,7 +95,7 @@ ___
 
 *Inherited from [JWTPayload](jwtpayload.md).[sub](jwtpayload.md#sub)*
 
-*Defined in [Credentials.ts:64](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L64)*
+*Defined in [Credentials.ts:57](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L57)*
 
 ___
 <a id="type"></a>
@@ -106,7 +106,7 @@ ___
 
 *Inherited from [JWTPayload](jwtpayload.md).[type](jwtpayload.md#type)*
 
-*Defined in [Credentials.ts:67](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L67)*
+*Defined in [Credentials.ts:60](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L60)*
 
 ___
 

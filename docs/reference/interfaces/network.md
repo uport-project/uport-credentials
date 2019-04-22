@@ -23,7 +23,7 @@
 
 **● registry**: *`string`*
 
-*Defined in [Credentials.ts:33](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L33)*
+*Defined in [Credentials.ts:26](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L26)*
 
 ___
 <a id="rpcurl"></a>
@@ -32,7 +32,7 @@ ___
 
 **● rpcUrl**: *`string`*
 
-*Defined in [Credentials.ts:34](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L34)*
+*Defined in [Credentials.ts:27](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L27)*
 
 ___
 

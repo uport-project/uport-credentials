@@ -24,7 +24,7 @@
 
 **● callback**: *`string`*
 
-*Defined in [Credentials.ts:179](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L179)*
+*Defined in [Credentials.ts:172](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L172)*
 
 ___
 <a id="from"></a>
@@ -33,7 +33,7 @@ ___
 
 **● from**: *`string`*
 
-*Defined in [Credentials.ts:177](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L177)*
+*Defined in [Credentials.ts:170](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L170)*
 
 ___
 <a id="net"></a>
@@ -42,7 +42,7 @@ ___
 
 **● net**: *`string`*
 
-*Defined in [Credentials.ts:178](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L178)*
+*Defined in [Credentials.ts:171](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L171)*
 
 ___
 

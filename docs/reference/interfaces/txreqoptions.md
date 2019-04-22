@@ -25,7 +25,7 @@
 
 **● callbackUrl**: *`string`*
 
-*Defined in [Credentials.ts:183](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L183)*
+*Defined in [Credentials.ts:176](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L176)*
 
 ___
 <a id="exp"></a>
@@ -34,7 +34,7 @@ ___
 
 **● exp**: *`number`*
 
-*Defined in [Credentials.ts:184](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L184)*
+*Defined in [Credentials.ts:177](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L177)*
 
 ___
 <a id="label"></a>
@@ -43,7 +43,7 @@ ___
 
 **● label**: *`string`*
 
-*Defined in [Credentials.ts:186](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L186)*
+*Defined in [Credentials.ts:179](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L179)*
 
 ___
 <a id="networkid"></a>
@@ -52,7 +52,7 @@ ___
 
 **● networkId**: *`string`*
 
-*Defined in [Credentials.ts:185](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L185)*
+*Defined in [Credentials.ts:178](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L178)*
 
 ___
 

@@ -23,7 +23,7 @@
 
 **● abi**: *[ContractABI](../#contractabi)*
 
-*Defined in [Contract.ts:110](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L110)*
+*Defined in [Contract.ts:110](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L110)*
 
 ___
 <a id="address"></a>
@@ -32,7 +32,7 @@ ___
 
 **● address**: *`string`*
 
-*Defined in [Contract.ts:111](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L111)*
+*Defined in [Contract.ts:111](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L111)*
 
 ___
 

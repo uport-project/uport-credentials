@@ -22,7 +22,7 @@
 
 ▸ **at**(address: *`string`*): [ContractInterface](contractinterface.md)
 
-*Defined in [Contract.ts:106](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L106)*
+*Defined in [Contract.ts:106](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L106)*
 
 **Parameters:**
 

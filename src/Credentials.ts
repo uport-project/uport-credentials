@@ -205,35 +205,38 @@ class Credentials {
    *
    * The following example is just for testing purposes. *You should never store a private key in source code.*
    *
-   * @example
+   * ```javascript
    * import { Credentials } from 'uport-credentials'
    * const credentials = new Credentials({
    *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
    * })
+   * ```
    *
    * The above example derives the public key used to generate the did, so only a private key is needed.
    * Generating a public key from a private key is slow. It is recommended to configure the `did` option as well.
    *
-   * @example
+   * ```javascript
    * import { Credentials } from 'uport-credentials'
    * const credentials = new Credentials({
    *   did: 'did:ethr:0xbc3ae59bc76f894822622cdef7a2018dbe353840',
    *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
    * })
+   * ```
    *
    * It is recommended to store the address and private key in environment variables for your server application
    *
-   * @example
+   * ```javascript
    * import { Credentials, SimpleSigner } from 'uport-credentials'
    * const credentials = new Credentials({
    *   did: process.env.APPLICATION_DID,
    *   signer: SimpleSigner(process.env.PRIVATE_KEY)
    * })
+   * ```
    *
    * Instead of a private key you can pass in a [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions) to
    * present UX or call a HSM.
    *
-   * @example
+   * ```javascript
    * import { Credentials } from 'uport-credentials'
    *
    * function mySigner (data) {
@@ -247,6 +250,7 @@ class Credentials {
    *   did: process.env.APPLICATION_DID,
    *   signer: mySigner
    * })
+   * ```
    *
    * @param       {Object}            [settings]               optional setttings
    * @param       {DID}               [settings.did]           Application [DID](https://w3c-ccg.github.io/did-spec/#decentralized-identifiers-dids) (unique identifier) for your application
@@ -296,10 +300,11 @@ class Credentials {
   /**
    * Generate a DID and private key, effectively creating a new identity that can sign and verify data
    *
-   * @example
+   * ```javascript
    * const {did, privateKey} = Credentials.createIdentity()
    * const credentials = new Credentials({did, privateKey, ...})
-   *
+   * ```
+   * 
    * @returns {Object} keypair
    *           - {String} keypair.did         An ethr-did string for the new identity
    *           - {String} keypair.privateKey  The identity's private key, as a string
@@ -316,13 +321,14 @@ class Credentials {
   /**
    *  Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/specs/blob/develop/messages/sharereq.md)
    *
-   *  @example
+   *  ```javascript
    *  const req = { requested: ['name', 'country'],
    *                callbackUrl: 'https://myserver.com',
    *                notifications: true }
    *  credentials.createDisclosureRequest(req).then(jwt => {
    *      ...
    *  })
+   * ```
    *
    *  @param    {Object}             [params={}]           request params object
    *  @param    {Array}              params.requested      an array of attributes for which you are requesting credentials to be shared for
@@ -367,7 +373,7 @@ class Credentials {
   /**
    *  Create a credential (a signed JSON Web Token)
    *
-   *  @example
+   *  ```javascript
    *  credentials.createVerification({
    *   sub: '5A8bRWU3F7j3REx3vkJ...', // uPort address of user, likely a MNID
    *   exp: <future timestamp>,
@@ -375,6 +381,7 @@ class Credentials {
    *  }).then( credential => {
    *   ...
    *  })
+   * ```
    *
    * @param    {Object}            [credential]           a unsigned claim object
    * @param    {String}            credential.sub         subject of credential (a valid DID)
@@ -389,7 +396,7 @@ class Credentials {
   /**
    *  Creates a request a for a DID to [sign a verification](https://github.com/uport-project/specs/blob/develop/messages/verificationreq.md)
    *
-   *  @example
+   *  ```javascript
    *  const unsignedClaim = {
    *    claim: {
    *      "Citizen of city X": {
@@ -405,6 +412,7 @@ class Credentials {
    *  credentials.createVerificationSignatureRequest(unsignedClaim, {aud, sub, callbackUrl}).then(jwt => {
    *    // ...
    *  })
+   * ```
    *
    * @param    {Object}      unsignedClaim       Unsigned claim object which you want the user to attest
    * @param    {Object}      [opts]
@@ -430,7 +438,7 @@ class Credentials {
   /**
    * Create a JWT requesting a signature on a piece of structured/typed data conforming to
    * the ERC712 specification
-   * @example
+   * ```javascript
    * // A ERC712 Greeting Structure
    * const data = {
    *   types: {
@@ -459,6 +467,7 @@ class Credentials {
    *     subject: 'World'
    *   }
    * }
+   * 
 
    * const from = '0xbeef4567' // Eth account you are asking to sign the claim
    * const net = '0x1' // The network on which this address exists
@@ -466,6 +475,7 @@ class Credentials {
    * const signRequestJWT = credentials.createTypedDataSignatureRequest(data, {from, net, callback})
    * // Send the JWT to a client
    * // ...
+   * ```
    *
    * @param {Object} typedData              the ERC712 data to sign
    * @param {Object} opts                   additional options for the jwt
@@ -501,7 +511,7 @@ class Credentials {
    *  Given a transaction object, similarly defined as the web3 transaction object,
    *  it creates a JWT transaction request and appends addtional request options.
    *
-   *  @example
+   *  ```javascript
    *  const txObject = {
    *    to: '0xc3245e75d3ecd1e81a9bfb6558b6dafe71e9f347',
    *    value: '0.1',
@@ -510,6 +520,7 @@ class Credentials {
    *  connect.createTxRequest(txObject, {callbackUrl: 'http://mycb.domain'}).then(jwt => {
    *    ...
    *  })
+   * ```
    *
    *  @param    {Object}    txObj               A web3 style transaction object
    *  @param    {Object}    [opts]
@@ -534,10 +545,11 @@ class Credentials {
    * [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md),
    * where it can be used to authenticate the identity.
    *
-   *  @example
+   *  ```javascript
    *  credentials.createDisclosureResponse({own: {name: 'Lourdes Valentina Gomez'}}).then(jwt => {
    *      ...
    *  })
+   * ```
    *
    *  @param    {Object}             [payload={}]           request params object
    *  @param    {JWT}                payload.req            A selective disclosure Request JWT if this is returned as part of an authentication flow
@@ -643,13 +655,14 @@ class Credentials {
    *
    *  It Verifies and parses the given response token and verifies the challenge response flow.
    *
-   *  @example
+   *  ```javascript
    *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
    *  credentials.authenticateDisclosureResponse(resToken).then(res => {
    *      const credentials = res.verified
    *      const name =  res.name
    *      ...
    *  })
+   * ```
    *
    *  @param    {String}                  token                 a response token
    *  @param    {String}                  [callbackUrl=null]    callbackUrl
@@ -683,13 +696,14 @@ class Credentials {
    * The main difference between this and `authenticateDisclosureResponse()` is that it does not verify the challenge.
    * This can be used to verify user profiles that have been shared through other methods such as QR codes and messages.
    *
-   *  @example
+   *  ```javascript
    *  const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
    *  credentials.verifyDisclosure(resToken).then(profile => {
    *      const credentials = profile.verified
    *      const name =  profile.name
    *      ...
    *  })
+   * ```
    *
    *  @param    {String}                  token                 a response token
    *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.

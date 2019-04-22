@@ -28,7 +28,7 @@
 
 **● address**: *`string`*
 
-*Defined in [Credentials.ts:49](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L49)*
+*Defined in [Credentials.ts:42](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L42)*
 
 ___
 <a id="did"></a>
@@ -37,7 +37,7 @@ ___
 
 **● did**: *`string`*
 
-*Defined in [Credentials.ts:48](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L48)*
+*Defined in [Credentials.ts:41](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L41)*
 
 ___
 <a id="ethrconfig"></a>
@@ -46,7 +46,7 @@ ___
 
 **● ethrConfig**: *`any`*
 
-*Defined in [Credentials.ts:54](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L54)*
+*Defined in [Credentials.ts:47](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L47)*
 
 ___
 <a id="networks"></a>
@@ -55,7 +55,7 @@ ___
 
 **● networks**: *[Networks](networks.md)*
 
-*Defined in [Credentials.ts:52](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L52)*
+*Defined in [Credentials.ts:45](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L45)*
 
 ___
 <a id="privatekey"></a>
@@ -64,7 +64,7 @@ ___
 
 **● privateKey**: *`string`*
 
-*Defined in [Credentials.ts:50](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L50)*
+*Defined in [Credentials.ts:43](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L43)*
 
 ___
 <a id="registry"></a>
@@ -73,7 +73,7 @@ ___
 
 **● registry**: *`function`*
 
-*Defined in [Credentials.ts:53](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L53)*
+*Defined in [Credentials.ts:46](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L46)*
 
 #### Type declaration
 ▸(mnid: *`string`*): `Promise`<`Object`>
@@ -93,7 +93,7 @@ ___
 
 **● signer**: *[Signer](../#signer)*
 
-*Defined in [Credentials.ts:51](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L51)*
+*Defined in [Credentials.ts:44](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L44)*
 
 ___
 

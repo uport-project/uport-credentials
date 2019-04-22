@@ -33,7 +33,7 @@
 
 **● aud**: *`string`*
 
-*Defined in [Credentials.ts:65](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L65)*
+*Defined in [Credentials.ts:58](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L58)*
 
 ___
 <a id="exp"></a>
@@ -42,7 +42,7 @@ ___
 
 **● exp**: *`number`*
 
-*Defined in [Credentials.ts:68](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L68)*
+*Defined in [Credentials.ts:61](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L61)*
 
 ___
 <a id="iat"></a>
@@ -51,7 +51,7 @@ ___
 
 **● iat**: *`number`*
 
-*Defined in [Credentials.ts:66](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L66)*
+*Defined in [Credentials.ts:59](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L59)*
 
 ___
 <a id="iss"></a>
@@ -60,7 +60,7 @@ ___
 
 **● iss**: *`string`*
 
-*Defined in [Credentials.ts:63](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L63)*
+*Defined in [Credentials.ts:56](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L56)*
 
 ___
 <a id="sub"></a>
@@ -69,7 +69,7 @@ ___
 
 **● sub**: *`string`*
 
-*Defined in [Credentials.ts:64](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L64)*
+*Defined in [Credentials.ts:57](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L57)*
 
 ___
 <a id="type"></a>
@@ -78,7 +78,7 @@ ___
 
 **● type**: *`string`*
 
-*Defined in [Credentials.ts:67](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L67)*
+*Defined in [Credentials.ts:60](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L60)*
 
 ___
 

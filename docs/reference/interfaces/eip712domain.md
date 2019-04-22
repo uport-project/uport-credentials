@@ -26,7 +26,7 @@
 
 **● chainId**: *`number`*
 
-*Defined in [Credentials.ts:159](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L159)*
+*Defined in [Credentials.ts:152](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L152)*
 
 ___
 <a id="name"></a>
@@ -35,7 +35,7 @@ ___
 
 **● name**: *`string`*
 
-*Defined in [Credentials.ts:157](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L157)*
+*Defined in [Credentials.ts:150](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L150)*
 
 ___
 <a id="salt"></a>
@@ -44,7 +44,7 @@ ___
 
 **● salt**: *`string`*
 
-*Defined in [Credentials.ts:161](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L161)*
+*Defined in [Credentials.ts:154](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L154)*
 
 ___
 <a id="verifyingcontract"></a>
@@ -53,7 +53,7 @@ ___
 
 **● verifyingContract**: *`string`*
 
-*Defined in [Credentials.ts:160](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L160)*
+*Defined in [Credentials.ts:153](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L153)*
 
 ___
 <a id="version"></a>
@@ -62,7 +62,7 @@ ___
 
 **● version**: *`string`*
 
-*Defined in [Credentials.ts:158](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L158)*
+*Defined in [Credentials.ts:151](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L151)*
 
 ___
 

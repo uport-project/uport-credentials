@@ -29,7 +29,7 @@
 
 **● data**: *`string`*
 
-*Defined in [Contract.ts:7](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L7)*
+*Defined in [Contract.ts:7](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L7)*
 
 ___
 <a id="fn"></a>
@@ -38,7 +38,7 @@ ___
 
 **● fn**: *`string`*
 
-*Defined in [Contract.ts:11](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L11)*
+*Defined in [Contract.ts:11](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L11)*
 
 ___
 <a id="from"></a>
@@ -47,7 +47,7 @@ ___
 
 **● from**: *`string`*
 
-*Defined in [Contract.ts:5](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L5)*
+*Defined in [Contract.ts:5](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L5)*
 
 ___
 <a id="function"></a>
@@ -56,7 +56,7 @@ ___
 
 **● function**: *`string`*
 
-*Defined in [Contract.ts:12](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L12)*
+*Defined in [Contract.ts:12](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L12)*
 
 ___
 <a id="gas"></a>
@@ -65,7 +65,7 @@ ___
 
 **● gas**: *`string` \| `number`*
 
-*Defined in [Contract.ts:10](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L10)*
+*Defined in [Contract.ts:10](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L10)*
 
 ___
 <a id="gasprice"></a>
@@ -74,7 +74,7 @@ ___
 
 **● gasPrice**: *`string` \| `number`*
 
-*Defined in [Contract.ts:9](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L9)*
+*Defined in [Contract.ts:9](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L9)*
 
 ___
 <a id="to"></a>
@@ -83,7 +83,7 @@ ___
 
 **● to**: *`string`*
 
-*Defined in [Contract.ts:6](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L6)*
+*Defined in [Contract.ts:6](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L6)*
 
 ___
 <a id="value"></a>
@@ -92,7 +92,7 @@ ___
 
 **● value**: *`string` \| `number`*
 
-*Defined in [Contract.ts:8](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L8)*
+*Defined in [Contract.ts:8](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L8)*
 
 ___
 

@@ -24,7 +24,7 @@
 
 **● r**: *`string`*
 
-*Defined in [Credentials.ts:41](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L41)*
+*Defined in [Credentials.ts:34](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L34)*
 
 ___
 <a id="recoveryparam"></a>
@@ -33,7 +33,7 @@ ___
 
 **● recoveryParam**: *`number`*
 
-*Defined in [Credentials.ts:43](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L43)*
+*Defined in [Credentials.ts:36](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L36)*
 
 ___
 <a id="s"></a>
@@ -42,7 +42,7 @@ ___
 
 **● s**: *`string`*
 
-*Defined in [Credentials.ts:42](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L42)*
+*Defined in [Credentials.ts:35](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L35)*
 
 ___
 

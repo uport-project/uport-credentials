@@ -82,6 +82,7 @@ This library is part of a suite of tools maintained by the uPort Project, a Cons
 
 ### Variables
 
+* [SimpleSigner](#simplesigner)
 * [secp256k1](#secp256k1)
 
 ### Functions
@@ -91,7 +92,6 @@ This library is part of a suite of tools maintained by the uPort Project, a Cons
 * [encodeMethodReadable](#encodemethodreadable)
 * [getCallableMethodsFromABI](#getcallablemethodsfromabi)
 * [isTransactionObject](#istransactionobject)
-* [toSeconds](#toseconds)
 
 ---
 
@@ -103,7 +103,7 @@ This library is part of a suite of tools maintained by the uPort Project, a Cons
 
 **Ƭ ContractABI**: *([AbiEvent](interfaces/abievent.md) \| [AbiFunction](interfaces/abifunction.md))[]*
 
-*Defined in [Contract.ts:59](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L59)*
+*Defined in [Contract.ts:59](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L59)*
 
 ___
 <a id="signer"></a>
@@ -112,7 +112,7 @@ ___
 
 **Ƭ Signer**: *`function`*
 
-*Defined in [Credentials.ts:45](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L45)*
+*Defined in [Credentials.ts:38](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L38)*
 
 #### Type declaration
 ▸(data: *`string`*): `Promise`<[EcdsaSignature](interfaces/ecdsasignature.md)>
@@ -129,13 +129,22 @@ ___
 
 ## Variables
 
+<a id="simplesigner"></a>
+
+### `<Const>` SimpleSigner
+
+**● SimpleSigner**: *`SimpleSigner`* =  S
+
+*Defined in [index.ts:6](https://github.com/uport-project/uport-credentials/blob/2b03873/src/index.ts#L6)*
+
+___
 <a id="secp256k1"></a>
 
 ### `<Const>` secp256k1
 
 **● secp256k1**: *`ec`* =  new EC('secp256k1')
 
-*Defined in [Credentials.ts:14](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L14)*
+*Defined in [Credentials.ts:14](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L14)*
 
 ___
 
@@ -147,7 +156,7 @@ ___
 
 ▸ **ContractFactory**(encoder?: *`function`*): `(Anonymous function)`
 
-*Defined in [Contract.ts:117](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L117)*
+*Defined in [Contract.ts:117](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L117)*
 
 **Parameters:**
 
@@ -164,7 +173,7 @@ ___
 
 ▸ **configNetworks**(nets: *[Networks](interfaces/networks.md)*): [Networks](interfaces/networks.md)
 
-*Defined in [Credentials.ts:727](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L727)*
+*Defined in [Credentials.ts:734](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L734)*
 
 **Parameters:**
 
@@ -181,7 +190,7 @@ ___
 
 ▸ **encodeMethodReadable**(methodObject: *[AbiFunction](interfaces/abifunction.md)*, methodArgs: *`any`[]*): `string`
 
-*Defined in [Contract.ts:78](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L78)*
+*Defined in [Contract.ts:78](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L78)*
 
 **Parameters:**
 
@@ -199,7 +208,7 @@ ___
 
 ▸ **getCallableMethodsFromABI**(contractABI: *[ContractABI](#contractabi)*): [AbiFunction](interfaces/abifunction.md)[]
 
-*Defined in [Contract.ts:74](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L74)*
+*Defined in [Contract.ts:74](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L74)*
 
 **Parameters:**
 
@@ -216,7 +225,7 @@ ___
 
 ▸ **isTransactionObject**(txObj: *[TransactionRequest](interfaces/transactionrequest.md)*): `boolean`
 
-*Defined in [Contract.ts:61](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L61)*
+*Defined in [Contract.ts:61](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L61)*
 
 **Parameters:**
 
@@ -225,25 +234,6 @@ ___
 | txObj | [TransactionRequest](interfaces/transactionrequest.md) |
 
 **Returns:** `boolean`
-
-___
-<a id="toseconds"></a>
-
-### `<Const>` toSeconds
-
-▸ **toSeconds**(date: *`number`*): `number`
-
-*Defined in [Credentials.ts:30](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L30)*
-
-Convert a date to seconds since unix epoch, rounded down to the nearest whole second
-
-**Parameters:**
-
-| Name | Type | Description |
-| ------ | ------ | ------ |
-| date | `number` |  \- |
-
-**Returns:** `number`
 
 ___
 

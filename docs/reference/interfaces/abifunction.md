@@ -30,7 +30,7 @@
 
 **● constant**: *`true`*
 
-*Defined in [Contract.ts:46](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L46)*
+*Defined in [Contract.ts:46](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L46)*
 
 ___
 <a id="inputs"></a>
@@ -41,7 +41,7 @@ ___
 
 *Inherited from [AbiEntry](abientry.md).[inputs](abientry.md#inputs)*
 
-*Defined in [Contract.ts:38](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L38)*
+*Defined in [Contract.ts:38](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L38)*
 
 ___
 <a id="name"></a>
@@ -52,7 +52,7 @@ ___
 
 *Inherited from [AbiEntry](abientry.md).[name](abientry.md#name)*
 
-*Defined in [Contract.ts:37](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L37)*
+*Defined in [Contract.ts:37](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L37)*
 
 ___
 <a id="outputs"></a>
@@ -61,7 +61,7 @@ ___
 
 **● outputs**: *[AbiParam](abiparam.md)[]*
 
-*Defined in [Contract.ts:43](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L43)*
+*Defined in [Contract.ts:43](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L43)*
 
 ___
 <a id="payable"></a>
@@ -70,7 +70,7 @@ ___
 
 **● payable**: *`true`*
 
-*Defined in [Contract.ts:45](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L45)*
+*Defined in [Contract.ts:45](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L45)*
 
 ___
 <a id="statemutability"></a>
@@ -79,7 +79,7 @@ ___
 
 **● stateMutability**: *[StateMutability](../enums/statemutability.md)*
 
-*Defined in [Contract.ts:44](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L44)*
+*Defined in [Contract.ts:44](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L44)*
 
 ___
 <a id="type"></a>
@@ -90,7 +90,7 @@ ___
 
 *Inherited from [AbiEntry](abientry.md).[type](abientry.md#type)*
 
-*Defined in [Contract.ts:36](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Contract.ts#L36)*
+*Defined in [Contract.ts:36](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Contract.ts#L36)*
 
 ___
 

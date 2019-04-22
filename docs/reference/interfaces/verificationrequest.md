@@ -27,7 +27,7 @@
 
 **● aud**: *`string`*
 
-*Defined in [Credentials.ts:148](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L148)*
+*Defined in [Credentials.ts:141](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L141)*
 
 ___
 <a id="callbackurl"></a>
@@ -36,7 +36,7 @@ ___
 
 **● callbackUrl**: *`string`*
 
-*Defined in [Credentials.ts:153](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L153)*
+*Defined in [Credentials.ts:146](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L146)*
 
 ___
 <a id="expiresin"></a>
@@ -45,7 +45,7 @@ ___
 
 **● expiresIn**: *`number`*
 
-*Defined in [Credentials.ts:151](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L151)*
+*Defined in [Credentials.ts:144](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L144)*
 
 ___
 <a id="riss"></a>
@@ -54,7 +54,7 @@ ___
 
 **● riss**: *`string`*
 
-*Defined in [Credentials.ts:150](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L150)*
+*Defined in [Credentials.ts:143](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L143)*
 
 ___
 <a id="sub"></a>
@@ -63,7 +63,7 @@ ___
 
 **● sub**: *`string`*
 
-*Defined in [Credentials.ts:149](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L149)*
+*Defined in [Credentials.ts:142](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L142)*
 
 ___
 <a id="vc"></a>
@@ -72,7 +72,7 @@ ___
 
 **● vc**: *`string`[]*
 
-*Defined in [Credentials.ts:152](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L152)*
+*Defined in [Credentials.ts:145](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L145)*
 
 ___
 

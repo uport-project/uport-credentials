@@ -23,7 +23,7 @@
 
 **● did**: *`string`*
 
-*Defined in [Credentials.ts:58](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L58)*
+*Defined in [Credentials.ts:51](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L51)*
 
 ___
 <a id="privatekey"></a>
@@ -32,7 +32,7 @@ ___
 
 **● privateKey**: *`string`*
 
-*Defined in [Credentials.ts:59](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L59)*
+*Defined in [Credentials.ts:52](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L52)*
 
 ___
 

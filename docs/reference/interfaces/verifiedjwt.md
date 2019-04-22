@@ -26,7 +26,7 @@
 
 **● doc**: *`DIDDocument`*
 
-*Defined in [Credentials.ts:129](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L129)*
+*Defined in [Credentials.ts:122](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L122)*
 
 ___
 <a id="issuer"></a>
@@ -35,7 +35,7 @@ ___
 
 **● issuer**: *`string`*
 
-*Defined in [Credentials.ts:130](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L130)*
+*Defined in [Credentials.ts:123](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L123)*
 
 ___
 <a id="jwt"></a>
@@ -44,7 +44,7 @@ ___
 
 **● jwt**: *`string`*
 
-*Defined in [Credentials.ts:132](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L132)*
+*Defined in [Credentials.ts:125](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L125)*
 
 ___
 <a id="payload"></a>
@@ -53,7 +53,7 @@ ___
 
 **● payload**: *`any`*
 
-*Defined in [Credentials.ts:128](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L128)*
+*Defined in [Credentials.ts:121](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L121)*
 
 ___
 <a id="signer"></a>
@@ -62,7 +62,7 @@ ___
 
 **● signer**: *`PublicKey`*
 
-*Defined in [Credentials.ts:131](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L131)*
+*Defined in [Credentials.ts:124](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L124)*
 
 ___
 

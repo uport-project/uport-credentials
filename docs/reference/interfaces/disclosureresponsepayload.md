@@ -38,7 +38,7 @@
 
 *Inherited from [JWTPayload](jwtpayload.md).[aud](jwtpayload.md#aud)*
 
-*Defined in [Credentials.ts:65](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L65)*
+*Defined in [Credentials.ts:58](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L58)*
 
 ___
 <a id="boxpub"></a>
@@ -47,7 +47,7 @@ ___
 
 **● boxPub**: *`string`*
 
-*Defined in [Credentials.ts:100](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L100)*
+*Defined in [Credentials.ts:93](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L93)*
 
 ___
 <a id="capabilities"></a>
@@ -56,7 +56,7 @@ ___
 
 **● capabilities**: *`string`[]*
 
-*Defined in [Credentials.ts:101](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L101)*
+*Defined in [Credentials.ts:94](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L94)*
 
 ___
 <a id="dad"></a>
@@ -65,7 +65,7 @@ ___
 
 **● dad**: *`string`*
 
-*Defined in [Credentials.ts:99](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L99)*
+*Defined in [Credentials.ts:92](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L92)*
 
 ___
 <a id="exp"></a>
@@ -76,7 +76,7 @@ ___
 
 *Inherited from [JWTPayload](jwtpayload.md).[exp](jwtpayload.md#exp)*
 
-*Defined in [Credentials.ts:68](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L68)*
+*Defined in [Credentials.ts:61](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L61)*
 
 ___
 <a id="iat"></a>
@@ -87,7 +87,7 @@ ___
 
 *Inherited from [JWTPayload](jwtpayload.md).[iat](jwtpayload.md#iat)*
 
-*Defined in [Credentials.ts:66](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L66)*
+*Defined in [Credentials.ts:59](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L59)*
 
 ___
 <a id="iss"></a>
@@ -98,7 +98,7 @@ ___
 
 *Inherited from [JWTPayload](jwtpayload.md).[iss](jwtpayload.md#iss)*
 
-*Defined in [Credentials.ts:63](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L63)*
+*Defined in [Credentials.ts:56](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L56)*
 
 ___
 <a id="nad"></a>
@@ -107,7 +107,7 @@ ___
 
 **● nad**: *`string`*
 
-*Defined in [Credentials.ts:98](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L98)*
+*Defined in [Credentials.ts:91](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L91)*
 
 ___
 <a id="own"></a>
@@ -116,7 +116,7 @@ ___
 
 **● own**: *`any`*
 
-*Defined in [Credentials.ts:96](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L96)*
+*Defined in [Credentials.ts:89](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L89)*
 
 ___
 <a id="req"></a>
@@ -125,7 +125,7 @@ ___
 
 **● req**: *`string`*
 
-*Defined in [Credentials.ts:95](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L95)*
+*Defined in [Credentials.ts:88](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L88)*
 
 ___
 <a id="sub"></a>
@@ -136,7 +136,7 @@ ___
 
 *Inherited from [JWTPayload](jwtpayload.md).[sub](jwtpayload.md#sub)*
 
-*Defined in [Credentials.ts:64](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L64)*
+*Defined in [Credentials.ts:57](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L57)*
 
 ___
 <a id="type"></a>
@@ -147,7 +147,7 @@ ___
 
 *Inherited from [JWTPayload](jwtpayload.md).[type](jwtpayload.md#type)*
 
-*Defined in [Credentials.ts:67](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L67)*
+*Defined in [Credentials.ts:60](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L60)*
 
 ___
 <a id="verified"></a>
@@ -156,7 +156,7 @@ ___
 
 **● verified**: *`string`[]*
 
-*Defined in [Credentials.ts:97](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L97)*
+*Defined in [Credentials.ts:90](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L90)*
 
 ___
 

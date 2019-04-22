@@ -23,7 +23,7 @@
 
 **● doc**: *`DIDDocument`*
 
-*Defined in [Credentials.ts:106](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L106)*
+*Defined in [Credentials.ts:99](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L99)*
 
 ___
 <a id="payload"></a>
@@ -32,7 +32,7 @@ ___
 
 **● payload**: *[DisclosureResponsePayload](disclosureresponsepayload.md)*
 
-*Defined in [Credentials.ts:105](https://github.com/uport-project/uport-credentials/blob/c498e74/src/Credentials.ts#L105)*
+*Defined in [Credentials.ts:98](https://github.com/uport-project/uport-credentials/blob/2b03873/src/Credentials.ts#L98)*
 
 ___
 
