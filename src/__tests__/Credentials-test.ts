@@ -1,5 +1,5 @@
-import Credentials from '../Credentials'
-import { SimpleSigner, createJWT, verifyJWT, decodeJWT } from 'did-jwt'
+import { Credentials, SimpleSigner} from '../index'
+import { verifyJWT, decodeJWT } from 'did-jwt'
 import MockDate from 'mockdate'
 import { registerMethod, DIDDocument } from 'did-resolver'
 import { AbiEntryType, ContractABI } from '../Contract';
@@ -10,7 +10,6 @@ MockDate.set(NOW * 1000)
 const toSeconds = date => Math.floor(date / 1000)
 
 const privateKey = '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
-const signer = SimpleSigner(privateKey)
 const address = '0xbc3ae59bc76f894822622cdef7a2018dbe353840'
 const did = `did:ethr:${address}`
 const mnid = '2nQtiQG6Cgm1GYTBaaKAgr76uY7iSexUkqX'
@@ -151,8 +150,14 @@ describe('createDisclosureRequest()', () => {
     const jwt = await uport.createDisclosureRequest(params)
     return await verifyJWT(jwt)
   }
+
   it('creates a valid JWT for a request', async () => {
     const response = await createAndVerify({requested: ['name', 'phone']})
+    return expect(response).toMatchSnapshot()
+  })
+
+  it('creates a valid JWT for a request with expiry', async () => {
+    const response = await createAndVerify({exp: NOW+1000})
     return expect(response).toMatchSnapshot()
   })
 
@@ -455,9 +460,10 @@ describe('txRequest()', () => {
   it('adds additional request options passed to jwt', async () => {
       const networkId =  '0x4'
       const callbackUrl = 'mydomain'
-      const jwt = await statusContract.updateStatus('hello', {networkId, callbackUrl })
+      const jwt = await statusContract.updateStatus('hello', {networkId, callbackUrl, label: 'Update Status'})
       const verified = await verifyJWT(jwt)
       expect(verified.payload.net).toEqual(networkId)
       expect(verified.payload.callback).toEqual(callbackUrl)
+      expect(verified.payload.label).toEqual('Update Status')
   })
 })

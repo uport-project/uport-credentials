@@ -22,13 +22,6 @@ enum Types {
   PERSONAL_SIGN_REQUEST = 'personalSigReq'
 }
 
-/**
- * Convert a date to seconds since unix epoch, rounded down to the nearest whole second
- * @param   {Date}   date 
- * @returns {Number}
- */
-const toSeconds = (date: number): number => Math.floor(date / 1000)
-
 interface Network {
   registry: string
   rpcUrl: string
