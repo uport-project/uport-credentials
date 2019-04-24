@@ -115,13 +115,20 @@ class Credentials {
       this.did = `did:ethr:${address}`
     }
 
-    this.signJWT = (payload, expiresIn) =>
-      createJWT(payload, {
+    this.signJWT = (payload, expiresIn) => {
+      console.group('[uport-credentials] signJWT')
+      console.log(payload)
+      console.log(expiresIn)
+      const jwt = createJWT(payload, {
         issuer: this.did,
         signer: this.signer,
         alg: this.did.match('^did:uport:') || isMNID(this.did) ? 'ES256K' : 'ES256K-R',
         expiresIn,
       })
+      console.log(jwt)
+      console.groupEnd()
+      return jwt
+    }
 
     UportDIDResolver(registry || UportLite({ networks: networks ? configNetworks(networks) : {} }))
     EthrDIDResolver(ethrConfig || {})
@@ -251,6 +258,9 @@ class Credentials {
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
   createVerificationSignatureRequest(unsignedClaim, { aud, sub, riss, callbackUrl, vc, expiresIn} = {}) {
+    console.group('[uport-credentials] createVerificationSignatureRequest')
+    console.log(expiresIn)
+    console.groupEnd()
     return this.signJWT({
       unsignedClaim,
       sub,
@@ -259,7 +269,8 @@ class Credentials {
       vc,
       callback: callbackUrl,
       type: Types.VERIFICATION_SIGNATURE_REQUEST,
-    }, expiresIn)
+      exp: expiresIn ? Math.floor(Date.now() / 1000) + Math.floor(expiresIn) : undefined,
+    })
   }
 
   /**
