@@ -313,21 +313,42 @@ describe('Contract', () => {
 describe('ContractFactory', () => {
 
   describe('By default', () => {
+    let tokenContract: any
     let txObject
 
     beforeAll(() => {
-      const tokenContract : any = ContractFactory()(abiToken).at(address)
-      txObject = tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)
+      tokenContract = ContractFactory()(abiToken).at(address)
     })
 
-    it('returns a well formed txObject on contract function calls', () => {
-      expect(txObject.function).toBeDefined()
-      expect(txObject.to).toEqual(address)
-    });
+    describe('function with address and uint256', () => {
+      beforeAll(() => {
+        txObject = tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)
+      })
 
-    it('returns a txObject with a human readable function and params', () => {
-      expect(txObject.function).toEqual('transfer(address 0x41566e3a081f5032bdcad470adb797635ddfe1f0, uint256 10)')
-    });
+      it('returns a well formed txObject on contract function calls', () => {
+        expect(txObject.function).toBeDefined()
+        expect(txObject.to).toEqual(address)
+      });
+  
+      it('returns a txObject with a human readable function and params', () => {
+        expect(txObject.function).toEqual('transfer(address 0x41566e3a081f5032bdcad470adb797635ddfe1f0, uint256 10)')
+      });
+    })
+
+    describe('function with address, uint and bytes and txObject', () => {
+      beforeAll(() => {
+        txObject = tokenContract.approveAndCall('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10, '0x1234', {gas: '0x123454'})
+      })
+
+      it('returns a well formed txObject on contract function calls', () => {
+        expect(txObject.function).toBeDefined()
+        expect(txObject.to).toEqual(address)
+      });
+  
+      it('returns a txObject with a human readable function and params', () => {
+        expect(txObject.function).toEqual('approveAndCall(address 0x41566e3a081f5032bdcad470adb797635ddfe1f0, uint256 10, bytes 0x1234)')
+      });
+    })
   });
 
   describe('With an extend function', () => {
