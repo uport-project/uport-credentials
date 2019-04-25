@@ -473,17 +473,13 @@ class Credentials {
    *   @param {String} opts.callback        callback URL to handle the response
    * @returns {Promise<Object, Error>}      a promise which resolves to a signed JWT or rejects with an error
    */
-  createTypedDataSignatureRequest(typedData: EIP712Object, { from, net, callback }: NetworkRequest = {}) {
+  async createTypedDataSignatureRequest(typedData: EIP712Object, { from, net, callback }: NetworkRequest = {}) {
     // Check if the typedData is a valid ERC712 request
     for (const prop of ['types', 'primaryType', 'message', 'domain']) {
-      
+      if (!typedData[prop]) throw new Error(`Invalid EIP712 Request, must include '${prop}'`)  
     }
-    if (!typedData.types) throw new Error(`Invalid EIP712 Request, must include 'types'`)
-    if (!typedData.primaryType) throw new Error(`Invalid EIP712 Request, must include 'primaryType'`)
-    if (!typedData.message) throw new Error(`Invalid EIP712 Request, must include 'message'`)
-    if (!typedData.domain) throw new Error(`Invalid EIP712 Request, must include 'domain'`)
 
-    return this.signJWT({ typedData, from, net, callback, type: Types.TYPED_DATA_SIGNATURE_REQUEST })
+    return await this.signJWT({ typedData, from, net, callback, type: Types.TYPED_DATA_SIGNATURE_REQUEST })
   }
 
   /**

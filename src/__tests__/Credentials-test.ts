@@ -302,6 +302,16 @@ describe('createTypedDataSignatureRequest()', () => {
     const jwt = await uport.createTypedDataSignatureRequest(typedData, {from: '0xdeadbeef', net: '0x1'})
     expect(jwt).toMatchSnapshot()
   })
+
+  describe('missing data', () => {
+    ['types', 'primaryType', 'domain', 'message'].forEach(prop => {
+      it(`should require ${prop}`, async () => {
+        const broken = {...typedData}
+        delete broken[prop]
+        return expect(uport.createTypedDataSignatureRequest(broken, {from: '0xdeadbeef', net: '0x1'})).rejects.toThrow(`Invalid EIP712 Request, must include '${prop}'`)        
+      })
+    })
+  })
 })
 
 describe('createPersonalSignRequest()', () => {
