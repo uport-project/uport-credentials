@@ -281,7 +281,7 @@ describe('createDisclosureRequest()', () => {
             }
           },
           user_info: {
-            name: { essential: true, reason: "Show your name to other users"},
+            name: { essential: true, reason: 'Show your name to other users' },
             country: null
           }
         }
