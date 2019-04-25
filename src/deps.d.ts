@@ -74,7 +74,7 @@ declare module 'did-jwt' {
   }
 
   export function SimpleSigner(hexPrivateKey: string): (data: string) => Promise<EcdsaSignature>
-  export function createJWT(payload: Object, options: JWTOptions): Promise<string>
+  export function createJWT(payload: object, options: JWTOptions): Promise<string>
   export function verifyJWT(jwt: string, options?: JWTVerifyOptions): Promise<Verified>
   export function decodeJWT(jwt: string): JWTDecoded
 }
