@@ -15,20 +15,20 @@ for private data). It also provides signature verification over signed payloads.
 
 **Kind**: global class  
 
-* [Credentials](#Credentials)
-    * [new Credentials([settings])](#new_Credentials_new)
-    * _instance_
-        * [.createDisclosureRequest([params], expiresIn)](#Credentials+createDisclosureRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-        * [.createVerification([credential])](#Credentials+createVerification) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-        * [.createVerificationSignatureRequest(unsignedClaim, [opts])](#Credentials+createVerificationSignatureRequest) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-        * [.createTxRequest(txObj, [opts])](#Credentials+createTxRequest) ⇒ <code>String</code>
-        * [.createDisclosureResponse([payload])](#Credentials+createDisclosureResponse) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-        * [.processDisclosurePayload(response)](#Credentials+processDisclosurePayload)
-        * [.authenticateDisclosureResponse(token, [callbackUrl])](#Credentials+authenticateDisclosureResponse) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-        * [.verifyDisclosure(token)](#Credentials+verifyDisclosure) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-        * [.contract(abi)](#Credentials+contract) ⇒ <code>Object</code>
-    * _static_
-        * [.createIdentity()](#Credentials.createIdentity) ⇒ <code>Object</code>
+- [Credentials](#credentials)
+  - [new Credentials([settings])](#new-credentialssettings)
+  - [credentials.createDisclosureRequest([params], expiresIn) ⇒ <code>Promise.&lt;Object, Error&gt;</code>](#credentialscreatedisclosurerequestparams-expiresin-%E2%87%92-codepromiseltobject-errorgtcode)
+    - [Verifiable Claims Spec](#verifiable-claims-spec)
+    - [User Info Spec](#user-info-spec)
+  - [credentials.createVerification([credential]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>](#credentialscreateverificationcredential-%E2%87%92-codepromiseltobject-errorgtcode)
+  - [credentials.createVerificationSignatureRequest(unsignedClaim, [opts]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>](#credentialscreateverificationsignaturerequestunsignedclaim-opts-%E2%87%92-codepromiseltobject-errorgtcode)
+  - [credentials.createTxRequest(txObj, [opts]) ⇒ <code>String</code>](#credentialscreatetxrequesttxobj-opts-%E2%87%92-codestringcode)
+  - [credentials.createDisclosureResponse([payload]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>](#credentialscreatedisclosureresponsepayload-%E2%87%92-codepromiseltobject-errorgtcode)
+  - [credentials.processDisclosurePayload(response)](#credentialsprocessdisclosurepayloadresponse)
+  - [credentials.authenticateDisclosureResponse(token, [callbackUrl]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>](#credentialsauthenticatedisclosureresponsetoken-callbackurl-%E2%87%92-codepromiseltobject-errorgtcode)
+  - [credentials.verifyDisclosure(token) ⇒ <code>Promise.&lt;Object, Error&gt;</code>](#credentialsverifydisclosuretoken-%E2%87%92-codepromiseltobject-errorgtcode)
+  - [credentials.contract(abi) ⇒ <code>Object</code>](#credentialscontractabi-%E2%87%92-codeobjectcode)
+  - [Credentials.createIdentity() ⇒ <code>Object</code>](#credentialscreateidentity-%E2%87%92-codeobjectcode)
 
 <a name="new_Credentials_new"></a>
 
@@ -61,20 +61,115 @@ Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/sp
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [params] | <code>Object</code> | <code>{}</code> | Request params object |
-| params.requested | <code>Array</code> |  | An array of attributes for which you are requesting credentials to be shared for |
-| params.verified | <code>Array</code> |  | An array of attributes for which you are requesting verified credentials to be shared for |
+| params.requested | <code>Array</code> |  | DEPRECATED An array of attributes for which you are requesting credentials to be shared for |
+| params.verified | <code>Array</code> |  | DEPRECATED An array of attributes for which you are requesting verified credentials to be shared for |
+| params.claims | <code>Object</code> | | |
 | params.notifications | <code>Boolean</code> |  | Boolean if you want to request the ability to send push notifications |
 | params.callbackUrl | <code>String</code> |  | The URL which you want to receive the response of this request |
 | params.networkId | <code>String</code> |  | Network ID of Ethereum chain of identity e.g., 0x4 for Rinkeby |
 | params.accountType | <code>String</code> |  | Ethereum account type: "general", "segregated", "keypair", "devicekey" or "none" |
 | expiresIn | <code>Number</code> |  | Seconds until expiry |
 
+
+#### Verifiable Claims Spec
+
+This is an json object that lives at the `verifiable` key within the `claims` object. It is not required, but provides you flexibility in clearly specifying the kind of claims you need.
+
+Name | Description | Required
+---- | ----------- | --------
+type | The key in the `verifiable` object is the claims type requested | yes
+essential | This claim is essential. A response should not be returned if user does not have this claim | no
+iss | Array of `{did, url}` objects where `did` is DID of allowed issuer of claims and `url` is URL for obtaining claim, `did` is required but `url` is not | no
+reason | Short string explaining why you need this | no
+
+Examples:
+
+```js
+{
+  email: {
+    essential: true,
+    iss: [
+      {
+        did: 'did:web:uport.claims',
+        url: 'https://uport.claims/email'
+      },
+      {
+        did: 'did:web:sobol.io',
+        url: 'https://sobol.io/verify'
+      }
+    ],
+    reason: 'Whe need to be able to email you' 
+  }
+}
+```
+
+#### User Info Spec
+
+This is an json object that lives at the `user_info` key within the `claims` object. It is not required, but provides you flexibility in clearly specifying the kind of self presented user claims you need.
+
+NOTE: These are claims specifically made by the user themselves and are not verifiable by an external party.
+
+Name | Description | Required
+---- | ----------- | --------
+type | The key in the `verifiable` object is the claims type requested | yes
+essential | This claim is essential. A response should not be returned if user does not have this claim | no
+reason | Short string explaining why you need this | no
+
+Per the OpenId spec if the value of the claim type in the object is `null` then it is a non essential value.
+
+Examples:
+
+```js
+{
+  email: {
+    essential: true,
+    reason: 'Whe need to be able to email you' 
+  },
+  name: null,
+  phone: {
+    reason: 'So we can notify you by text'
+  }
+}
+```
+
 **Example**  
 ```js
-const req = { requested: ['name', 'country'],
-               callbackUrl: 'https://myserver.com',
-               notifications: true }
- credentials.createDisclosureRequest(req).then(jwt => {
+const req = {
+  claims: {
+    verifiable: {
+      email: {
+        iss: [
+          {
+            did: 'did:web:uport.claims',
+            url: 'https://uport.claims/email'
+          },
+          {
+            did: 'did:web:sobol.io',
+            url: 'https://sobol.io/verify'
+          }
+        ],
+        reason: 'Whe need to be able to email you'
+      },
+      nationalIdentity: {
+        essential: true,
+        iss: [
+          {
+            did: 'did:web:idverifier.claims',
+            url: 'https://idverifier.example'
+          }
+        ],
+        reason: 'To legally be able to open your account'
+      }
+    },
+    user_info: {
+      name: { essential: true, reason: "Show your name to other users"},
+      country: null
+    }
+  },
+  callbackUrl: 'https://myserver.com',
+  notifications: true 
+}
+credentials.createDisclosureRequest(req).then(jwt => {
      ...
  })
 

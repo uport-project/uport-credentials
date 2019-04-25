@@ -251,6 +251,44 @@ describe('createDisclosureRequest()', () => {
     return expect(response).toMatchSnapshot()
   })
 
+  describe('specifying requested claims', () => {
+    it('has correct payload in JWT for a request asking for verified credentials', async () => {
+      const response = await createAndVerify({
+        claims: {
+          verifiable: {
+            email: {
+              iss: [
+                {
+                  did: 'did:web:uport.claims',
+                  url: 'https://uport.claims/email'
+                },
+                {
+                  did: 'did:web:sobol.io',
+                  url: 'https://sobol.io/verify'
+                }
+              ],
+              reason: 'Whe need to be able to email you'
+            },
+            nationalIdentity: {
+              essential: true,
+              iss: [
+                {
+                  did: 'did:web:idverifier.claims',
+                  url: 'https://idverifier.example'
+                }
+              ],
+              reason: 'To legally be able to open your account'
+            }
+          },
+          user_info: {
+            name: { essential: true, reason: 'Show your name to other users' },
+            country: null
+          }
+        }
+      })
+      return expect(response).toMatchSnapshot()
+    })
+  })
   it('has correct payload in JWT for a request asking for verified credentials', async () => {
     const response = await createAndVerify({
       requested: ['name', 'phone'],
