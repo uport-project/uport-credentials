@@ -350,23 +350,55 @@ class Credentials {
    *  Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/specs/blob/develop/messages/sharereq.md)
    *
    *  ```javascript
-   *  const req = { requested: ['name', 'country'],
-   *                callbackUrl: 'https://myserver.com',
-   *                notifications: true }
+   *  const req = { claims: {
+   *      verifiable: {
+   *        email: {
+   *          iss: [
+   *            {
+   *              did: 'did:web:uport.claims',
+   *              url: 'https://uport.claims/email'
+   *            },
+   *            {
+   *              did: 'did:web:sobol.io',
+   *              url: 'https://sobol.io/verify'
+   *            }
+   *          ],
+   *          reason: 'Whe need to be able to email you'
+   *        },
+   *        nationalIdentity: {
+   *          essential: true,
+   *          iss: [
+   *            {
+   *              did: 'did:web:idverifier.claims',
+   *              url: 'https://idverifier.example'
+   *            }
+   *          ],
+   *          reason: 'To legally be able to open your account'
+   *        }
+   *      },
+   *      user_info: {
+   *        name: { essential: true, reason: "Show your name to other users"},
+   *        country: null
+   *      }
+   *    },
+   *    callbackUrl: 'https://myserver.com',
+   *    notifications: true }
    *  credentials.createDisclosureRequest(req).then(jwt => {
    *      ...
    *  })
-   * ```
+   * `
+   * 
    *
    *  @param    {Object}             [params={}]           request params object
    * 
    *  @param    {Array}              params.requested      DEPRECATED an array of attributes for which you are requesting credentials to be shared for
    *  @param    {Array}              params.verified       DEPRECATED an array of attributes for which you are requesting verified credentials to be shared for
+   *  @param    {Object}             params.claims         Claims spec Object
    *  @param    {Boolean}            params.notifications  boolean if you want to request the ability to send push notifications
    *  @param    {String}             params.callbackUrl    the url which you want to receive the response of this request
    *  @param    {String}             params.networkId      network id of Ethereum chain of identity eg. 0x4 for rinkeby
    *  @param    {String}             params.rpcUrl         JSON RPC url for use with account connecting to non standard (private or permissioned chain). The JSON-RPC url must match the `networkId`
-   *  @param    {String[]}           params.vc             An array of JWTs about the requester, signed by 3rd parties
+   *  @param    {String[]}           params.vc            An array of JWTs about the requester, signed by 3rd parties
    *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", or "none"
    *  @param    {Number}             expiresIn             Seconds until expiry
    *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
