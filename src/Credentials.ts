@@ -289,7 +289,7 @@ class Credentials {
   }
 
   signJWT(payload: Object, expiresIn?: number) {
-    if (!(this.did && this.signer)) throw new Error('No Signing Identity configured')
+    if (!(this.did && this.signer)) return Promise.reject(new Error('No Signing Identity configured'))
     return createJWT(payload, {
       issuer: this.did,
       signer: this.signer,
@@ -661,11 +661,9 @@ class Credentials {
     })
 
     if (payload.req) {
-      const challengeReq = await verifyJWT(payload.req)
+      const challengeReq = await verifyJWT(payload.req, {audience: this.did})
       const request : DisclosureRequestPayload = challengeReq.payload
-      if (request.iss !== this.did) {
-        throw new Error(`Challenge issuer does not match current identity: ${request.iss} !== ${this.did}`)
-      } else if (request.type !== Types.DISCLOSURE_REQUEST) {
+      if (request.type !== Types.DISCLOSURE_REQUEST) {
         throw new Error(`Challenge payload type invalid: ${request.type}`)
       } else {
         return this.processDisclosurePayload({ payload, doc })

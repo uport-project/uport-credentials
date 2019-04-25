@@ -142,6 +142,18 @@ describe('signJWT', () => {
     })
   })
 
+  describe('validation', () => {
+    it('should fail if no signer was configured', async () => {
+      const badport = new Credentials({did})
+      return expect(badport.signJWT({type: 'request'})).rejects.toThrow('No Signing Identity configured')
+    })
+
+    it('should fail if no did was configured', async () => {
+      const badport = new Credentials({signer: SimpleSigner(privateKey)})
+      return expect(badport.signJWT({type: 'request'})).rejects.toThrow('No Signing Identity configured')
+    })
+
+  })
 })
 
 describe('createDisclosureRequest()', () => {
@@ -385,9 +397,25 @@ describe('authenticateDisclosureResponse()', () => {
     expect(profile).toMatchSnapshot()
   })
 
-  it('handles response with missing challenge', async () => {
-    const jwt = await uport.createDisclosureResponse({own: {name: 'bob'}})
-    expect(uport.authenticateDisclosureResponse(jwt)).rejects.toMatchSnapshot()
+  describe('check original request', () => {
+    it('rejects response with missing challenge', async () => {
+      const jwt = await uport.createDisclosureResponse({own: {name: 'bob'}})
+      expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow('Challenge was not included in response')
+    })
+  
+    it('should reject if embedded request was not from me', async () => {
+      const id = Credentials.createIdentity()
+      const badPort = new Credentials(id)
+      const req = await badPort.createDisclosureRequest({requested: ['name', 'phone']})
+      const jwt = await uport.createDisclosureResponse({own: {name: 'Davie', phone: '+15555551234'}, req})
+      return expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow(`JWT audience does not match your DID: aud: ${id.did} !== yours: ${uport.did}`)
+    })
+
+    it('should reject if wrong request type', async () => {
+      const req = await uport.createVerification({sub: '0x01234', claim: {name: 'Bob'}})
+      const jwt = await uport.createDisclosureResponse({own: {name: 'Davie', phone: '+15555551234'}, req})
+      return expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow(`Challenge payload type invalid: `)
+    })
   })
 })
 
