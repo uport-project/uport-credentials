@@ -43,7 +43,7 @@ interface Settings {
   privateKey?: string,
   signer?: Signer,
   networks?: Networks,
-  registry?: (mnid: string) => Promise<Object>,
+  registry?: (mnid: string) => Promise<object>,
   ethrConfig?: any
 }
 
@@ -288,15 +288,6 @@ class Credentials {
     HttpsDIDResolver()
   }
 
-  signJWT(payload: Object, expiresIn?: number) {
-    if (!(this.did && this.signer)) return Promise.reject(new Error('No Signing Identity configured'))
-    return createJWT(payload, {
-      issuer: this.did,
-      signer: this.signer,
-      alg: this.did.match('^did:uport:') || isMNID(this.did) ? 'ES256K' : 'ES256K-R',
-      expiresIn,
-    })
-  }
   /**
    * Generate a DID and private key, effectively creating a new identity that can sign and verify data
    *
@@ -314,6 +305,16 @@ class Credentials {
     const address = toEthereumAddress(publicKey)
     const did = `did:ethr:${address}`
     return { did, privateKey }
+  }
+
+  signJWT(payload: object, expiresIn?: number) {
+    if (!(this.did && this.signer)) return Promise.reject(new Error('No Signing Identity configured'))
+    return createJWT(payload, {
+      issuer: this.did,
+      signer: this.signer,
+      alg: this.did.match('^did:uport:') || isMNID(this.did) ? 'ES256K' : 'ES256K-R',
+      expiresIn
+    })
   }
 
   /**
@@ -413,7 +414,7 @@ class Credentials {
    * @param    {Object[]}    [opts.vc]           An array of JWTs about the requester, signed by 3rd parties
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim: Object, { aud, sub, riss, callbackUrl, vc, expiresIn }: VerificationRequest) {
+  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, expiresIn }: VerificationRequest) {
     return this.signJWT({
       unsignedClaim,
       sub,
@@ -613,7 +614,7 @@ class Credentials {
     // Return invalid jwts in the `invalid` array
     if (verified) {
       const invalid: string[] = []
-      const verifying: Promise<VerifiedJWT|undefined>[] = verified.map(token => verifyJWT(token, { audience: this.did }).catch(() => {
+      const verifying: Array<Promise<undefined|VerifiedJWT>> = verified.map(token => verifyJWT(token, { audience: this.did }).catch(() => {
         invalid.push(token)
         return Promise.resolve(undefined)
       }))
@@ -623,7 +624,7 @@ class Credentials {
       const verifications : Verification[] = []
       unfiltered.forEach(item => {
         if (item) {
-          verifications.push(<Verification>{...item.payload, jwt: item.jwt})
+          verifications.push(<Verification>{ ...item.payload, jwt: item.jwt })
         }
       })
       processed.verified = verifications
@@ -653,7 +654,7 @@ class Credentials {
    *  @param    {String}                  [callbackUrl=null]    callbackUrl
    *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
    */
-  async authenticateDisclosureResponse(token: string, callbackUrl = undefined) {
+  async authenticateDisclosureResponse(token: string, callbackUrl?: string) {
     const { payload, doc }: DisclosurePayload = await verifyJWT(token, {
       audience: this.did,
       callbackUrl,
@@ -661,7 +662,7 @@ class Credentials {
     })
 
     if (payload.req) {
-      const challengeReq = await verifyJWT(payload.req, {audience: this.did})
+      const challengeReq = await verifyJWT(payload.req, { audience: this.did })
       const request : DisclosureRequestPayload = challengeReq.payload
       if (request.type !== Types.DISCLOSURE_REQUEST) {
         throw new Error(`Challenge payload type invalid: ${request.type}`)

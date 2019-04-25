@@ -1,5 +1,5 @@
 import Creds from './Credentials'
-import { SimpleSigner as S} from 'did-jwt'
+import { SimpleSigner as S } from 'did-jwt'
 import { ContractFactory as CF } from './Contract'
 
 export const Credentials = Creds

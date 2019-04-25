@@ -48,7 +48,7 @@ declare module 'did-jwt' {
     payload: any,
     doc: DIDDocument,
     issuer: string,
-    signer: Object,
+    signer: object,
     jwt: string
   }
 
@@ -94,9 +94,9 @@ declare module 'mnid' {
 }
 
 declare module 'ethr-did-resolver' {
-  export default function register(ethConfig: Object): void
+  export default function register(ethConfig: object): void
 }
 
 declare module 'uport-lite' {
-  export default function UportLite (conf: {networks: Object}): (address: string) => Promise<Object>
+  export default function UportLite (conf: {networks: object}): (address: string) => Promise<object>
 }

@@ -56,7 +56,7 @@ export interface AbiEvent extends AbiEntry {
   anonymous?: boolean
 }
 
-export type ContractABI = (AbiEvent|AbiFunction)[]
+export type ContractABI = Array<AbiEvent|AbiFunction>
 
 const isTransactionObject = (txObj: TransactionRequest) => {
   const txObjectProperties = ['from', 'to', 'data', 'value', 'gasPrice', 'gas']
@@ -141,7 +141,7 @@ export const ContractFactory = (encoder?: (tx: any, params? : any) => any) => (c
           }  
         }
       })
-      return {...functionCalls, abi: contractABI, address}
+      return { ...functionCalls, abi: contractABI, address }
     }
   }
 }

@@ -8,7 +8,7 @@ const Contract = ContractFactory(buildRequestURI)
 
 
 const address = '0x41566e3a081f5032bdcad470adb797635ddfe1f0'
-const abiToken : ContractABI = [
+const abiToken: ContractABI = [
   {
     "constant": true,
     "inputs": [],
@@ -329,7 +329,7 @@ describe('ContractFactory', () => {
         expect(txObject.function).toBeDefined()
         expect(txObject.to).toEqual(address)
       });
-  
+
       it('returns a txObject with a human readable function and params', () => {
         expect(txObject.function).toEqual('transfer(address 0x41566e3a081f5032bdcad470adb797635ddfe1f0, uint256 10)')
       });
@@ -337,14 +337,14 @@ describe('ContractFactory', () => {
 
     describe('function with address, uint and bytes and txObject', () => {
       beforeAll(() => {
-        txObject = tokenContract.approveAndCall('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10, '0x1234', {gas: '0x123454'})
+        txObject = tokenContract.approveAndCall('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10, '0x1234', { gas: '0x123454' })
       })
 
       it('returns a well formed txObject on contract function calls', () => {
         expect(txObject.function).toBeDefined()
         expect(txObject.to).toEqual(address)
       });
-  
+
       it('returns a txObject with a human readable function and params', () => {
         expect(txObject.function).toEqual('approveAndCall(address 0x41566e3a081f5032bdcad470adb797635ddfe1f0, uint256 10, bytes 0x1234)')
       });
@@ -353,9 +353,9 @@ describe('ContractFactory', () => {
 
   describe('With an extend function', () => {
     it('allows the Contract object functions to be extended if given a function', () => {
-      const extend = (_) => { return 'hello'}
+      const extend = (_) => 'hello'
       const Contract = ContractFactory(extend)
-      const tokenContract : any = Contract(abiToken).at(address)
+      const tokenContract: any = Contract(abiToken).at(address)
       expect(tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)).toEqual('hello')
     });
 
@@ -363,7 +363,7 @@ describe('ContractFactory', () => {
       const str = 'ether'
       const extend = (_, arg) => arg
       const Contract = ContractFactory(extend)
-      const tokenContract : any = Contract(abiToken).at(address)
+      const tokenContract: any = Contract(abiToken).at(address)
       expect(tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10, str)).toEqual(str)
     });
   });
