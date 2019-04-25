@@ -2,19 +2,24 @@ import { Credentials, SimpleSigner } from '../index'
 import { verifyJWT, decodeJWT } from 'did-jwt'
 import MockDate from 'mockdate'
 import { registerMethod, DIDDocument } from 'did-resolver'
-import { AbiEntryType, ContractABI } from '../Contract';
+import { AbiEntryType, ContractABI } from '../Contract'
 
 const NOW = 1485321133
 MockDate.set(NOW * 1000)
 
 const toSeconds = date => Math.floor(date / 1000)
 
-const privateKey = '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
+const privateKey =
+  '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
 const address = '0xbc3ae59bc76f894822622cdef7a2018dbe353840'
 const did = `did:ethr:${address}`
 const mnid = '2nQtiQG6Cgm1GYTBaaKAgr76uY7iSexUkqX'
 
-const claim = { sub: '0x112233', claim: { email: 'bingbangbung@email.com' }, exp: 1485321133 + 1 }
+const claim = {
+  sub: '0x112233',
+  claim: { email: 'bingbangbung@email.com' },
+  exp: 1485321133 + 1,
+}
 
 const uport = new Credentials({ privateKey, did })
 const uport2 = new Credentials({})
@@ -28,16 +33,20 @@ function mockresolver(profile?: object) {
     const doc: DIDDocumentWithProfile = {
       '@context': 'https://w3id.org/did/v1',
       id,
-      publicKey: [{
-        id: `${id}#owner`,
-        type: 'Secp256k1VerificationKey2018',
-        owner: id,
-        ethereumAddress: parsed.id
-      }],
-      authentication: [{
-        type: 'Secp256k1SignatureAuthentication2018',
-        publicKey: `${id}#owner`
-      }]
+      publicKey: [
+        {
+          id: `${id}#owner`,
+          type: 'Secp256k1VerificationKey2018',
+          owner: id,
+          ethereumAddress: parsed.id,
+        },
+      ],
+      authentication: [
+        {
+          type: 'Secp256k1SignatureAuthentication2018',
+          publicKey: `${id}#owner`,
+        },
+      ],
     }
     if (profile) {
       doc.uportProfile = profile
@@ -47,7 +56,6 @@ function mockresolver(profile?: object) {
 }
 
 describe('configuration', () => {
-
   describe('sets did', () => {
     describe('`did` configured', () => {
       expect(new Credentials({ did }).did).toEqual(did)
@@ -62,7 +70,9 @@ describe('configuration', () => {
     })
 
     describe('mnid `address` configured', () => {
-      expect(new Credentials({ address: mnid }).did).toEqual(`did:uport:${mnid}`)
+      expect(new Credentials({ address: mnid }).did).toEqual(
+        `did:uport:${mnid}`,
+      )
     })
   })
 
@@ -79,18 +89,29 @@ describe('configuration', () => {
 
   describe('configNetworks', () => {
     it('should accept a valid network setting', () => {
-      const networks = { '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c' } }
+      const networks = {
+        '0x94365e3b': {
+          rpcUrl: 'https://private.chain/rpc',
+          registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c',
+        },
+      }
       expect(() => new Credentials({ networks })).not.toThrow()
     })
 
     // TODO Investigate how to override type system to allow this
     it('should require a registry address', () => {
-      const networks: any = { '0x94365e3b': { rpcUrl: 'https://private.chain/rpc' } }
+      const networks: any = {
+        '0x94365e3b': { rpcUrl: 'https://private.chain/rpc' },
+      }
       expect(() => new Credentials({ networks })).toThrowErrorMatchingSnapshot()
     })
 
     it('should require a rpcUrl', () => {
-      const networks: any = { '0x94365e3b': { registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c' } }
+      const networks: any = {
+        '0x94365e3b': {
+          registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c',
+        },
+      }
       expect(() => new Credentials({ networks })).toThrowErrorMatchingSnapshot()
     })
 
@@ -126,7 +147,10 @@ describe('signJWT', () => {
     })
 
     it('uses ES256K with did = did:uport:mnid', async () => {
-      const credentials = new Credentials({ did: `did:uport:${mnid}`, privateKey })
+      const credentials = new Credentials({
+        did: `did:uport:${mnid}`,
+        privateKey,
+      })
       const jwt = await credentials.signJWT({ hello: 1 })
       const { header } = decodeJWT(jwt)
       expect(header.alg).toEqual('ES256K')
@@ -145,14 +169,17 @@ describe('signJWT', () => {
   describe('validation', () => {
     it('should fail if no signer was configured', async () => {
       const badport = new Credentials({ did })
-      return expect(badport.signJWT({ type: 'request' })).rejects.toThrow('No Signing Identity configured')
+      return expect(badport.signJWT({ type: 'request' })).rejects.toThrow(
+        'No Signing Identity configured',
+      )
     })
 
     it('should fail if no did was configured', async () => {
       const badport = new Credentials({ signer: SimpleSigner(privateKey) })
-      return expect(badport.signJWT({ type: 'request' })).rejects.toThrow('No Signing Identity configured')
+      return expect(badport.signJWT({ type: 'request' })).rejects.toThrow(
+        'No Signing Identity configured',
+      )
     })
-
   })
 })
 
@@ -185,16 +212,21 @@ describe('createDisclosureRequest()', () => {
 
   describe('private chains', () => {
     it('has correct payload in JWT requesting a specific networkId with rpcUrl', async () => {
-      const response = await createAndVerify({ networkId: '0x64', rpcUrl: 'https://dai.poa.network/' })
+      const response = await createAndVerify({
+        networkId: '0x64',
+        rpcUrl: 'https://dai.poa.network/',
+      })
       return expect(response).toMatchSnapshot()
     })
 
     it('missing network id', async () => {
-      await expect(createAndVerify({ rpcUrl: 'https://dai.poa.network/' })).rejects.toMatchSnapshot()
+      await expect(
+        createAndVerify({ rpcUrl: 'https://dai.poa.network/' }),
+      ).rejects.toMatchSnapshot()
     })
   })
 
-  for (let accountType of ['general', 'segregated', 'keypair', 'none']) {
+  for (const accountType of ['general', 'segregated', 'keypair', 'none']) {
     it(`has correct payload in JWT requesting accountType of ${accountType}`, async () => {
       const response = await createAndVerify({ accountType })
       return expect(response).toMatchSnapshot()
@@ -220,17 +252,26 @@ describe('createDisclosureRequest()', () => {
   })
 
   it('has correct payload in JWT for a request asking for verified credentials', async () => {
-    const response = await createAndVerify({ requested: ['name', 'phone'], verified: ['name'] })
+    const response = await createAndVerify({
+      requested: ['name', 'phone'],
+      verified: ['name'],
+    })
     return expect(response).toMatchSnapshot()
   })
 
   it('has correct payload in JWT for a request with callbackUrl', async () => {
-    const response = await createAndVerify({ requested: ['name', 'phone'], callbackUrl: 'https://myserver.com' })
+    const response = await createAndVerify({
+      requested: ['name', 'phone'],
+      callbackUrl: 'https://myserver.com',
+    })
     return expect(response).toMatchSnapshot()
   })
 
   it('has correct payload in JWT for a request for push notifications', async () => {
-    const response = await createAndVerify({ requested: ['name', 'phone'], notifications: true })
+    const response = await createAndVerify({
+      requested: ['name', 'phone'],
+      notifications: true,
+    })
     return expect(response).toMatchSnapshot()
   })
 })
@@ -268,14 +309,20 @@ describe('disclose()', () => {
 
 describe('createVerificationSignatureRequest()', () => {
   it('creates a valid JWT for a request', async () => {
-    const jwt = await uport.createVerificationSignatureRequest({ claim: { test: { prop1: 1, prop2: 2 } } }, { sub: 'did:uport:223ab45' })
+    const jwt = await uport.createVerificationSignatureRequest(
+      { claim: { test: { prop1: 1, prop2: 2 } } },
+      { sub: 'did:uport:223ab45' },
+    )
     return expect(await verifyJWT(jwt, { audience: did })).toMatchSnapshot()
   })
 
   it('allows setting an expiration', async () => {
     const fakeuport = new Credentials({ privateKey, did })
     const expiresIn = 1000
-    const jwt = await uport.createVerificationSignatureRequest({ claim: { test: 'test' } }, { sub: 'did:ethr:0x1', expiresIn })
+    const jwt = await uport.createVerificationSignatureRequest(
+      { claim: { test: 'test' } },
+      { sub: 'did:ethr:0x1', expiresIn },
+    )
     const { payload } = decodeJWT(jwt)
     return expect(payload.exp).toEqual(NOW + expiresIn)
   })
@@ -289,38 +336,46 @@ describe('createTypedDataSignatureRequest()', () => {
         { name: 'version', type: 'string' },
         { name: 'chainId', type: 'uint256' },
         { name: 'verifyingContract', type: 'address' },
-        { name: 'salt', type: 'bytes32' }
+        { name: 'salt', type: 'bytes32' },
       ],
       Greeting: [
         { name: 'text', type: 'string' },
         { name: 'subject', type: 'string' },
-      ]
+      ],
     },
     domain: {
       name: 'My dapp',
       version: '1.0',
       chainId: 1,
       verifyingContract: '0xdeadbeef',
-      salt: '0x999999999910101010101010'
+      salt: '0x999999999910101010101010',
     },
     primaryType: 'Greeting',
     message: {
       text: 'Hello',
-      subject: 'World'
-    }
+      subject: 'World',
+    },
   }
 
   it('creates a valid JWT for a typed data request', async () => {
-    const jwt = await uport.createTypedDataSignatureRequest(typedData, { from: '0xdeadbeef', net: '0x1' })
+    const jwt = await uport.createTypedDataSignatureRequest(typedData, {
+      from: '0xdeadbeef',
+      net: '0x1',
+    })
     expect(jwt).toMatchSnapshot()
   })
 
   describe('missing data', () => {
-    ['types', 'primaryType', 'domain', 'message'].forEach(prop => {
+    ;['types', 'primaryType', 'domain', 'message'].forEach(prop => {
       it(`should require ${prop}`, async () => {
         const broken = { ...typedData }
         delete broken[prop]
-        return expect(uport.createTypedDataSignatureRequest(broken, { from: '0xdeadbeef', net: '0x1' })).rejects.toThrow(`Invalid EIP712 Request, must include '${prop}'`)
+        return expect(
+          uport.createTypedDataSignatureRequest(broken, {
+            from: '0xdeadbeef',
+            net: '0x1',
+          }),
+        ).rejects.toThrow(`Invalid EIP712 Request, must include '${prop}'`)
       })
     })
   })
@@ -330,7 +385,10 @@ describe('createPersonalSignRequest()', () => {
   it('creates a valid JWT for a personal sign request', async () => {
     const did = '0xdeadbeef'
     const data = '0xdeadbeef'
-    const jwt = await uport.createPersonalSignRequest(data, { from: did, net: '0x1' })
+    const jwt = await uport.createPersonalSignRequest(data, {
+      from: did,
+      net: '0x1',
+    })
     expect(jwt).toMatchSnapshot()
     const { data: decodedData, from, net, type }: any = decodeJWT(jwt).payload
     expect(decodedData).toEqual(data)
@@ -343,38 +401,58 @@ describe('createPersonalSignRequest()', () => {
 describe('createVerification()', () => {
   beforeAll(() => mockresolver())
   it('has correct payload in JWT for an attestation', async () => {
-    return uport.createVerification({ sub: 'did:uport:223ab45', claim: { email: 'bingbangbung@email.com' }, exp: 1485321133 + 1 }).then(async (jwt) => {
-      const decoded = await verifyJWT(jwt)
-      return expect(decoded).toMatchSnapshot()
-    })
+    return uport
+      .createVerification({
+        sub: 'did:uport:223ab45',
+        claim: { email: 'bingbangbung@email.com' },
+        exp: 1485321133 + 1,
+      })
+      .then(async jwt => {
+        const decoded = await verifyJWT(jwt)
+        return expect(decoded).toMatchSnapshot()
+      })
   })
 })
 
 describe('authenticateDisclosureResponse()', () => {
-  beforeAll(() => mockresolver({
-    name: 'Super Developer',
-    country: 'NI'
-  }))
+  beforeAll(() =>
+    mockresolver({
+      name: 'Super Developer',
+      country: 'NI',
+    }),
+  )
 
   async function createShareResp(payload = {}) {
-    const req = await uport.createDisclosureRequest({ requested: ['name', 'phone'] })
+    const req = await uport.createDisclosureRequest({
+      requested: ['name', 'phone'],
+    })
     return uport.createDisclosureResponse({ ...payload, req })
   }
 
   async function createShareRespWithVerifiedCredential(payload = {}) {
-    const req = await uport.createDisclosureRequest({ requested: ['name', 'phone'] })
+    const req = await uport.createDisclosureRequest({
+      requested: ['name', 'phone'],
+    })
     const attestation = await uport.createVerification(claim)
-    return uport.createDisclosureResponse({ ...payload, verified: [attestation], req })
+    return uport.createDisclosureResponse({
+      ...payload,
+      verified: [attestation],
+      req,
+    })
   }
 
   it('returns profile mixing public and private claims', async () => {
-    const jwt = await createShareResp({ own: { name: 'Davie', phone: '+15555551234' } })
+    const jwt = await createShareResp({
+      own: { name: 'Davie', phone: '+15555551234' },
+    })
     const profile = await uport.authenticateDisclosureResponse(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile mixing public and private claims and verified credentials', async () => {
-    const jwt = await createShareRespWithVerifiedCredential({ own: { name: 'Davie', phone: '+15555551234' } })
+    const jwt = await createShareRespWithVerifiedCredential({
+      own: { name: 'Davie', phone: '+15555551234' },
+    })
     const profile = await uport.authenticateDisclosureResponse(jwt)
     expect(profile).toMatchSnapshot()
   })
@@ -386,7 +464,9 @@ describe('authenticateDisclosureResponse()', () => {
   })
 
   it('returns profile with private chain network id claims', async () => {
-    const jwt = await createShareResp({ nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m' })
+    const jwt = await createShareResp({
+      nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m',
+    })
     const profile = await uport.authenticateDisclosureResponse(jwt)
     expect(profile).toMatchSnapshot()
   })
@@ -400,39 +480,65 @@ describe('authenticateDisclosureResponse()', () => {
   describe('check original request', () => {
     it('rejects response with missing challenge', async () => {
       const jwt = await uport.createDisclosureResponse({ own: { name: 'bob' } })
-      expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow('Challenge was not included in response')
+      expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow(
+        'Challenge was not included in response',
+      )
     })
 
     it('should reject if embedded request was not from me', async () => {
       const id = Credentials.createIdentity()
       const badPort = new Credentials(id)
-      const req = await badPort.createDisclosureRequest({ requested: ['name', 'phone'] })
-      const jwt = await uport.createDisclosureResponse({ own: { name: 'Davie', phone: '+15555551234' }, req })
-      return expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow(`JWT audience does not match your DID: aud: ${id.did} !== yours: ${uport.did}`)
+      const req = await badPort.createDisclosureRequest({
+        requested: ['name', 'phone'],
+      })
+      const jwt = await uport.createDisclosureResponse({
+        own: { name: 'Davie', phone: '+15555551234' },
+        req,
+      })
+      return expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow(
+        `JWT audience does not match your DID: aud: ${id.did} !== yours: ${
+          uport.did
+        }`,
+      )
     })
 
     it('should reject if wrong request type', async () => {
-      const req = await uport.createVerification({ sub: '0x01234', claim: { name: 'Bob' } })
-      const jwt = await uport.createDisclosureResponse({ own: { name: 'Davie', phone: '+15555551234' }, req })
-      return expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow(`Challenge payload type invalid: `)
+      const req = await uport.createVerification({
+        sub: '0x01234',
+        claim: { name: 'Bob' },
+      })
+      const jwt = await uport.createDisclosureResponse({
+        own: { name: 'Davie', phone: '+15555551234' },
+        req,
+      })
+      return expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow(
+        `Challenge payload type invalid: `,
+      )
     })
   })
 })
 
 describe('verifyDisclosure()', () => {
-  beforeAll(() => mockresolver({
-    name: 'Bob Smith',
-    country: 'NI'
-  }))
+  beforeAll(() =>
+    mockresolver({
+      name: 'Bob Smith',
+      country: 'NI',
+    }),
+  )
   it('returns profile mixing public and private claims', async () => {
-    const jwt = await uport.createDisclosureResponse({ own: { name: 'Davie', phone: '+15555551234' } })
+    const jwt = await uport.createDisclosureResponse({
+      own: { name: 'Davie', phone: '+15555551234' },
+    })
     const profile = await uport.verifyDisclosure(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile mixing public and private claims and verified credentials', async () => {
     const attestation = await uport.createVerification(claim)
-    const jwt = await uport.createDisclosureResponse({ own: { name: 'Davie', phone: '+15555551234' }, verified: [attestation] })
+    const jwt = await uport.createDisclosureResponse({
+      own: { name: 'Davie', phone: '+15555551234' },
+      verified: [attestation],
+    })
     const profile = await uport.verifyDisclosure(jwt)
     expect(profile).toMatchSnapshot()
   })
@@ -444,13 +550,17 @@ describe('verifyDisclosure()', () => {
   })
 
   it('returns profile with private chain network id claims', async () => {
-    const jwt = await uport.createDisclosureResponse({ nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m' })
+    const jwt = await uport.createDisclosureResponse({
+      nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m',
+    })
     const profile = await uport.verifyDisclosure(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns pushToken if available', async () => {
-    const jwt = await uport.createDisclosureResponse({ capabilities: ['PUSHTOKEN'] })
+    const jwt = await uport.createDisclosureResponse({
+      capabilities: ['PUSHTOKEN'],
+    })
     const profile = await uport.verifyDisclosure(jwt)
     expect(profile).toMatchSnapshot()
   })
@@ -459,7 +569,9 @@ describe('verifyDisclosure()', () => {
     const goodjwt = await uport.createVerification(claim)
     const badjwt = 'not.a.jwt'
 
-    const response = await uport.createDisclosureResponse({ verified: [goodjwt, badjwt] })
+    const response = await uport.createDisclosureResponse({
+      verified: [goodjwt, badjwt],
+    })
     const profile = await uport.verifyDisclosure(response)
 
     expect(profile.verified.length).toEqual(1)
@@ -472,8 +584,23 @@ describe('txRequest()', () => {
   beforeAll(() => mockresolver())
 
   const abi: ContractABI = [
-    { "constant": false, "inputs": [{ "name": "status", "type": "string" }], "name": "updateStatus", "outputs": [], "payable": false, "type": AbiEntryType.Function },
-    { "constant": false, "inputs": [{ "name": "addr", "type": "address" }], "name": "getStatus", "outputs": [{ "name": "", "type": "string" }], "payable": false, "type": AbiEntryType.Function }]
+    {
+      constant: false,
+      inputs: [{ name: 'status', type: 'string' }],
+      name: 'updateStatus',
+      outputs: [],
+      payable: false,
+      type: AbiEntryType.Function,
+    },
+    {
+      constant: false,
+      inputs: [{ name: 'addr', type: 'address' }],
+      name: 'getStatus',
+      outputs: [{ name: '', type: 'string' }],
+      payable: false,
+      type: AbiEntryType.Function,
+    },
+  ]
   const address = '0x70A804cCE17149deB6030039798701a38667ca3B'
   const statusContract: any = uport.contract(abi).at(address)
 
@@ -498,7 +625,11 @@ describe('txRequest()', () => {
   it('adds additional request options passed to jwt', async () => {
     const networkId = '0x4'
     const callbackUrl = 'mydomain'
-    const jwt = await statusContract.updateStatus('hello', { networkId, callbackUrl, label: 'Update Status' })
+    const jwt = await statusContract.updateStatus('hello', {
+      networkId,
+      callbackUrl,
+      label: 'Update Status',
+    })
     const verified = await verifyJWT(jwt)
     expect(verified.payload.net).toEqual(networkId)
     expect(verified.payload.callback).toEqual(callbackUrl)
