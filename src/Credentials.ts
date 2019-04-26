@@ -177,6 +177,7 @@ interface VerificationRequest {
   aud?: string
   sub: string
   riss?: string
+  rexp?: number
   expiresIn?: number
   vc?: string[]
   callbackUrl?: string
@@ -416,7 +417,6 @@ class Credentials {
    *      ...
    *  })
    * `
-   * 
    *
    *  @param    {Object}             [params={}]           request params object
    * 
@@ -527,9 +527,11 @@ class Credentials {
    * @param    {String}      [opts.riss]         The DID of the identity you want to sign the Verified Claim
    * @param    {String}      [opts.callbackUrl]  The url to receive the response of this request
    * @param    {Object[]}    [opts.vc]           An array of JWTs about the requester, signed by 3rd parties
+   * @param    {Number}      [opts.rexp]         The duration in seconds after which the signed verification expires
+   * @param    {Number}      [opts.expiresIn]    The duration in seconds after which the request expires
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, expiresIn}:VerificationRequest) {
+  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, rexp, expiresIn}:VerificationRequest) {
     return this.signJWT({
       unsignedClaim,
       sub,
@@ -538,8 +540,8 @@ class Credentials {
       vc,
       callback: callbackUrl,
       type: Types.VERIFICATION_SIGNATURE_REQUEST,
-      rexp: expiresIn ? expiresIn : undefined,
-    })
+      rexp,
+    }, expiresIn)
   }
 
   /**
