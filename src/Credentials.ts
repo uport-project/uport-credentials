@@ -353,16 +353,6 @@ class Credentials {
       this.did = `did:ethr:${address}`
     }
 
-    this.signJWT = (payload, expiresIn) => {
-      const jwt = createJWT(payload, {
-        issuer: this.did,
-        signer: this.signer,
-        alg: this.did.match('^did:uport:') || isMNID(this.did) ? 'ES256K' : 'ES256K-R',
-        expiresIn,
-      })
-      return jwt
-    }
-
     UportDIDResolver(
       registry ||
         UportLite({ networks: networks ? configNetworks(networks) : {} })
