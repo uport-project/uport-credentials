@@ -269,7 +269,7 @@ class Credentials {
       vc,
       callback: callbackUrl,
       type: Types.VERIFICATION_SIGNATURE_REQUEST,
-      rexp: expiresIn ? Math.floor(Date.now() / 1000) + Math.floor(expiresIn) : undefined,
+      rexp: expiresIn ? expiresIn : undefined,
     })
   }
 
