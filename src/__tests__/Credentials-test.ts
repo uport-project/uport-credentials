@@ -354,7 +354,18 @@ describe('createVerificationSignatureRequest()', () => {
     return expect(await verifyJWT(jwt, { audience: did })).toMatchSnapshot()
   })
 
-  it('allows setting an expiration', async () => {
+  it('allows setting an expiration for the requested credential', async () => {
+    const fakeuport = new Credentials({ privateKey, did })
+    const rexp = 1000
+    const jwt = await uport.createVerificationSignatureRequest(
+      { claim: { test: 'test' } },
+      { sub: 'did:ethr:0x1', rexp }
+    )
+    const { payload } = decodeJWT(jwt)
+    return expect(payload.rexp).toEqual(rexp)
+  })
+
+  it('allows setting an expiration for the request message', async () => {
     const fakeuport = new Credentials({ privateKey, did })
     const expiresIn = 1000
     const jwt = await uport.createVerificationSignatureRequest(
