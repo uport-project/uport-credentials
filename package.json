@@ -1,25 +1,28 @@
 {
   "name": "uport-credentials",
-  "version": "1.1.8-dev.1",
+  "version": "1.2.1",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
+  "umd:main": "lib/index.umd.js",
+  "modules": "lib/index.mjs",
+  "source": "src/index.ts",
+  "types": "lib/index.d.ts",
   "files": [
     "lib",
     "dist",
     "src",
+    "esm",
     "tutorial"
   ],
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "test:ci": "./node_modules/.bin/jest -u --coverage",
-    "build:es5": "./node_modules/.bin/babel src -d lib",
+    "build:js": "./node_modules/.bin/microbundle",
     "build:browser": "./node_modules/.bin/webpack --config webpack.config.js",
-    "build": "npm run build:es5 && npm run test:ci && npm run build:browser",
-    "build:docs:html": "./node_modules/.bin/jsdoc src/* README.md -d docs",
-    "build:docs:md": "./node_modules/jsdoc-to-markdown/bin/cli.js -f src/* --template \"./template.hbs\" -c js2doc.conf > docs/reference/index.md; echo",
-    "build:docs": "npm run build:docs:html && npm run build:docs:md",
+    "build": "npm run build:js && npm run test:ci && npm run build:browser",
+    "build:docs": "echo 'PLEASE UPDATE REFEREN DOCS MANUALLY'",
     "prepublish": "npm run build",
-    "prepare": "npm run build:es5",
+    "prepare": "npm run build",
     "draft-release-notes": "GREN_GITHUB_TOKEN=$(vault read -field=value secret/mobile/release_token) gren release -d",
     "publish-release-notes": "GREN_GITHUB_TOKEN=$(vault read -field=value secret/mobile/release_token) gren release"
   },
@@ -28,43 +31,58 @@
   "dependencies": {
     "did-jwt": "^0.1.3",
     "did-resolver": "^0.0.6",
-    "ethjs-util": "^0.1.3",
+    "elliptic": "^6.4.1",
     "ethr-did-resolver": "^0.2.0",
     "https-did-resolver": "^0.1.0",
-    "nacl-did": "^0.4.0",
-    "jsontokens": "^0.7.8",
     "mnid": "^0.1.1",
     "uport-did-resolver": "^0.0.7",
     "uport-lite": "^1.0.5"
   },
   "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json"
+    ],
     "coverageDirectory": "./coverage/",
+    "collectCoverageFrom": [
+      "src/**/*.{ts,tsx}",
+      "!src/**/*.d.ts",
+      "!**/node_modules/**"
+    ],
     "unmockedModulePathPatterns": [
       "<rootDir>/node_modules/nock"
     ],
     "testEnvironment": "node"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-jest": "^22.4.3",
-    "babel-loader": "^7.1.4",
-    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
-    "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-polyfill": "^6.22.0",
-    "babel-preset-env": "^1.6.1",
+    "@types/elliptic": "^6.4.6",
+    "@types/jest": "^24.0.11",
+    "@types/mockdate": "^2.0.0",
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
-    "jest": "^22.4.3",
-    "jsdoc-to-markdown": "^4.0.1",
+    "jest": "^24.7.1",
     "json-loader": "^0.5.4",
+    "microbundle": "^0.11.0",
     "mockdate": "^2.0.1",
     "ngrok": "^3.1.0",
     "nock": "^9.4.3",
+    "prettier": "^1.17.0",
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.16.0",
+    "tslint-config-prettier": "^1.18.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "typedoc": "^0.14.2",
+    "typedoc-plugin-markdown": "^1.2.0",
+    "typescript": "^3.4.4",
     "uport-transports": "^0.2.4",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.1"
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.0"
   }
 }
