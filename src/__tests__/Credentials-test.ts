@@ -362,7 +362,7 @@ describe('createVerificationSignatureRequest()', () => {
       { sub: 'did:ethr:0x1', expiresIn }
     )
     const { payload } = decodeJWT(jwt)
-    return expect(payload.exp).toEqual(NOW + expiresIn)
+    return expect(payload.rexp).toEqual(expiresIn)
   })
 })
 
