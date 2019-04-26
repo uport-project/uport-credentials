@@ -216,6 +216,9 @@ Creates a request a for a DID to [sign a verification](https://github.com/uport-
 | [opts.sub] | <code>String</code> | The DID which the unsigned claim is about |
 | [opts.riss] | <code>String</code> | The DID of the identity you want to sign the Verified Claim |
 | [opts.callbackUrl] | <code>String</code> | The URL to receive the response of this request |
+| [opts.vc] | <code>Object[]</code> | An array of JWTs about the requester, signed by 3rd parties |
+| [opts.rexp] | <code>Number</code> | The duration in seconds after which the signed verification expires |
+| [opts.expiresIn] | <code>Number</code> | The duration in seconds after which the request expires |
 
 **Example**  
 ```js

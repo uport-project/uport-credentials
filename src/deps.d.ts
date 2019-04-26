@@ -59,6 +59,7 @@ declare module 'did-jwt' {
     iat?: number
     type?: string
     exp?: number
+    rexp?: number
   }
 
   interface JWTHeader {
