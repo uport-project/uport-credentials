@@ -1,7 +1,7 @@
 import { ec as EC } from 'elliptic'
 
 import { createJWT, verifyJWT, SimpleSigner, DIDDocument } from 'did-jwt'
-import { toEthereumAddress } from 'did-jwt/lib/Digest'
+import { toEthereumAddress } from 'did-jwt/lib/index'
 import UportDIDResolver from 'uport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
 import HttpsDIDResolver from 'https-did-resolver'

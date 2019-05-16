@@ -80,9 +80,9 @@ declare module 'did-jwt' {
   export function decodeJWT(jwt: string): JWTDecoded
 }
 
-declare module 'did-jwt/lib/Digest' {
-  export function toEthereumAddress( hexPublicKey: string ): string
-}
+// declare module 'did-jwt/lib/Digest' {
+//   export function toEthereumAddress( hexPublicKey: string ): string
+// }
 
 declare module 'mnid' {
   interface NetworkAddress {
