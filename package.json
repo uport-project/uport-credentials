@@ -1,6 +1,6 @@
 {
   "name": "uport-credentials",
-  "version": "1.2.2-alpha.0",
+  "version": "1.2.2-alpha.1",
   "description": "Library for interacting with uport profiles and attestations",
   "main": "lib/index.js",
   "umd:main": "lib/index.umd.js",
@@ -29,7 +29,7 @@
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "license": "Apache-2.0",
   "dependencies": {
-    "did-jwt": "^0.2.0-alpha.0",
+    "did-jwt": "0.2.1-alpha.5",
     "did-resolver": "^0.0.6",
     "elliptic": "^6.4.1",
     "ethr-did-resolver": "^0.2.0",

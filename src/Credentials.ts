@@ -1,7 +1,6 @@
 import { ec as EC } from 'elliptic'
 
-import { createJWT, verifyJWT, SimpleSigner, DIDDocument } from 'did-jwt'
-import { toEthereumAddress } from 'did-jwt/lib/index'
+import { createJWT, verifyJWT, SimpleSigner, Signer, toEthereumAddress } from 'did-jwt'
 import UportDIDResolver from 'uport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
 import HttpsDIDResolver from 'https-did-resolver'
@@ -16,7 +15,7 @@ import {
   ContractInterface,
   Factory
 } from './Contract'
-import { PublicKey } from 'did-resolver'
+import { DIDDocument, PublicKey } from 'did-resolver'
 
 const secp256k1 = new EC('secp256k1')
 
@@ -36,13 +35,6 @@ interface Network {
 interface Networks {
   [net: string]: Network
 }
-
-interface EcdsaSignature {
-  r: string
-  s: string
-  recoveryParam: number
-}
-type Signer = (data: string) => Promise<EcdsaSignature>
 
 interface Settings {
   did?: string
