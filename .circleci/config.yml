@@ -16,11 +16,11 @@ jobs:
           name: install-dependencies
           command: |
             sudo npm i -g  codecov node-gyp
-            yarn
+            npm install
 
       - run:
           name: test
-          command: yarn test:ci && codecov
+          command: npm run test:ci && codecov
 
       - run:
           name: code-coverage
