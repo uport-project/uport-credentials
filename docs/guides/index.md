@@ -23,7 +23,7 @@ const credentials = new Credentials({
 ```
 ## Generate an Ethereum Keypair 
  
-At times, you might want identities to be created dynamically. This can be accomplished with the static `Credentials.createIdentity()` method, which generates an Ethereum keypair and returns an object containing the associated DID and private key.
+At times, you might want identities to be created dynamically. This can be accomplished with the static `Credentials.createIdentity()` method, which generates an Ethereum keypair and returns an object containing the associated DID and private key. This method is not intended to be used in a react-native context, if you are developing a react-native app please use the [react-native-uport-signer](http://github.com/uport-project/react-native-uport-signer) to generate Ethereum Keypairs.
 ```javascript
 // Create a credentials object for a new identity
 const {did, privateKey} = Credentials.createIdentity()
