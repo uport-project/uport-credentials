@@ -1,6 +1,6 @@
 import { ec as EC } from 'elliptic'
 
-import { createJWT, verifyJWT, SimpleSigner, Signer, toEthereumAddress } from 'did-jwt'
+import { createJWT, verifyJWT, decodeJWT, SimpleSigner, Signer, toEthereumAddress } from 'did-jwt'
 import UportDIDResolver from 'uport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
 import HttpsDIDResolver from 'https-did-resolver'
@@ -171,6 +171,14 @@ interface VerificationParam {
   aud?: string
   exp?: number
   proof?: string
+}
+
+interface PresentationParam {
+  aud:string
+  jti:string
+  nbf:number
+  exp?: number
+  vcs: string[]
 }
 
 interface VerificationRequest {
@@ -497,6 +505,21 @@ class Credentials {
    */
   createVerification({ aud, sub, jti, nbf, vc, exp, proof }: VerificationParam) {
     return this.signJWT({ aud, sub, jti, nbf, vc, exp, proof })
+  }
+
+  createPresentation({ aud, jti, nbf, exp, vcs }: PresentationParam) {
+    const vp = {
+      '@context': vcs.map(decodeJWT).reduce((allContexts, decodedVc) => {
+        const payload = decodedVc.payload as any
+        const context = payload.vc['@context']
+        return Array.isArray(context) ?
+          new Set([...allContexts, ...context]) :
+          new Set([...allContexts, context])
+      }, new Set()),
+      type: ['VerifiablePresentation'],
+      verifiableCredential: vcs
+    }
+    return this.signJWT({ aud, jti, nbf, exp, vp })
   }
 
   /**
