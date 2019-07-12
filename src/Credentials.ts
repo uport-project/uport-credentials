@@ -157,23 +157,18 @@ interface Verification extends JWTPayload {
   jwt?: string
 }
 
-interface CredentialSubject {
-  id: string
-  [claim: string]: any
-}
-
 interface VC {
-  '@context': string
-  type: string
-  credentialSubject: CredentialSubject
+  '@context': string | string[]
+  type: string | string[]
+  credentialSubject: object
 }
 
 interface VerificationParam {
-  aud: string
   sub: string
   jti: string
   nbf: number
   vc: VC
+  aud?: string
   exp?: number
   proof?: string
 }
