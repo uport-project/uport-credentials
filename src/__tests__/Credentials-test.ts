@@ -22,11 +22,11 @@ const verificationParams = {
   vc: {
     '@context': [
       'https://www.w3.org/2018/credentials/v1',
-      'https://www.w3.org/2018/credentials/examples/v1'
+      'https://www.w3.org/2018/credentials/examples/v1',
     ],
     type: [
       'VerifiableCredential',
-      'UniversityDegreeCredential'
+      'UniversityDegreeCredential',
     ],
     credentialSubject: {
       'degree': {
