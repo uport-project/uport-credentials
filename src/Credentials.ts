@@ -157,20 +157,12 @@ interface Verification extends JWTPayload {
   jwt?: string
 }
 
-interface VC {
-  '@context': string | string[]
-  type: string | string[]
-  credentialSubject: object
-}
-
 interface VerificationParam {
   sub: string
-  jti: string
-  nbf: number
-  vc: VC
-  aud?: string
+  claim: any
   exp?: number
-  proof?: string
+  vc?: string[]
+  callbackUrl?: string
 }
 
 interface PresentationParam {
@@ -235,6 +227,22 @@ interface PersonalSignPayload {
   from?: string
   net?: string
   data: string
+}
+
+interface VC {
+  '@context': string | string[]
+  type: string | string[]
+  credentialSubject: object
+}
+
+interface VerifiableCredentialParams {
+  sub: string
+  jti: string
+  nbf: number
+  vc: VC
+  aud?: string
+  exp?: number
+  proof?: string
 }
 
 /**
@@ -503,8 +511,8 @@ class Credentials {
    * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
-  createVerification({ aud, sub, jti, nbf, vc, exp, proof }: VerificationParam) {
-    return this.signJWT({ aud, sub, jti, nbf, vc, exp, proof })
+  createVerification({ sub, claim, exp, vc, callbackUrl }: VerificationParam) {
+    return this.signJWT({ sub, claim, exp, vc, callbackUrl })
   }
 
   createPresentation({ aud, jti, nbf, exp, vcs }: PresentationParam) {
@@ -889,7 +897,11 @@ class Credentials {
     }
     return ContractFactory(txObjHandler.bind(this))(abi)
   }
-}
+
+  async createVerifiableCredential(vcParams: VerifiableCredentialParams): Promise<string> {
+    return await this.signJWT(vcParams)
+  }
+} 
 
 function configNetworks(nets: Networks) {
   Object.keys(nets).forEach(key => {

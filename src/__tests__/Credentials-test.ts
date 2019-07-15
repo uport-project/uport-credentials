@@ -15,8 +15,14 @@ const address = '0xbc3ae59bc76f894822622cdef7a2018dbe353840'
 const did = `did:ethr:${address}`
 const mnid = '2nQtiQG6Cgm1GYTBaaKAgr76uY7iSexUkqX'
 
-const verificationParams = {
-  sub: 'did:uport:223ab45',
+const claim = {
+  sub: '0x112233',
+  claim: { email: 'bingbangbung@email.com' },
+  exp: 1485321133 + 1
+}
+
+const verifiableCredentialParams = {
+  sub: 'did:ethr:0x12345678',
   jti: 'http://example.edu/credentials/3732',
   nbf: 1562950282801,
   vc: {
@@ -35,7 +41,7 @@ const verificationParams = {
       }
     }
   }
-} 
+}
 
 const uport = new Credentials({ privateKey, did })
 const uport2 = new Credentials({})
@@ -467,7 +473,11 @@ describe('createVerification()', () => {
   beforeAll(() => mockresolver())
   it('has correct payload in JWT for an attestation', async () => {
     return uport
-      .createVerification(verificationParams)
+      .createVerification({
+        sub: 'did:uport:223ab45',
+        claim: { email: 'bingbangbung@email.com' },
+        exp: 1485321133 + 1
+      })
       .then(async jwt => {
         const decoded = await verifyJWT(jwt)
         return expect(decoded).toMatchSnapshot()
@@ -494,7 +504,7 @@ describe('authenticateDisclosureResponse()', () => {
     const req = await uport.createDisclosureRequest({
       requested: ['name', 'phone']
     })
-    const attestation = await uport.createVerification(verificationParams)
+    const attestation = await uport.createVerification(claim)
     return uport.createDisclosureResponse({
       ...payload,
       verified: [attestation],
@@ -564,7 +574,10 @@ describe('authenticateDisclosureResponse()', () => {
     })
 
     it('should reject if wrong request type', async () => {
-      const req = await uport.createVerification(verificationParams)
+      const req = await uport.createVerification({
+        sub: '0x01234',
+        claim: { name: 'Bob' }
+      })
       const jwt = await uport.createDisclosureResponse({
         own: { name: 'Davie', phone: '+15555551234' },
         req
@@ -592,7 +605,7 @@ describe('verifyDisclosure()', () => {
   })
 
   it('returns profile mixing public and private claims and verified credentials', async () => {
-    const attestation = await uport.createVerification(verificationParams)
+    const attestation = await uport.createVerification(claim)
     const jwt = await uport.createDisclosureResponse({
       own: { name: 'Davie', phone: '+15555551234' },
       verified: [attestation]
@@ -624,7 +637,7 @@ describe('verifyDisclosure()', () => {
   })
 
   it('declines to verify invalid jwts without crashing', async () => {
-    const goodjwt = await uport.createVerification(verificationParams)
+    const goodjwt = await uport.createVerification(claim)
     const badjwt = 'not.a.jwt'
 
     const response = await uport.createDisclosureResponse({
@@ -692,5 +705,17 @@ describe('txRequest()', () => {
     expect(verified.payload.net).toEqual(networkId)
     expect(verified.payload.callback).toEqual(callbackUrl)
     expect(verified.payload.label).toEqual('Update Status')
+  })
+})
+
+describe('createVerifiableCredential', () => {
+  beforeAll(() => mockresolver())
+  it('has correct payload in JWT for a VerifiableCredential', async () => {
+    return uport
+      .createVerifiableCredential(verifiableCredentialParams)
+      .then(async jwt => {
+        const decoded = await verifyJWT(jwt)
+        return expect(decoded).toMatchSnapshot()
+      })
   })
 })
