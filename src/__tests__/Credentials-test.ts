@@ -21,6 +21,28 @@ const claim = {
   exp: 1485321133 + 1
 }
 
+const verifiableCredentialParams = {
+  sub: 'did:ethr:0x12345678',
+  jti: 'http://example.edu/credentials/3732',
+  nbf: 1562950282801,
+  vc: {
+    '@context': [
+      'https://www.w3.org/2018/credentials/v1',
+      'https://www.w3.org/2018/credentials/examples/v1'
+    ],
+    type: [
+      'VerifiableCredential',
+      'UniversityDegreeCredential'
+    ],
+    credentialSubject: {
+      'degree': {
+        type: 'BachelorDegree',
+        name: 'Baccalauréat en musiques numériques'
+      }
+    }
+  }
+}
+
 const uport = new Credentials({ privateKey, did })
 const uport2 = new Credentials({})
 
@@ -683,5 +705,17 @@ describe('txRequest()', () => {
     expect(verified.payload.net).toEqual(networkId)
     expect(verified.payload.callback).toEqual(callbackUrl)
     expect(verified.payload.label).toEqual('Update Status')
+  })
+})
+
+describe('createVerifiableCredential', () => {
+  beforeAll(() => mockresolver())
+  it('has correct payload in JWT for a VerifiableCredential', async () => {
+    return uport
+      .createVerifiableCredential(verifiableCredentialParams)
+      .then(async jwt => {
+        const decoded = await verifyJWT(jwt)
+        return expect(decoded).toMatchSnapshot()
+      })
   })
 })

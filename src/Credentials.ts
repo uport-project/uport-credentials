@@ -221,6 +221,22 @@ interface PersonalSignPayload {
   data: string
 }
 
+interface VC {
+  '@context': string | string[]
+  type: string | string[]
+  credentialSubject: object
+}
+
+interface VerifiableCredentialParams {
+  sub: string
+  jti: string
+  nbf: number
+  vc: VC
+  aud?: string
+  exp?: number
+  proof?: string
+}
+
 /**
  * The Credentials class allows you to easily create the signed payloads used in uPort including
  * credentials and signed mobile app requests (ex. selective disclosure requests
@@ -858,7 +874,11 @@ class Credentials {
     }
     return ContractFactory(txObjHandler.bind(this))(abi)
   }
-}
+
+  async createVerifiableCredential(vcParams: VerifiableCredentialParams): Promise<string> {
+    return await this.signJWT(vcParams)
+  }
+} 
 
 function configNetworks(nets: Networks) {
   Object.keys(nets).forEach(key => {
