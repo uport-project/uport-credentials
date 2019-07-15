@@ -42,8 +42,8 @@ export interface AbiFunction extends AbiEntry {
   // type: AbiEntryType.Function | AbiEntryType.Constructor | AbiEntryType.Constructor,
   outputs?: AbiParam[],
   stateMutability?: StateMutability,
-  payable?: true
-  constant?: true
+  payable?: boolean
+  constant?: boolean
 }
 
 interface AbiEventParam extends AbiParam {
