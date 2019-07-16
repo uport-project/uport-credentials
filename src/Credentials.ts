@@ -165,12 +165,17 @@ interface VerificationParam {
   callbackUrl?: string
 }
 
+interface VP {
+  '@context': string | string[]
+  type: string | string[]
+  verifiableCredential: string[]
+}
+
 interface PresentationParam {
-  aud:string
-  jti:string
-  nbf:number
+  aud?:string
+  jti?:string
   exp?: number
-  vcs: string[]
+  vp: VP
 }
 
 interface VerificationRequest {
@@ -514,19 +519,8 @@ class Credentials {
     return this.signJWT({ sub, claim, exp, vc, callbackUrl })
   }
 
-  createPresentation({ aud, jti, nbf, exp, vcs }: PresentationParam) {
-    const vp = {
-      '@context': vcs.map(decodeJWT).reduce((allContexts, decodedVc) => {
-        const payload = decodedVc.payload as any
-        const context = payload.vc['@context']
-        return Array.isArray(context) ?
-          new Set([...allContexts, ...context]) :
-          new Set([...allContexts, context])
-      }, new Set()),
-      type: ['VerifiablePresentation'],
-      verifiableCredential: vcs
-    }
-    return this.signJWT({ aud, jti, nbf, exp, vp })
+  createPresentation({ aud, jti, exp, vp }: PresentationParam) {
+    return this.signJWT({ aud, jti, exp, vp })
   }
 
   /**

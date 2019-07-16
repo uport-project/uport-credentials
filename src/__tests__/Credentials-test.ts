@@ -48,8 +48,14 @@ const vc = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRpZDpleGFtcGxlOmFiZmUx
 const presentationParams = {
   aud: 'did:ethr:0x34523485',
   jti: 'http://example.edu/credentials/3732',
-  nbf: 1562950282801,
-  vcs: [vc]
+  vp: {
+    '@context': [
+      'https://www.w3.org/2018/credentials/v1',
+      'https://www.w3.org/2018/credentials/examples/v1'
+    ], 
+    type: ['VerifiableCredential'],
+    verifiableCredential: [vc]
+  }
 }
 
 const uport = new Credentials({ privateKey, did })
