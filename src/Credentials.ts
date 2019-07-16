@@ -234,7 +234,6 @@ interface VerifiableCredentialParams {
   vc: VC
   aud?: string
   exp?: number
-  proof?: string
 }
 
 /**
