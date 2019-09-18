@@ -31,3 +31,5 @@ To hit the ground running with uPort Credentials, visit the [Getting Started gui
 For details on uPort's underlying architecture, read our [spec repo](https://github.com/uport-project/specs) or check out the [uPort identity contracts](https://github.com/uport-project/uport-identity).
 
 This library is part of a suite of tools maintained by the uPort Project, a ConsenSys formation.  For more information on the project, visit [uport.me](https://uport.me)
+
+[FAQ and helpdesk support](http://bit.ly/uPort_helpdesk)
