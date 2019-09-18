@@ -5,6 +5,8 @@
 
 [DID Specification](https://w3c-ccg.github.io/did-spec/) | [Getting Started](/docs/guides/index.md)
 
+[FAQ and helpdesk support](http://bit.ly/uPort_helpdesk)
+
 # uPort Credentials Library
 
 **Required Upgrade to uport-credentials@1.0.0 or uport@^0.6.3**
