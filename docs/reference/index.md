@@ -381,7 +381,7 @@ Builds and returns a contract object which can be used to interact with
 <a name="Credentials.createIdentity"></a>
 
 ### Credentials.createIdentity() ⇒ <code>Object</code>
-Generate a DID and private key, effectively creating a new identity that can sign and verify data
+Generate a DID and private key, effectively creating a new identity that can sign and verify data. This is intended to be used in a Node environment. To do something like this in react-native please use the [react-native-uport-signer](http://github.com/uport-project/react-native-uport-signer)
 
 **Kind**: static method of [<code>Credentials</code>](#Credentials)  
 **Returns**: <code>Object</code> - keypair
