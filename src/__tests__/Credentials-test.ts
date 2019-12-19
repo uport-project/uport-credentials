@@ -5,12 +5,10 @@ import { Issuer } from 'did-jwt-vc/lib/types'
 
 import MockDate from 'mockdate'
 import { DIDDocument, Resolver } from 'did-resolver'
-import { getResolver } from 'ethr-did-resolver'
+import * as ethrResolver  from 'ethr-did-resolver'
 import { AbiEntryType, ContractABI } from '../Contract'
 
 jest.mock('ethr-did-resolver')
-
-
 
 const NOW = 1485321133
 MockDate.set(NOW * 1000)
@@ -37,7 +35,8 @@ interface DIDDocumentWithProfile extends DIDDocument {
 }
 
 function mockresolver(profile?: object) {
-  getResolver.mockReturnValue({'ethr': (id, parsed) => {
+  const mockGetResolver = jest.spyOn(ethrResolver, 'getResolver')
+  mockGetResolver.mockReturnValue({'ethr': (id, parsed) => {
     const doc: DIDDocumentWithProfile = {
       '@context': 'https://w3id.org/did/v1',
       id,
@@ -747,17 +746,8 @@ describe('issueVerifiableCredential', () => {
     credentials = new Credentials({privateKey, did})
     let jwt = await credentials.issueVerifiableCredential(vcPayload)
     let decoded = await verifyCredential(jwt, credentials.resolver)
-    console.log(decoded)
     expect(decoded.payload.vc).toEqual(vcPayload.vc)
   })
-
-  // it('empty vc test', async () => {
-  //   credentials = new Credentials({privateKey, did})
-  //   let jwt = await credentials.issueVerifiableCredential()
-  //   let decoded = await verifyCredential(jwt, credentials.resolver)
-  //   console.log(decoded)
-  //   expect(decoded.payload.vc).toEqual(vcPayload.vc)
-  // })
 })
 
 describe('verifyPresentation', () => {
@@ -852,18 +842,8 @@ describe('create presentation request', () => {
   it('creates valid presentation request', async () => {
     credentials = new Credentials({privateKey, did})
     let req = await createAndVerify(reqParams)
-    console.log('HEREEE')
-    console.log(req)
-
-  })
-
-
-  it('creates empty req', async () => {
-    credentials = new Credentials({privateKey, did})
-    let req = await createAndVerify()
-    console.log('HEREEE')
-    console.log(req)
-
+    expect(req.payload.claims).toEqual(reqParams.claims)
+    expect(req.payload.callback).toEqual(reqParams.callbackUrl)
   })
 
 })
