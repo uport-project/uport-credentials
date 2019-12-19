@@ -334,7 +334,7 @@ describe('LEGACY createDisclosureRequest()', () => {
   })
   async function createAndVerify(params = {}) {
     const jwt = await credentials.createDisclosureRequest(params)
-    return await verifyJWT(jwt, { resolver: credentials.resolver})
+    return await verifyJWT(jwt, { resolver: credentials.resolver })
   }
   it('creates a valid JWT for a request', async () => {
     const response = await createAndVerify({ requested: ['name', 'phone'] })
@@ -744,21 +744,14 @@ describe('issueVerifiableCredential', () => {
   }
   it('vc test', async () => {
     credentials = new Credentials({privateKey, did})
-    let jwt = await credentials.issueVerifiableCredential(vcPayload)
-    let decoded = await verifyCredential(jwt, credentials.resolver)
+    const jwt = await credentials.issueVerifiableCredential(vcPayload)
+    const decoded = await verifyCredential(jwt, credentials.resolver)
     expect(decoded.payload.vc).toEqual(vcPayload.vc)
   })
 })
 
 describe('verifyPresentation', () => {
   let credentials: Credentials
-  interface verifyResult {
-    payload: object,
-    doc: object,
-    issuer: string,
-    signer: object,
-    jwt: string
-  }
 
   const vcPayload: any = {
     sub: 'did:ethr:0x435df3eda57154cf8cf7926079881f2912f54db4',
@@ -777,7 +770,7 @@ describe('verifyPresentation', () => {
 
   it('verifyPresentation', async () => {
     credentials = new Credentials({privateKey, did})
-    let vcJwt = await credentials.issueVerifiableCredential(vcPayload)
+    const vcJwt = await credentials.issueVerifiableCredential(vcPayload)
 
     const vpPayload: any = {
       vp: {
@@ -787,7 +780,7 @@ describe('verifyPresentation', () => {
       }
     }
 
-    let issuer: Issuer = { did: credentials.did, signer: credentials.signer}
+    const issuer: Issuer = { did: credentials.did, signer: credentials.signer }
     const vpJwt = await createPresentation(vpPayload, issuer)
 
     const result = await credentials.verifyPresentation(vpJwt)
@@ -799,7 +792,7 @@ describe('verifyPresentation', () => {
 
 describe('create presentation request', () => {
   let credentials: Credentials
-  let reqParams = {
+  const reqParams = {
     callbackUrl: 'https://myserver.com',
     claims: {
       verifiable: {
@@ -840,8 +833,8 @@ describe('create presentation request', () => {
   }
 
   it('creates valid presentation request', async () => {
-    credentials = new Credentials({privateKey, did})
-    let req = await createAndVerify(reqParams)
+    credentials = new Credentials({ privateKey, did })
+    const req = await createAndVerify(reqParams)
     expect(req.payload.claims).toEqual(reqParams.claims)
     expect(req.payload.callback).toEqual(reqParams.callbackUrl)
   })

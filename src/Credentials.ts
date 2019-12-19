@@ -386,9 +386,9 @@ class Credentials {
     if(resolver) {
       this.resolver = resolver
     } else {
-      let ethrResolver = EthrDIDResolver.getResolver(ethrConfig || {})
-      let webResolver = WebDidResolver.getResolver()
-      this.resolver = new Resolver({ ...webResolver, ...ethrResolver})
+      const ethrResolver = EthrDIDResolver.getResolver(ethrConfig || {})
+      const webResolver = WebDidResolver.getResolver()
+      this.resolver = new Resolver({ ...webResolver, ...ethrResolver })
     }
     
     // UportDIDResolver(
@@ -532,7 +532,7 @@ class Credentials {
    * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
-  createVerification({ sub, claim, exp, nbf, vc, callbackUrl, expiresIn}: VerificationParam) {
+  createVerification({ sub, claim, exp, nbf, vc, callbackUrl, expiresIn }: VerificationParam) {
     return this.signJWT({ sub, claim, exp, nbf, vc, callbackUrl }, expiresIn)
   }
 
@@ -568,7 +568,7 @@ class Credentials {
    * @param    {Number}      [opts.expiresIn]    The duration in seconds after which the request expires
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, rexp, expiresIn, nbf}:VerificationRequest) {
+  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, rexp, expiresIn, nbf }:VerificationRequest) {
     return this.signJWT({
       unsignedClaim,
       sub,
