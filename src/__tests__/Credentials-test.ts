@@ -174,7 +174,7 @@ describe('createDisclosureRequest()', () => {
   let credentials: Credentials
   beforeAll(() => mockresolver())
   beforeAll(() => {
-    credentials = new Credentials({privateKey, did})
+    credentials = new Credentials({ privateKey, did })
   })
   async function createAndVerify(params = {}) {
     const jwt = await credentials.createDisclosureRequest(params)
@@ -309,7 +309,7 @@ describe('LEGACY createDisclosureRequest()', () => {
   let credentials: Credentials
   beforeAll(() => mockresolver())
   beforeAll(() => {
-    credentials = new Credentials({privateKey, did})
+    credentials = new Credentials({ privateKey, did })
   })
   async function createAndVerify(params = {}) {
     const jwt = await credentials.createDisclosureRequest(params)
@@ -325,7 +325,7 @@ describe('disclose()', () => {
   let credentials: Credentials
   beforeAll(() => mockresolver())
   beforeAll(() => {
-    credentials = new Credentials({privateKey, did})
+    credentials = new Credentials({ privateKey, did })
   })
   async function createAndVerify(params = {}) {
     const jwt = await credentials.createDisclosureResponse(params)
@@ -348,7 +348,7 @@ describe('createVerificationSignatureRequest()', () => {
   let credentials: Credentials
   beforeAll(() => mockresolver())
   beforeAll(() => {
-    credentials = new Credentials({privateKey, did})
+    credentials = new Credentials({ privateKey, did })
   })
 
   it('creates a valid JWT for a request', async () => {
@@ -456,7 +456,7 @@ describe('createVerification()', () => {
   let credentials: Credentials
   beforeAll(() => mockresolver())
   beforeAll(() => {
-    credentials = new Credentials({privateKey, did})
+    credentials = new Credentials({ privateKey, did })
   })
   it('has correct payload in JWT for an attestation', async () => {
     return credentials
@@ -481,7 +481,7 @@ describe('authenticateDisclosureResponse()', () => {
     })
   )
   beforeAll(() => {
-    credentials = new Credentials({privateKey, did})
+    credentials = new Credentials({ privateKey, did })
   })
   async function createShareResp(payload = {}) {
     const req = await credentials.createDisclosureRequest({
@@ -588,7 +588,7 @@ describe('verifyDisclosure()', () => {
     })
   )
   beforeAll(() => {
-    credentials = new Credentials({privateKey, did})
+    credentials = new Credentials({ privateKey, did })
   })
   
   it('returns profile mixing public and private claims', async () => {
@@ -649,7 +649,7 @@ describe('verifyDisclosure()', () => {
 describe('txRequest()', () => {
   let credentials: Credentials
   mockresolver()
-  credentials = new Credentials({privateKey, did})
+  credentials = new Credentials({ privateKey, did })
   const abi: ContractABI = [
     {
       constant: false,
