@@ -105,7 +105,7 @@ describe('configuration', () => {
       }
       expect(() => new Credentials({ networks })).not.toThrow()
     })
-    
+
   })
 })
 
@@ -722,7 +722,7 @@ describe('issueVerifiableCredential', () => {
     }
   }
   it('vc test', async () => {
-    credentials = new Credentials({privateKey, did})
+    credentials = new Credentials({ privateKey, did })
     const jwt = await credentials.issueVerifiableCredential(vcPayload)
     const decoded = await verifyCredential(jwt, credentials.resolver)
     expect(decoded.payload.vc).toEqual(vcPayload.vc)
