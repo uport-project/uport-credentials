@@ -169,7 +169,6 @@ interface VerificationParam {
   exp?: number
   vc?: string[]
   callbackUrl?: string
-  nbf?: number,
   expiresIn?: number
 }
 
@@ -390,13 +389,6 @@ class Credentials {
       const webResolver = WebDidResolver.getResolver()
       this.resolver = new Resolver({ ...webResolver, ...ethrResolver })
     }
-    
-    // UportDIDResolver(
-    //   registry ||
-    //     UportLite({ networks: networks ? configNetworks(networks) : {} })
-    // )
-    // EthrDIDResolver(ethrConfig || {})
-    // HttpsDIDResolver()
   }
 
   signJWT(payload: object, expiresIn?: number) {
@@ -532,8 +524,8 @@ class Credentials {
    * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
-  createVerification({ sub, claim, exp, nbf, vc, callbackUrl, expiresIn }: VerificationParam) {
-    return this.signJWT({ sub, claim, exp, nbf, vc, callbackUrl }, expiresIn)
+  createVerification({ sub, claim, exp, vc, callbackUrl, expiresIn }: VerificationParam) {
+    return this.signJWT({ sub, claim, exp, vc, callbackUrl }, expiresIn)
   }
 
   /**
@@ -898,7 +890,7 @@ class Credentials {
 
     return this.signJWT(
       { ...payload, type: Types.PRESENTATION_REQUEST },
-      params.exp ? undefined : expiresIn
+      expiresIn ? undefined : expiresIn
     )
   }
 
