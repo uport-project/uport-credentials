@@ -1,9 +1,12 @@
 import { ec as EC } from 'elliptic'
 
 import { createJWT, verifyJWT, SimpleSigner, Signer, toEthereumAddress } from 'did-jwt'
+import { createVerifiableCredential, verifyPresentation } from 'did-jwt-vc'
+import { PresentationPayload } from 'did-jwt-vc/lib/types'
 import UportDIDResolver from 'uport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
-import HttpsDIDResolver from 'https-did-resolver'
+import * as WebDidResolver from 'web-did-resolver'
+import { Resolver } from 'did-resolver'
 import UportLite from 'uport-lite'
 import { isMNID, decode as mnidDecode } from 'mnid'
 
@@ -16,6 +19,7 @@ import {
   Factory
 } from './Contract'
 import { DIDDocument, PublicKey } from 'did-resolver'
+import { VerifiableCredentialPayload, Issuer } from 'did-jwt-vc/lib/types'
 
 const secp256k1 = new EC('secp256k1')
 
@@ -25,7 +29,8 @@ enum Types {
   TYPED_DATA_SIGNATURE_REQUEST = 'eip712Req',
   VERIFICATION_SIGNATURE_REQUEST = 'verReq',
   ETH_TX_REQUEST = 'ethtx',
-  PERSONAL_SIGN_REQUEST = 'personalSigReq'
+  PERSONAL_SIGN_REQUEST = 'personalSigReq',
+  PRESENTATION_REQUEST = 'presentationReq'
 }
 
 interface Network {
@@ -43,7 +48,8 @@ interface Settings {
   signer?: Signer
   networks?: Networks
   registry?: (mnid: string) => Promise<object>
-  ethrConfig?: any
+  ethrConfig?: any,
+  resolver?: Resolver
 }
 
 interface Identity {
@@ -163,6 +169,8 @@ interface VerificationParam {
   exp?: number
   vc?: string[]
   callbackUrl?: string
+  nbf?: number,
+  expiresIn?: number
 }
 
 interface VerificationRequest {
@@ -170,6 +178,7 @@ interface VerificationRequest {
   sub: string
   riss?: string
   rexp?: number
+  nbf?: number
   expiresIn?: number
   vc?: string[]
   callbackUrl?: string
@@ -221,6 +230,32 @@ interface PersonalSignPayload {
   data: string
 }
 
+interface PresentationResponse {
+  payload: PresentationPayload,
+  doc: DIDDocument,
+  issuer: string,
+  signer: {
+    id: string,
+    type: string,
+    owner: string,
+    ethereumAddress: string
+  },
+  jwt: string
+}
+
+interface PresentationRequest extends JWTPayload {
+  claims?: ClaimsSpec,
+  iss?: string,
+  callback?: string
+}
+
+interface PresentationRequestParams {
+  claims?: ClaimsSpec,
+  iss?: string,
+  callbackUrl?: string,
+  exp?: number
+}
+
 /**
  * The Credentials class allows you to easily create the signed payloads used in uPort including
  * credentials and signed mobile app requests (ex. selective disclosure requests
@@ -248,6 +283,7 @@ class Credentials {
 
   readonly did?: string
   readonly signer?: Signer
+  readonly resolver: Resolver
 
   /**
    * Instantiates a new uPort Credentials object
@@ -323,7 +359,8 @@ class Credentials {
     signer,
     networks,
     registry,
-    ethrConfig
+    ethrConfig,
+    resolver
   }: Settings) {
     if (signer) {
       this.signer = signer
@@ -346,12 +383,20 @@ class Credentials {
       this.did = `did:ethr:${address}`
     }
 
-    UportDIDResolver(
-      registry ||
-        UportLite({ networks: networks ? configNetworks(networks) : {} })
-    )
-    EthrDIDResolver(ethrConfig || {})
-    HttpsDIDResolver()
+    if(resolver) {
+      this.resolver = resolver
+    } else {
+      let ethrResolver = EthrDIDResolver.getResolver(ethrConfig || {})
+      let webResolver = WebDidResolver.getResolver()
+      this.resolver = new Resolver({ ...webResolver, ...ethrResolver})
+    }
+    
+    // UportDIDResolver(
+    //   registry ||
+    //     UportLite({ networks: networks ? configNetworks(networks) : {} })
+    // )
+    // EthrDIDResolver(ethrConfig || {})
+    // HttpsDIDResolver()
   }
 
   signJWT(payload: object, expiresIn?: number) {
@@ -487,8 +532,8 @@ class Credentials {
    * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
-  createVerification({ sub, claim, exp, vc, callbackUrl }: VerificationParam) {
-    return this.signJWT({ sub, claim, exp, vc, callbackUrl })
+  createVerification({ sub, claim, exp, nbf, vc, callbackUrl, expiresIn}: VerificationParam) {
+    return this.signJWT({ sub, claim, exp, nbf, vc, callbackUrl }, expiresIn)
   }
 
   /**
@@ -523,7 +568,7 @@ class Credentials {
    * @param    {Number}      [opts.expiresIn]    The duration in seconds after which the request expires
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, rexp, expiresIn}:VerificationRequest) {
+  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, rexp, expiresIn, nbf}:VerificationRequest) {
     return this.signJWT({
       unsignedClaim,
       sub,
@@ -533,6 +578,7 @@ class Credentials {
       callback: callbackUrl,
       type: Types.VERIFICATION_SIGNATURE_REQUEST,
       rexp,
+      nbf
     }, expiresIn)
   }
 
@@ -685,7 +731,7 @@ class Credentials {
     expiresIn = 600
   ) {
     if (payload.req) {
-      const verified = await verifyJWT(payload.req)
+      const verified = await verifyJWT(payload.req, { resolver: this.resolver })
       if (verified.issuer) {
         payload.aud = verified.issuer
       }
@@ -758,7 +804,7 @@ class Credentials {
       const invalid: string[] = []
       const verifying: Array<Promise<undefined | VerifiedJWT>> = verified.map(
         token =>
-          verifyJWT(token, { audience: this.did }).catch(() => {
+          verifyJWT(token, { resolver: this.resolver, audience: this.did }).catch(() => {
             invalid.push(token)
             return Promise.resolve(undefined)
           })
@@ -801,13 +847,14 @@ class Credentials {
    */
   async authenticateDisclosureResponse(token: string, callbackUrl?: string) {
     const { payload, doc }: DisclosurePayload = await verifyJWT(token, {
+      resolver: this.resolver,
       audience: this.did,
       callbackUrl,
       auth: true
     })
 
     if (payload.req) {
-      const challengeReq = await verifyJWT(payload.req, { audience: this.did })
+      const challengeReq = await verifyJWT(payload.req, { resolver: this.resolver, audience: this.did })
       const request: DisclosureRequestPayload = challengeReq.payload
       if (request.type !== Types.DISCLOSURE_REQUEST) {
         throw new Error(`Challenge payload type invalid: ${request.type}`)
@@ -838,8 +885,33 @@ class Credentials {
    *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
    */
   async verifyDisclosure(token: string) {
-    const { payload, doc } = await verifyJWT(token, { audience: this.did })
+    const { payload, doc } = await verifyJWT(token, { resolver: this.resolver, audience: this.did })
     return this.processDisclosurePayload({ payload, doc })
+  }
+
+  createPresentationRequest(params: PresentationRequestParams, expiresIn = 600) {
+    const payload: PresentationRequest = {}
+    if (params.iss) payload.iss = params.iss
+    if (params.claims) payload.claims = params.claims
+    if (params.callbackUrl) payload.callback = params.callbackUrl
+
+
+    return this.signJWT(
+      { ...payload, type: Types.PRESENTATION_REQUEST },
+      params.exp ? undefined : expiresIn
+    )
+  }
+
+  async issueVerifiableCredential(vcPayload: VerifiableCredentialPayload) {
+    if (!(this.did && this.signer))
+      return Promise.reject(new Error('No Signing Identity configured'))
+    const issuer: Issuer = { did: this.did, signer: this.signer }
+    return await createVerifiableCredential(vcPayload, issuer)
+  }
+
+  async verifyPresentation(vpJwt: string): Promise<PresentationResponse> {
+    const verifiedVP = await verifyPresentation(vpJwt, this.resolver)
+    return verifiedVP
   }
 
   /**
