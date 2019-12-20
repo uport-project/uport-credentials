@@ -5,7 +5,8 @@ import { Issuer } from 'did-jwt-vc/lib/types'
 
 import MockDate from 'mockdate'
 import { DIDDocument, Resolver } from 'did-resolver'
-import * as ethrResolver  from 'ethr-did-resolver'
+import * as ethrResolver from 'ethr-did-resolver'
+import * as webResolver from 'web-did-resolver'
 import { AbiEntryType, ContractABI } from '../Contract'
 
 jest.mock('ethr-did-resolver')
@@ -92,6 +93,15 @@ describe('configuration', () => {
 
     describe('sets signer if privateKey is passed in', () => {
       expect(new Credentials({ privateKey }).signer).toBeDefined()
+    })
+  })
+
+  describe('sets resolver', () => {
+    describe('always uses resolver if passed in', () => {
+      let web = webResolver.getResolver()
+      let ethr = ethrResolver.getResolver()
+      let resolver = new Resolver({...web, ...ethr})
+      expect(new Credentials({resolver}).resolver).toEqual(resolver)
     })
   })
 
@@ -375,7 +385,7 @@ describe('createVerificationSignatureRequest()', () => {
     const expiresIn = 1000
     const jwt = await uport.createVerificationSignatureRequest(
       { claim: { test: 'test' } },
-      { sub: 'did:ethr:0x1', expiresIn, nbf: NOW }
+      { sub: 'did:ethr:0x1', expiresIn }
     )
     const { payload } = decodeJWT(jwt)
     return expect(payload.exp).toEqual(NOW + expiresIn)
@@ -727,6 +737,13 @@ describe('issueVerifiableCredential', () => {
     const decoded = await verifyCredential(jwt, credentials.resolver)
     expect(decoded.payload.vc).toEqual(vcPayload.vc)
   })
+
+  it('Throws error if no signer configured', async () => {
+    credentials = new Credentials({})
+    expect(credentials.issueVerifiableCredential(vcPayload)).rejects.toThrow(
+      'No Signing Identity configured'
+    )
+  })
 })
 
 describe('verifyPresentation', () => {
@@ -763,7 +780,10 @@ describe('verifyPresentation', () => {
     const vpJwt = await createPresentation(vpPayload, issuer)
 
     const result = await credentials.verifyPresentation(vpJwt)
+    console.log(result)
+    expect(result.payload.iss).toEqual(issuer.did)
     expect(result.payload.vp).toEqual(vpPayload.vp)
+    expect(result.payload.vp.verifiableCredential).toEqual(vpPayload.vp.verifiableCredential)
 
   })
 
@@ -810,6 +830,18 @@ describe('create presentation request', () => {
     const jwt = await credentials.createPresentationRequest(params)
     return await verifyJWT(jwt, { resolver: credentials.resolver })
   }
+
+  it('sets callbackurl', async () => {
+    credentials = new Credentials({ privateKey, did })
+    const req = await createAndVerify({callbackUrl: 'https://myserver.com'})
+    expect(req.payload.callback).toEqual(reqParams.callbackUrl)
+  })
+
+  it('sets claims', async () => {
+    credentials = new Credentials({ privateKey, did })
+    const req = await createAndVerify({claims: reqParams.claims})
+    expect(req.payload.claims).toEqual(reqParams.claims)
+  })
 
   it('creates valid presentation request', async () => {
     credentials = new Credentials({ privateKey, did })

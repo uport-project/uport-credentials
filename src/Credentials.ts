@@ -177,7 +177,6 @@ interface VerificationRequest {
   sub: string
   riss?: string
   rexp?: number
-  nbf?: number
   expiresIn?: number
   vc?: string[]
   callbackUrl?: string
@@ -560,7 +559,7 @@ class Credentials {
    * @param    {Number}      [opts.expiresIn]    The duration in seconds after which the request expires
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, rexp, expiresIn, nbf }:VerificationRequest) {
+  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, rexp, expiresIn }:VerificationRequest) {
     return this.signJWT({
       unsignedClaim,
       sub,
@@ -570,7 +569,6 @@ class Credentials {
       callback: callbackUrl,
       type: Types.VERIFICATION_SIGNATURE_REQUEST,
       rexp,
-      nbf
     }, expiresIn)
   }
 
@@ -883,14 +881,12 @@ class Credentials {
 
   createPresentationRequest(params: PresentationRequestParams, expiresIn = 600) {
     const payload: PresentationRequest = {}
-    if (params.iss) payload.iss = params.iss
     if (params.claims) payload.claims = params.claims
     if (params.callbackUrl) payload.callback = params.callbackUrl
 
-
     return this.signJWT(
       { ...payload, type: Types.PRESENTATION_REQUEST },
-      expiresIn ? undefined : expiresIn
+      expiresIn
     )
   }
 
@@ -922,24 +918,6 @@ class Credentials {
     }
     return ContractFactory(txObjHandler.bind(this))(abi)
   }
-}
-
-function configNetworks(nets: Networks) {
-  Object.keys(nets).forEach(key => {
-    const net = nets[key]
-    if (typeof net === 'object') {
-      ;['registry', 'rpcUrl'].forEach(key => {
-        if (!net.hasOwnProperty(key)) {
-          throw new Error(
-            `Malformed network config object, object must have '${key}' key specified.`
-          )
-        }
-      })
-    } else {
-      throw new Error(`Network configuration object required`)
-    }
-  })
-  return nets
 }
 
 export default Credentials
