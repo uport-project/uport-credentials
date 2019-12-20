@@ -98,10 +98,10 @@ describe('configuration', () => {
 
   describe('sets resolver', () => {
     describe('always uses resolver if passed in', () => {
-      let web = webResolver.getResolver()
-      let ethr = ethrResolver.getResolver()
-      let resolver = new Resolver({...web, ...ethr})
-      expect(new Credentials({resolver}).resolver).toEqual(resolver)
+      const web = webResolver.getResolver()
+      const ethr = ethrResolver.getResolver()
+      const resolver = new Resolver({ ...web, ...ethr })
+      expect(new Credentials({ resolver }).resolver).toEqual(resolver)
     })
   })
 
@@ -780,7 +780,6 @@ describe('verifyPresentation', () => {
     const vpJwt = await createPresentation(vpPayload, issuer)
 
     const result = await credentials.verifyPresentation(vpJwt)
-    console.log(result)
     expect(result.payload.iss).toEqual(issuer.did)
     expect(result.payload.vp).toEqual(vpPayload.vp)
     expect(result.payload.vp.verifiableCredential).toEqual(vpPayload.vp.verifiableCredential)
@@ -833,13 +832,13 @@ describe('create presentation request', () => {
 
   it('sets callbackurl', async () => {
     credentials = new Credentials({ privateKey, did })
-    const req = await createAndVerify({callbackUrl: 'https://myserver.com'})
+    const req = await createAndVerify({ callbackUrl: 'https://myserver.com' })
     expect(req.payload.callback).toEqual(reqParams.callbackUrl)
   })
 
   it('sets claims', async () => {
     credentials = new Credentials({ privateKey, did })
-    const req = await createAndVerify({claims: reqParams.claims})
+    const req = await createAndVerify({ claims: reqParams.claims })
     expect(req.payload.claims).toEqual(reqParams.claims)
   })
 
