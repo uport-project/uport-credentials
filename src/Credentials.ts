@@ -241,19 +241,6 @@ interface PresentationResponse {
   jwt: string
 }
 
-interface PresentationRequest extends JWTPayload {
-  claims?: ClaimsSpec,
-  iss?: string,
-  callback?: string
-}
-
-interface PresentationRequestParams {
-  claims?: ClaimsSpec,
-  iss?: string,
-  callbackUrl?: string,
-  exp?: number
-}
-
 /**
  * The Credentials class allows you to easily create the signed payloads used in uPort including
  * credentials and signed mobile app requests (ex. selective disclosure requests
@@ -877,17 +864,6 @@ class Credentials {
   async verifyDisclosure(token: string) {
     const { payload, doc } = await verifyJWT(token, { resolver: this.resolver, audience: this.did })
     return this.processDisclosurePayload({ payload, doc })
-  }
-
-  createPresentationRequest(params: PresentationRequestParams, expiresIn = 600) {
-    const payload: PresentationRequest = {}
-    if (params.claims) payload.claims = params.claims
-    if (params.callbackUrl) payload.callback = params.callbackUrl
-
-    return this.signJWT(
-      { ...payload, type: Types.PRESENTATION_REQUEST },
-      expiresIn
-    )
   }
 
   async issueVerifiableCredential(vcPayload: VerifiableCredentialPayload) {
