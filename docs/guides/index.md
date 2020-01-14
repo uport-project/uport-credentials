@@ -72,10 +72,10 @@ credentials.requestDisclosure({networkId: '0x4'}).then(requestToken => {
 })
 ```
  
-When a response JWT is received, it can be parsed and verified via the `verifyDisclosureResponse()` method, which checks the validity of the signature on the JWT, as well as the validity of the original disclosure request, which is expected as part of the response. 
+When a response JWT is received, it can be parsed and verified via the `verifyDisclosure()` method, which checks the validity of the signature on the JWT, as well as the validity of the original disclosure request, which is expected as part of the response. 
  
 ```javascript
-credentials.verifyDisclosureResponse(responseToken).then(verifiedData => {
+credentials.verifyDisclosure(responseToken).then(verifiedData => {
   // Do stuff with verified data or transport
 })
 ```
@@ -117,7 +117,7 @@ Attesting to information about your users helps to add real value to your applic
 ```javascript
 credentials.createVerification({
   sub: '0x...', // uport address of user
-  exp: <future timestamp>, // If your information is not permanent make sure to add an expires timestamp
+  expiresIn: <future timestamp>, // If your information is not permanent make sure to add expiresIn, the time in seconds from now
   claims: {name: 'John Smith'}
 }).then(attestation => {
   // send attestation to user
