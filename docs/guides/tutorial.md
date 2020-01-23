@@ -70,7 +70,7 @@ Note that in the above disclosure request, we set the `callbackUrl` field to `/c
 ```javascript
 credentials.createVerification({
   sub: did, // did of the current user
-  exp: Time30Days(), // calculate the timestamp for 30 days from now
+  expiresIn: Time30Days(), // calculate 30 days from now in seconds
   claim: {'My Title' : {'KeyOne' : 'ValueOne', 'KeyTwo' : 'Value2', 'Last Key' : 'Last Value'} }
   // Note, the above is a complex claim. Also supported are simple claims:
   // claim: {'Key' : 'Value'}

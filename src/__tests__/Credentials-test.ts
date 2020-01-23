@@ -1,8 +1,15 @@
 import { Credentials, SimpleSigner } from '../index'
 import { verifyJWT, decodeJWT } from 'did-jwt'
+import { createPresentation, verifyCredential } from 'did-jwt-vc'
+import { Issuer } from 'did-jwt-vc/lib/types'
+
 import MockDate from 'mockdate'
-import { registerMethod, DIDDocument } from 'did-resolver'
+import { DIDDocument, Resolver } from 'did-resolver'
+import * as ethrResolver from 'ethr-did-resolver'
+import * as webResolver from 'web-did-resolver'
 import { AbiEntryType, ContractABI } from '../Contract'
+
+jest.mock('ethr-did-resolver')
 
 const NOW = 1485321133
 MockDate.set(NOW * 1000)
@@ -29,7 +36,8 @@ interface DIDDocumentWithProfile extends DIDDocument {
 }
 
 function mockresolver(profile?: object) {
-  registerMethod('ethr', async (id, parsed) => {
+  const mockGetResolver = jest.spyOn(ethrResolver, 'getResolver')
+  mockGetResolver.mockReturnValue({'ethr': (id, parsed) => {
     const doc: DIDDocumentWithProfile = {
       '@context': 'https://w3id.org/did/v1',
       id,
@@ -52,7 +60,8 @@ function mockresolver(profile?: object) {
       doc.uportProfile = profile
     }
     return doc
-  })
+  }})
+  
 }
 
 describe('configuration', () => {
@@ -87,6 +96,15 @@ describe('configuration', () => {
     })
   })
 
+  describe('sets resolver', () => {
+    describe('always uses resolver if passed in', () => {
+      const web = webResolver.getResolver()
+      const ethr = ethrResolver.getResolver()
+      const resolver = new Resolver({ ...web, ...ethr })
+      expect(new Credentials({ resolver }).resolver).toEqual(resolver)
+    })
+  })
+
   describe('configNetworks', () => {
     it('should accept a valid network setting', () => {
       const networks = {
@@ -98,27 +116,6 @@ describe('configuration', () => {
       expect(() => new Credentials({ networks })).not.toThrow()
     })
 
-    // TODO Investigate how to override type system to allow this
-    it('should require a registry address', () => {
-      const networks: any = {
-        '0x94365e3b': { rpcUrl: 'https://private.chain/rpc' }
-      }
-      expect(() => new Credentials({ networks })).toThrowErrorMatchingSnapshot()
-    })
-
-    it('should require a rpcUrl', () => {
-      const networks: any = {
-        '0x94365e3b': {
-          registry: '0x3b2631d8e15b145fd2bf99fc5f98346aecdc394c'
-        }
-      }
-      expect(() => new Credentials({ networks })).toThrowErrorMatchingSnapshot()
-    })
-
-    it('if networks key is passed in it must contain configuration object', () => {
-      const networks: any = { '0x94365e3b': 'hey' }
-      expect(() => new Credentials({ networks })).toThrowErrorMatchingSnapshot()
-    })
   })
 })
 
@@ -184,10 +181,14 @@ describe('signJWT', () => {
 })
 
 describe('createDisclosureRequest()', () => {
+  let credentials: Credentials
   beforeAll(() => mockresolver())
+  beforeAll(() => {
+    credentials = new Credentials({ privateKey, did })
+  })
   async function createAndVerify(params = {}) {
-    const jwt = await uport.createDisclosureRequest(params)
-    return await verifyJWT(jwt)
+    const jwt = await credentials.createDisclosureRequest(params)
+    return await verifyJWT(jwt, { resolver: credentials.resolver })
   }
 
   it('creates a valid JWT for a request', async () => {
@@ -315,10 +316,14 @@ describe('createDisclosureRequest()', () => {
 })
 
 describe('LEGACY createDisclosureRequest()', () => {
+  let credentials: Credentials
   beforeAll(() => mockresolver())
+  beforeAll(() => {
+    credentials = new Credentials({ privateKey, did })
+  })
   async function createAndVerify(params = {}) {
-    const jwt = await uport.createDisclosureRequest(params)
-    return await verifyJWT(jwt)
+    const jwt = await credentials.createDisclosureRequest(params)
+    return await verifyJWT(jwt, { resolver: credentials.resolver })
   }
   it('creates a valid JWT for a request', async () => {
     const response = await createAndVerify({ requested: ['name', 'phone'] })
@@ -327,10 +332,14 @@ describe('LEGACY createDisclosureRequest()', () => {
 })
 
 describe('disclose()', () => {
+  let credentials: Credentials
   beforeAll(() => mockresolver())
+  beforeAll(() => {
+    credentials = new Credentials({ privateKey, did })
+  })
   async function createAndVerify(params = {}) {
-    const jwt = await uport.createDisclosureResponse(params)
-    return await verifyJWT(jwt, { audience: did })
+    const jwt = await credentials.createDisclosureResponse(params)
+    return await verifyJWT(jwt, { resolver: credentials.resolver, audience: did })
   }
 
   it('creates a valid JWT for a disclosure', async () => {
@@ -339,19 +348,25 @@ describe('disclose()', () => {
   })
 
   it('creates a valid JWT for a disclosure', async () => {
-    const req = await uport.createDisclosureRequest()
+    const req = await credentials.createDisclosureRequest()
     const response = await createAndVerify({ req })
     return expect(response).toMatchSnapshot()
   })
 })
 
 describe('createVerificationSignatureRequest()', () => {
+  let credentials: Credentials
+  beforeAll(() => mockresolver())
+  beforeAll(() => {
+    credentials = new Credentials({ privateKey, did })
+  })
+
   it('creates a valid JWT for a request', async () => {
     const jwt = await uport.createVerificationSignatureRequest(
       { claim: { test: { prop1: 1, prop2: 2 } } },
       { sub: 'did:uport:223ab45' }
     )
-    return expect(await verifyJWT(jwt, { audience: did })).toMatchSnapshot()
+    return expect(await verifyJWT(jwt, { resolver: credentials.resolver, audience: did })).toMatchSnapshot()
   })
 
   it('allows setting an expiration for the requested credential', async () => {
@@ -448,42 +463,49 @@ describe('createPersonalSignRequest()', () => {
 })
 
 describe('createVerification()', () => {
+  let credentials: Credentials
   beforeAll(() => mockresolver())
+  beforeAll(() => {
+    credentials = new Credentials({ privateKey, did })
+  })
   it('has correct payload in JWT for an attestation', async () => {
-    return uport
+    return credentials
       .createVerification({
         sub: 'did:uport:223ab45',
         claim: { email: 'bingbangbung@email.com' },
         exp: 1485321133 + 1
       })
       .then(async jwt => {
-        const decoded = await verifyJWT(jwt)
+        const decoded = await verifyJWT(jwt, { resolver: credentials.resolver })
         return expect(decoded).toMatchSnapshot()
       })
   })
 })
 
 describe('authenticateDisclosureResponse()', () => {
+  let credentials: Credentials
   beforeAll(() =>
     mockresolver({
       name: 'Super Developer',
       country: 'NI'
     })
   )
-
+  beforeAll(() => {
+    credentials = new Credentials({ privateKey, did })
+  })
   async function createShareResp(payload = {}) {
-    const req = await uport.createDisclosureRequest({
+    const req = await credentials.createDisclosureRequest({
       requested: ['name', 'phone']
     })
-    return uport.createDisclosureResponse({ ...payload, req })
+    return credentials.createDisclosureResponse({ ...payload, req })
   }
 
   async function createShareRespWithVerifiedCredential(payload = {}) {
-    const req = await uport.createDisclosureRequest({
+    const req = await credentials.createDisclosureRequest({
       requested: ['name', 'phone']
     })
-    const attestation = await uport.createVerification(claim)
-    return uport.createDisclosureResponse({
+    const attestation = await credentials.createVerification(claim)
+    return credentials.createDisclosureResponse({
       ...payload,
       verified: [attestation],
       req
@@ -494,7 +516,7 @@ describe('authenticateDisclosureResponse()', () => {
     const jwt = await createShareResp({
       own: { name: 'Davie', phone: '+15555551234' }
     })
-    const profile = await uport.authenticateDisclosureResponse(jwt)
+    const profile = await credentials.authenticateDisclosureResponse(jwt)
     expect(profile).toMatchSnapshot()
   })
 
@@ -502,13 +524,13 @@ describe('authenticateDisclosureResponse()', () => {
     const jwt = await createShareRespWithVerifiedCredential({
       own: { name: 'Davie', phone: '+15555551234' }
     })
-    const profile = await uport.authenticateDisclosureResponse(jwt)
+    const profile = await credentials.authenticateDisclosureResponse(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with only public claims', async () => {
     const jwt = await createShareResp()
-    const profile = await uport.authenticateDisclosureResponse(jwt)
+    const profile = await credentials.authenticateDisclosureResponse(jwt)
     expect(profile).toMatchSnapshot()
   })
 
@@ -516,20 +538,20 @@ describe('authenticateDisclosureResponse()', () => {
     const jwt = await createShareResp({
       nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'
     })
-    const profile = await uport.authenticateDisclosureResponse(jwt)
+    const profile = await credentials.authenticateDisclosureResponse(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns pushToken if available', async () => {
     const jwt = await createShareResp({ capabilities: ['PUSHTOKEN'] })
-    const profile = await uport.authenticateDisclosureResponse(jwt)
+    const profile = await credentials.authenticateDisclosureResponse(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   describe('check original request', () => {
     it('rejects response with missing challenge', async () => {
-      const jwt = await uport.createDisclosureResponse({ own: { name: 'bob' } })
-      expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow(
+      const jwt = await credentials.createDisclosureResponse({ own: { name: 'bob' } })
+      expect(credentials.authenticateDisclosureResponse(jwt)).rejects.toThrow(
         'Challenge was not included in response'
       )
     })
@@ -540,27 +562,27 @@ describe('authenticateDisclosureResponse()', () => {
       const req = await badPort.createDisclosureRequest({
         requested: ['name', 'phone']
       })
-      const jwt = await uport.createDisclosureResponse({
+      const jwt = await credentials.createDisclosureResponse({
         own: { name: 'Davie', phone: '+15555551234' },
         req
       })
-      return expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow(
+      return expect(credentials.authenticateDisclosureResponse(jwt)).rejects.toThrow(
         `JWT audience does not match your DID: aud: ${id.did} !== yours: ${
-          uport.did
+          credentials.did
         }`
       )
     })
 
     it('should reject if wrong request type', async () => {
-      const req = await uport.createVerification({
+      const req = await credentials.createVerification({
         sub: '0x01234',
         claim: { name: 'Bob' }
       })
-      const jwt = await uport.createDisclosureResponse({
+      const jwt = await credentials.createDisclosureResponse({
         own: { name: 'Davie', phone: '+15555551234' },
         req
       })
-      return expect(uport.authenticateDisclosureResponse(jwt)).rejects.toThrow(
+      return expect(credentials.authenticateDisclosureResponse(jwt)).rejects.toThrow(
         `Challenge payload type invalid: `
       )
     })
@@ -568,60 +590,65 @@ describe('authenticateDisclosureResponse()', () => {
 })
 
 describe('verifyDisclosure()', () => {
+  let credentials: Credentials
   beforeAll(() =>
     mockresolver({
       name: 'Bob Smith',
       country: 'NI'
     })
   )
+  beforeAll(() => {
+    credentials = new Credentials({ privateKey, did })
+  })
+  
   it('returns profile mixing public and private claims', async () => {
-    const jwt = await uport.createDisclosureResponse({
+    const jwt = await credentials.createDisclosureResponse({
       own: { name: 'Davie', phone: '+15555551234' }
     })
-    const profile = await uport.verifyDisclosure(jwt)
+    const profile = await credentials.verifyDisclosure(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile mixing public and private claims and verified credentials', async () => {
-    const attestation = await uport.createVerification(claim)
-    const jwt = await uport.createDisclosureResponse({
+    const attestation = await credentials.createVerification(claim)
+    const jwt = await credentials.createDisclosureResponse({
       own: { name: 'Davie', phone: '+15555551234' },
       verified: [attestation]
     })
-    const profile = await uport.verifyDisclosure(jwt)
+    const profile = await credentials.verifyDisclosure(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with only public claims', async () => {
-    const jwt = await uport.createDisclosureResponse()
-    const profile = await uport.verifyDisclosure(jwt)
+    const jwt = await credentials.createDisclosureResponse()
+    const profile = await credentials.verifyDisclosure(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns profile with private chain network id claims', async () => {
-    const jwt = await uport.createDisclosureResponse({
+    const jwt = await credentials.createDisclosureResponse({
       nad: '34wjsxwvduano7NFC8ujNJnFjbacgYeWA8m'
     })
-    const profile = await uport.verifyDisclosure(jwt)
+    const profile = await credentials.verifyDisclosure(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('returns pushToken if available', async () => {
-    const jwt = await uport.createDisclosureResponse({
+    const jwt = await credentials.createDisclosureResponse({
       capabilities: ['PUSHTOKEN']
     })
-    const profile = await uport.verifyDisclosure(jwt)
+    const profile = await credentials.verifyDisclosure(jwt)
     expect(profile).toMatchSnapshot()
   })
 
   it('declines to verify invalid jwts without crashing', async () => {
-    const goodjwt = await uport.createVerification(claim)
+    const goodjwt = await credentials.createVerification(claim)
     const badjwt = 'not.a.jwt'
 
-    const response = await uport.createDisclosureResponse({
+    const response = await credentials.createDisclosureResponse({
       verified: [goodjwt, badjwt]
     })
-    const profile = await uport.verifyDisclosure(response)
+    const profile = await credentials.verifyDisclosure(response)
 
     expect(profile.verified.length).toEqual(1)
     expect(profile.invalid.length).toEqual(1)
@@ -630,8 +657,9 @@ describe('verifyDisclosure()', () => {
 })
 
 describe('txRequest()', () => {
-  beforeAll(() => mockresolver())
-
+  let credentials: Credentials
+  mockresolver()
+  credentials = new Credentials({ privateKey, did })
   const abi: ContractABI = [
     {
       constant: false,
@@ -651,23 +679,23 @@ describe('txRequest()', () => {
     }
   ]
   const address = '0x70A804cCE17149deB6030039798701a38667ca3B'
-  const statusContract: any = uport.contract(abi).at(address)
+  const statusContract: any = credentials.contract(abi).at(address)
 
   it('creates a valid JWT for a request', async () => {
     const jwt = await statusContract.updateStatus('hello')
-    const verified = await verifyJWT(jwt)
+    const verified = await verifyJWT(jwt, { resolver: credentials.resolver })
     expect(verified.payload).toMatchSnapshot()
   })
 
   it('encodes readable function calls including given args in function key of jwt', async () => {
     const jwt = await statusContract.updateStatus('hello')
-    const verified = await verifyJWT(jwt)
+    const verified = await verifyJWT(jwt, { resolver: credentials.resolver })
     expect(verified.payload.fn).toEqual('updateStatus(string "hello")')
   })
 
   it('adds to key as contract address to jwt', async () => {
     const jwt = await statusContract.updateStatus('hello')
-    const verified = await verifyJWT(jwt)
+    const verified = await verifyJWT(jwt, { resolver: credentials.resolver })
     expect(verified.payload.to).toEqual(address)
   })
 
@@ -679,9 +707,83 @@ describe('txRequest()', () => {
       callbackUrl,
       label: 'Update Status'
     })
-    const verified = await verifyJWT(jwt)
+    const verified = await verifyJWT(jwt, { resolver: credentials.resolver })
     expect(verified.payload.net).toEqual(networkId)
     expect(verified.payload.callback).toEqual(callbackUrl)
     expect(verified.payload.label).toEqual('Update Status')
   })
+})
+
+describe('issueVerifiableCredential', () => {
+  let credentials: Credentials
+
+  const vcPayload: any = {
+    sub: 'did:ethr:0x435df3eda57154cf8cf7926079881f2912f54db4',
+    nbf: Date.now() / 1000,
+    vc: {
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      type: ['VerifiableCredential'],
+      credentialSubject: {
+        degree: {
+          type: 'BachelorDegree',
+          name: 'Baccalauréat en musiques numériques'
+        }
+      }
+    }
+  }
+  it('vc test', async () => {
+    credentials = new Credentials({ privateKey, did })
+    const jwt = await credentials.issueVerifiableCredential(vcPayload)
+    const decoded = await verifyCredential(jwt, credentials.resolver)
+    expect(decoded.payload.vc).toEqual(vcPayload.vc)
+  })
+
+  it('Throws error if no signer configured', async () => {
+    credentials = new Credentials({})
+    expect(credentials.issueVerifiableCredential(vcPayload)).rejects.toThrow(
+      'No Signing Identity configured'
+    )
+  })
+})
+
+describe('verifyPresentation', () => {
+  let credentials: Credentials
+
+  const vcPayload: any = {
+    sub: 'did:ethr:0x435df3eda57154cf8cf7926079881f2912f54db4',
+    nbf: 1562950282,
+    vc: {
+      '@context': ['https://www.w3.org/2018/credentials/v1'],
+      type: ['VerifiableCredential'],
+      credentialSubject: {
+        degree: {
+          type: 'BachelorDegree',
+          name: 'Baccalauréat en musiques numériques'
+        }
+      }
+    }
+  }
+
+  it('verifyPresentation', async () => {
+    credentials = new Credentials({ privateKey, did })
+    const vcJwt = await credentials.issueVerifiableCredential(vcPayload)
+
+    const vpPayload: any = {
+      vp: {
+        '@context': ['https://www.w3.org/2018/credentials/v1'],
+        type: ['VerifiableCredential'],
+        verifiableCredential: [vcJwt]
+      }
+    }
+
+    const issuer: Issuer = { did: credentials.did, signer: credentials.signer }
+    const vpJwt = await createPresentation(vpPayload, issuer)
+
+    const result = await credentials.verifyPresentation(vpJwt)
+    expect(result.payload.iss).toEqual(issuer.did)
+    expect(result.payload.vp).toEqual(vpPayload.vp)
+    expect(result.payload.vp.verifiableCredential).toEqual(vpPayload.vp.verifiableCredential)
+
+  })
+
 })

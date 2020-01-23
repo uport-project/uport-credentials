@@ -29,14 +29,16 @@
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "license": "Apache-2.0",
   "dependencies": {
-    "did-jwt": "0.2.0",
-    "did-resolver": "^0.0.6",
+    "did-jwt": "^4.0.0",
+    "did-jwt-vc": "^0.1.2",
+    "did-resolver": "^1.1.0",
     "elliptic": "^6.4.1",
-    "ethr-did-resolver": "^0.2.0",
+    "ethr-did-resolver": "^1.0.3",
     "https-did-resolver": "^0.1.0",
     "mnid": "^0.1.1",
     "uport-did-resolver": "^0.0.7",
-    "uport-lite": "^1.0.5"
+    "uport-lite": "^1.0.5",
+    "web-did-resolver": "^1.2.0"
   },
   "jest": {
     "transform": {
@@ -71,7 +73,7 @@
     "json-loader": "^0.5.4",
     "microbundle": "^0.11.0",
     "mockdate": "^2.0.1",
-    "ngrok": "^3.1.0",
+    "ngrok": "^3.2.7",
     "nock": "^9.4.3",
     "prettier": "^1.17.0",
     "ts-jest": "^24.0.2",
