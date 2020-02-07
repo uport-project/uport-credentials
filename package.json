@@ -84,7 +84,7 @@
     "tslint": "^5.16.0",
     "tslint-config-prettier": "^1.18.0",
     "tslint-eslint-rules": "^5.4.0",
-    "typedoc": "^0.14.2",
+    "typedoc": "^0.16.9",
     "typedoc-plugin-markdown": "^1.2.0",
     "typescript": "^3.4.4",
     "uport-transports": "^0.2.4",
