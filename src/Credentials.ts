@@ -277,8 +277,10 @@ class Credentials {
    *
    * ```javascript
    * import { Credentials } from 'uport-credentials'
+   * import { Resolver } from 'did-resolver'
    * const credentials = new Credentials({
-   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
+   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3',
+   *   resolver: new Resolver({...})
    * })
    * ```
    *
@@ -287,9 +289,11 @@ class Credentials {
    *
    * ```javascript
    * import { Credentials } from 'uport-credentials'
+   * import { Resolver } from 'did-resolver'
    * const credentials = new Credentials({
    *   did: 'did:ethr:0xbc3ae59bc76f894822622cdef7a2018dbe353840',
-   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
+   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3',
+   *   resolver: new Resolver({...})
    * })
    * ```
    *
@@ -297,9 +301,11 @@ class Credentials {
    *
    * ```javascript
    * import { Credentials, SimpleSigner } from 'uport-credentials'
+   * import { Resolver } from 'did-resolver'
    * const credentials = new Credentials({
    *   did: process.env.APPLICATION_DID,
-   *   signer: SimpleSigner(process.env.PRIVATE_KEY)
+   *   signer: SimpleSigner(process.env.PRIVATE_KEY),
+   *   resolver: new Resolver({...})
    * })
    * ```
    *
@@ -308,6 +314,7 @@ class Credentials {
    *
    * ```javascript
    * import { Credentials } from 'uport-credentials'
+   * import { Resolver } from 'did-resolver'
    *
    * function mySigner (data) {
    *   return new Promise((resolve, reject) => {
@@ -318,7 +325,8 @@ class Credentials {
    *
    * const credentials = new Credentials({
    *   did: process.env.APPLICATION_DID,
-   *   signer: mySigner
+   *   signer: mySigner,
+   *   resolver: new Resolver({...})
    * })
    * ```
    *
@@ -329,7 +337,10 @@ class Credentials {
    * @param       {SimpleSigner}      [settings.signer]        a signer object, see
    * [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions)
    * @param       {Object}            [settings.ethrConfig]    Configuration object for ethr did resolver. See
-   * [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver)
+   * [ethr-did-resolver](https://github.com/decentralized-identity/ethr-did-resolver)
+   * @param       {Resolver}          [settings.resolver]      A preconfigured `Resolver` instance. See
+   * [did-resolver](https://github.com/decentralized-identity/did-resolver)
+   * **You are required to provide either `ethrConfig` or `resolver`**
    * @param       {Address}           [settings.address]       DEPRECATED your uPort address (may be the address of your
    * application's uPort identity)
    * @param       {Object}            [settings.networks]      DEPRECATED networks config object, ie. {  '0x94365e3b': {

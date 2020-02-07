@@ -1,6 +1,4 @@
-[![npm](https://img.shields.io/npm/dt/ethr-did.svg)](https://www.npmjs.com/package/uport-credentials)
-[![npm](https://img.shields.io/npm/v/ethr-did.svg)](https://www.npmjs.com/package/uport-credentials)
-[![Join the chat at](https://img.shields.io/badge/Riot-Join%20chat-green.svg)](https://chat.uport.me/#/login)
+[![npm](https://img.shields.io/npm/v/uport-credentials.svg)](https://www.npmjs.com/package/uport-credentials)
 [![Twitter Follow](https://img.shields.io/twitter/follow/uport_me.svg?style=social&label=Follow)](https://twitter.com/uport_me)
 
 [DID Specification](https://w3c-ccg.github.io/did-spec/) | [Getting Started](/docs/guides/index.md)
@@ -9,14 +7,31 @@
 
 # uPort Credentials Library
 
-**Required Upgrade to uport-credentials@1.0.0 or uport@^0.6.3**
+**Required Upgrade to uport-credentials@1.3.0**
 
-**^0.6.3 (uport) to support new both new uPort Mobile Clients and legacy uPort Mobile Clients - [View Details](https://github.com/uport-project/uport-js/releases/tag/v0.6.3)**
+Starting with version 1.3.0 you are required to specify either a `Resolver` instance or a valid configuration object for `ethr-did-resolver`.
+Previous versions of this library were relying on automatic configuration of some default [DID resolvers](https://github.com/decentralized-identity/did-resolver)
+but this pattern was both limiting and prone to errors of misconfiguration or interference.
+This has caused an outage in credential verification on 2020-01-20 and continued use of previous versions are highly likely to no longer function properly because of this.
 
-**v1.0.0 (uport-credentials) to support only new uPort Mobile Clients and to use new features and fixes. In the future only v1.0.0 onwards will be supported.**
+An example configuration with a resolver:
 
-:bangbang: :warning: **v1.0.0** is released at the npm next tag at **uport-credentials@next**. While **^0.6.3** remains at **uport** on npm.  Only the newest uPort Mobile Client release will work with **v1.0.0**. It will become the default release once the newest uPort Mobile Client release is widely adopted (~ 2 weeks). Reference master branch for docs and info on current default release **^0.6.3**. Documentation for **v1.0.0** can only be found here and in the docs folder. The [developer site](https://developer.uport.me) will not contain **v1.0.0** documentation until it is the default release :warning: :bangbang:
+```javascript
 
+import { Resolver } from 'did-resolver'
+import getResolver from 'ethr-did-resolver'
+
+const providerConfig = { rpcUrl: 'https://mainnet.infura.io/<YOUR INFURA PROJECT ID>' }
+
+const credentials = new Credentials({
+    did: process.env.APPLICATION_DID,
+    signer: SimpleSigner(process.env.PRIVATE_KEY),
+    resolver: new Resolver(getResolver(providerConfig))
+})
+
+```
+
+See [ethr-did-resolver#43](https://github.com/decentralized-identity/ethr-did-resolver/issues/43) for more info.
 
 ## Integrate uPort Into Your Application 
 
