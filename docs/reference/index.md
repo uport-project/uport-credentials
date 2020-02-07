@@ -49,6 +49,7 @@ The following example is just for testing purposes. *You should never store a pr
 | [settings.address] | <code>Address</code> | DEPRECATED your uPort address (may be the address of your application's uPort identity) |
 | [settings.networks] | <code>Object</code> | DEPRECATED networks config object, e.g., {  '0x94365e3b': { rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }} |
 | [settings.registry] | <code>UportLite</code> | DEPRECATED a registry object from UportLite |
+| [settings.resolver] | <code>Resolver</code> | resolver object to fetch did documents. See [did-resolver](https://github.com/decentralized-identity/did-resolver)
 
 <a name="Credentials+createDisclosureRequest"></a>
 
@@ -381,7 +382,7 @@ Builds and returns a contract object which can be used to interact with
 <a name="Credentials.createIdentity"></a>
 
 ### Credentials.createIdentity() ⇒ <code>Object</code>
-Generate a DID and private key, effectively creating a new identity that can sign and verify data
+Generate a DID and private key, effectively creating a new identity that can sign and verify data. This is intended to be used in a Node environment. To do something like this in react-native please use the [react-native-uport-signer](http://github.com/uport-project/react-native-uport-signer)
 
 **Kind**: static method of [<code>Credentials</code>](#Credentials)  
 **Returns**: <code>Object</code> - keypair

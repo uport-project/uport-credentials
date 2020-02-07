@@ -1,5 +1,8 @@
 # Release Notes
 
+## Version 1.2.3
+* Fixes exports to allow `Credentials` to be used as a type
+
 ## Version 1.1.0
 * New method `Credentials.createPersonalSignRequest()` for creating a message to request a `personal_sign` RPC call from a uPort mobile wallet
 * New method `Credentials.createTypedDataSignatureRequest()` for creating a message to request a `eth_signTypedData` RPC call from a uPort mobile wallet

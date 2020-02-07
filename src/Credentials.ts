@@ -1,9 +1,12 @@
 import { ec as EC } from 'elliptic'
 
 import { createJWT, verifyJWT, SimpleSigner, Signer, toEthereumAddress } from 'did-jwt'
+import { createVerifiableCredential, verifyPresentation } from 'did-jwt-vc'
+import { PresentationPayload } from 'did-jwt-vc/lib/types'
 import UportDIDResolver from 'uport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
-import HttpsDIDResolver from 'https-did-resolver'
+import * as WebDidResolver from 'web-did-resolver'
+import { Resolver } from 'did-resolver'
 import UportLite from 'uport-lite'
 import { isMNID, decode as mnidDecode } from 'mnid'
 
@@ -16,6 +19,7 @@ import {
   Factory
 } from './Contract'
 import { DIDDocument, PublicKey } from 'did-resolver'
+import { VerifiableCredentialPayload, Issuer } from 'did-jwt-vc/lib/types'
 
 const secp256k1 = new EC('secp256k1')
 
@@ -25,7 +29,8 @@ enum Types {
   TYPED_DATA_SIGNATURE_REQUEST = 'eip712Req',
   VERIFICATION_SIGNATURE_REQUEST = 'verReq',
   ETH_TX_REQUEST = 'ethtx',
-  PERSONAL_SIGN_REQUEST = 'personalSigReq'
+  PERSONAL_SIGN_REQUEST = 'personalSigReq',
+  PRESENTATION_REQUEST = 'presentationReq'
 }
 
 interface Network {
@@ -43,7 +48,8 @@ interface Settings {
   signer?: Signer
   networks?: Networks
   registry?: (mnid: string) => Promise<object>
-  ethrConfig?: any
+  ethrConfig?: any,
+  resolver?: Resolver
 }
 
 interface Identity {
@@ -163,6 +169,7 @@ interface VerificationParam {
   exp?: number
   vc?: string[]
   callbackUrl?: string
+  expiresIn?: number
 }
 
 interface VerificationRequest {
@@ -221,6 +228,19 @@ interface PersonalSignPayload {
   data: string
 }
 
+interface PresentationResponse {
+  payload: PresentationPayload,
+  doc: DIDDocument,
+  issuer: string,
+  signer: {
+    id: string,
+    type: string,
+    owner: string,
+    ethereumAddress: string
+  },
+  jwt: string
+}
+
 /**
  * The Credentials class allows you to easily create the signed payloads used in uPort including
  * credentials and signed mobile app requests (ex. selective disclosure requests
@@ -248,6 +268,7 @@ class Credentials {
 
   readonly did?: string
   readonly signer?: Signer
+  readonly resolver: Resolver
 
   /**
    * Instantiates a new uPort Credentials object
@@ -256,8 +277,10 @@ class Credentials {
    *
    * ```javascript
    * import { Credentials } from 'uport-credentials'
+   * import { Resolver } from 'did-resolver'
    * const credentials = new Credentials({
-   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
+   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3',
+   *   resolver: new Resolver({...})
    * })
    * ```
    *
@@ -266,9 +289,11 @@ class Credentials {
    *
    * ```javascript
    * import { Credentials } from 'uport-credentials'
+   * import { Resolver } from 'did-resolver'
    * const credentials = new Credentials({
    *   did: 'did:ethr:0xbc3ae59bc76f894822622cdef7a2018dbe353840',
-   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
+   *   privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3',
+   *   resolver: new Resolver({...})
    * })
    * ```
    *
@@ -276,9 +301,11 @@ class Credentials {
    *
    * ```javascript
    * import { Credentials, SimpleSigner } from 'uport-credentials'
+   * import { Resolver } from 'did-resolver'
    * const credentials = new Credentials({
    *   did: process.env.APPLICATION_DID,
-   *   signer: SimpleSigner(process.env.PRIVATE_KEY)
+   *   signer: SimpleSigner(process.env.PRIVATE_KEY),
+   *   resolver: new Resolver({...})
    * })
    * ```
    *
@@ -287,6 +314,7 @@ class Credentials {
    *
    * ```javascript
    * import { Credentials } from 'uport-credentials'
+   * import { Resolver } from 'did-resolver'
    *
    * function mySigner (data) {
    *   return new Promise((resolve, reject) => {
@@ -297,7 +325,8 @@ class Credentials {
    *
    * const credentials = new Credentials({
    *   did: process.env.APPLICATION_DID,
-   *   signer: mySigner
+   *   signer: mySigner,
+   *   resolver: new Resolver({...})
    * })
    * ```
    *
@@ -308,7 +337,10 @@ class Credentials {
    * @param       {SimpleSigner}      [settings.signer]        a signer object, see
    * [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions)
    * @param       {Object}            [settings.ethrConfig]    Configuration object for ethr did resolver. See
-   * [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver)
+   * [ethr-did-resolver](https://github.com/decentralized-identity/ethr-did-resolver)
+   * @param       {Resolver}          [settings.resolver]      A preconfigured `Resolver` instance. See
+   * [did-resolver](https://github.com/decentralized-identity/did-resolver)
+   * **You are required to provide either `ethrConfig` or `resolver`**
    * @param       {Address}           [settings.address]       DEPRECATED your uPort address (may be the address of your
    * application's uPort identity)
    * @param       {Object}            [settings.networks]      DEPRECATED networks config object, ie. {  '0x94365e3b': {
@@ -323,7 +355,8 @@ class Credentials {
     signer,
     networks,
     registry,
-    ethrConfig
+    ethrConfig,
+    resolver
   }: Settings) {
     if (signer) {
       this.signer = signer
@@ -346,12 +379,13 @@ class Credentials {
       this.did = `did:ethr:${address}`
     }
 
-    UportDIDResolver(
-      registry ||
-        UportLite({ networks: networks ? configNetworks(networks) : {} })
-    )
-    EthrDIDResolver(ethrConfig || {})
-    HttpsDIDResolver()
+    if(resolver) {
+      this.resolver = resolver
+    } else {
+      const ethrResolver = EthrDIDResolver.getResolver(ethrConfig || {})
+      const webResolver = WebDidResolver.getResolver()
+      this.resolver = new Resolver({ ...webResolver, ...ethrResolver })
+    }
   }
 
   signJWT(payload: object, expiresIn?: number) {
@@ -523,7 +557,7 @@ class Credentials {
    * @param    {Number}      [opts.expiresIn]    The duration in seconds after which the request expires
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, rexp, expiresIn}:VerificationRequest) {
+  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, rexp, expiresIn }:VerificationRequest) {
     return this.signJWT({
       unsignedClaim,
       sub,
@@ -685,7 +719,7 @@ class Credentials {
     expiresIn = 600
   ) {
     if (payload.req) {
-      const verified = await verifyJWT(payload.req)
+      const verified = await verifyJWT(payload.req, { resolver: this.resolver })
       if (verified.issuer) {
         payload.aud = verified.issuer
       }
@@ -758,7 +792,7 @@ class Credentials {
       const invalid: string[] = []
       const verifying: Array<Promise<undefined | VerifiedJWT>> = verified.map(
         token =>
-          verifyJWT(token, { audience: this.did }).catch(() => {
+          verifyJWT(token, { resolver: this.resolver, audience: this.did }).catch(() => {
             invalid.push(token)
             return Promise.resolve(undefined)
           })
@@ -801,13 +835,14 @@ class Credentials {
    */
   async authenticateDisclosureResponse(token: string, callbackUrl?: string) {
     const { payload, doc }: DisclosurePayload = await verifyJWT(token, {
+      resolver: this.resolver,
       audience: this.did,
       callbackUrl,
       auth: true
     })
 
     if (payload.req) {
-      const challengeReq = await verifyJWT(payload.req, { audience: this.did })
+      const challengeReq = await verifyJWT(payload.req, { resolver: this.resolver, audience: this.did })
       const request: DisclosureRequestPayload = challengeReq.payload
       if (request.type !== Types.DISCLOSURE_REQUEST) {
         throw new Error(`Challenge payload type invalid: ${request.type}`)
@@ -838,8 +873,20 @@ class Credentials {
    *  @return   {Promise<Object, Error>}                        a promise which resolves with a parsed response or rejects with an error.
    */
   async verifyDisclosure(token: string) {
-    const { payload, doc } = await verifyJWT(token, { audience: this.did })
+    const { payload, doc } = await verifyJWT(token, { resolver: this.resolver, audience: this.did })
     return this.processDisclosurePayload({ payload, doc })
+  }
+
+  async issueVerifiableCredential(vcPayload: VerifiableCredentialPayload) {
+    if (!(this.did && this.signer))
+      return Promise.reject(new Error('No Signing Identity configured'))
+    const issuer: Issuer = { did: this.did, signer: this.signer }
+    return await createVerifiableCredential(vcPayload, issuer)
+  }
+
+  async verifyPresentation(vpJwt: string): Promise<PresentationResponse> {
+    const verifiedVP = await verifyPresentation(vpJwt, this.resolver)
+    return verifiedVP
   }
 
   /**
@@ -858,24 +905,6 @@ class Credentials {
     }
     return ContractFactory(txObjHandler.bind(this))(abi)
   }
-}
-
-function configNetworks(nets: Networks) {
-  Object.keys(nets).forEach(key => {
-    const net = nets[key]
-    if (typeof net === 'object') {
-      ;['registry', 'rpcUrl'].forEach(key => {
-        if (!net.hasOwnProperty(key)) {
-          throw new Error(
-            `Malformed network config object, object must have '${key}' key specified.`
-          )
-        }
-      })
-    } else {
-      throw new Error(`Network configuration object required`)
-    }
-  })
-  return nets
 }
 
 export default Credentials

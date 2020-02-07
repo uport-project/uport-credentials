@@ -9,7 +9,7 @@ declare module 'mnid' {
 }
 
 declare module 'ethr-did-resolver' {
-  export default function register(ethConfig: object): void
+  export function getResolver (conf?: object): object
 }
 
 declare module 'uport-lite' {
