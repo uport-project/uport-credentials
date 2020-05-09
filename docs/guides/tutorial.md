@@ -5,7 +5,7 @@ type: "content"
 source: "https://github.com/uport-project/uport-credentials/blob/develop/docs/guides/tutorial.md"
 ---
 
-In this toutorial, we will demonstrate how to create and sign a custom credential on a server (called the Creator) and present it to a uPort identity. The user of the uPort app will add this credential to their list of credentials. Later, we'll show you how another service (called the Requestor) can request this credential and validate the corresponding JSON Web Token. This example is available in the [uport-credentials repo](github.com/uport-project/uport-credentials).
+In this toutorial, we will demonstrate how to create and sign a custom credential on a server (called the Creator) and present it to a uPort identity. The user of the uPort app will add this credential to their list of credentials. Later, we'll show you how another service (called the Requestor) can request this credential and validate the corresponding JSON Web Token. This example is available in the [uport-credentials repo](https://github.com/uport-project/uport-credentials).
 
 To get started, download the repo, run install and build, then find the code for this example in the examples folder:
 
@@ -52,9 +52,15 @@ $ node
 In the file `createcredential.js`, we have a simple node `express` server. In the setup phase, we will use the private key, and the DID we created above; there is already an example key pair available in the file, but this should be replaced with your own keypair for any real application. Following along in the code, the first step is to create a `Credentials` object which will encapsulate our newly created keypair.
 
 ```js
+import { Resolver } from 'did-resolver'
+import { getResolver } from 'ethr-did-resolver'
+const providerConfig = { rpcUrl: 'https://mainnet.infura.io/<YOUR INFURA PROJECT ID>' }
+const resolver = new Resolver(getResolver(providerConfig))
+
 var credentials = new uport.Credentials({
   did: 'did:ethr:0xbc3ae59bc76f894822622cdef7a2018dbe353840',
-  privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
+  privateKey: '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3',
+  resolver
 })
 ```
 

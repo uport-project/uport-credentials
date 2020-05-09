@@ -17,16 +17,17 @@ This has caused an outage in credential verification on 2020-01-20 and continued
 An example configuration with a resolver:
 
 ```javascript
-
+import { Credentials, SimpleSigner } from 'uport-credentials'
 import { Resolver } from 'did-resolver'
-import getResolver from 'ethr-did-resolver'
+import { getResolver } from 'ethr-did-resolver'
 
 const providerConfig = { rpcUrl: 'https://mainnet.infura.io/<YOUR INFURA PROJECT ID>' }
+const resolver = new Resolver(getResolver(providerConfig))
 
 const credentials = new Credentials({
     did: process.env.APPLICATION_DID,
     signer: SimpleSigner(process.env.PRIVATE_KEY),
-    resolver: new Resolver(getResolver(providerConfig))
+    resolver
 })
 
 ```

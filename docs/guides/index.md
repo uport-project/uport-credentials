@@ -13,13 +13,19 @@ In your application, you must first configure your uPort object with an identifi
  
 ```javascript
 import { Credentials } from 'uport-credentials'
- 
+import { Resolver } from 'did-resolver'
+import { getResolver } from 'ethr-did-resolver'
+
+const providerConfig = { rpcUrl: 'https://mainnet.infura.io/<YOUR INFURA PROJECT ID>' }
+const resolver = new Resolver(getResolver(providerConfig))
+
 // For ethereum based addresses (ethr-did)
 const credentials = new Credentials({
   appName: 'App Name',
   did: 'did:ethr:0x....',
-  privateKey: process.env.PRIVATE_KEY
-})
+  privateKey: process.env.PRIVATE_KEY,
+  resolver
+}) 
 ```
 ## Generate an Ethereum Keypair 
  
@@ -28,17 +34,10 @@ At times, you might want identities to be created dynamically. This can be accom
 // Create a credentials object for a new identity
 const {did, privateKey} = Credentials.createIdentity()
 const credentials = new Credentials({
-  appName: 'App Name', did, privateKey
-})
-```
- 
-Finally, we continue to support older uPort identities described by an [MNID](http://github.com/uport-project/mnid)-encoded Ethereum address. These identifiers can be expressed as a DID via the 'uport' DID method: `did:uport:<mnid>`
-```javascript
-// For legacy application identity created on App Manager
-const credentials = new Credentials({
   appName: 'App Name',
-  did: 'did:uport:2nQtiQG...',  //append MNID encoded address using did:uport method 
-  privateKey: process.env.PRIVATE_KEY
+  did,
+  privateKey,
+  resolver
 })
 ```
 
