@@ -252,7 +252,7 @@ class Credentials {
    *
    * ```javascript
    * const {did, privateKey} = Credentials.createIdentity()
-   * const credentials = new Credentials({did, privateKey, ...})
+   * const credentials = new Credentials({did, privateKey, resolver, ...})
    * ```
    *
    * @returns {Object} keypair
@@ -297,7 +297,8 @@ class Credentials {
    * })
    * ```
    *
-   * It is recommended to store the address and private key in environment variables for your server application
+   * It is recommended to store the address and private key in environment variables for your server application and NOT
+   * hardcode it in your source code.
    *
    * ```javascript
    * import { Credentials, SimpleSigner } from 'uport-credentials'

@@ -41,7 +41,7 @@ The following example is just for testing purposes. *You should never store a pr
 | Param | Type | Description |
 | --- | --- | --- |
 | [settings] | <code>Object</code> | Optional settings |
-| [settings.did] | <code>DID</code> | Application [DID](https://w3c-ccg.github.io/did-spec/#decentralized-identifiers-dids) (unique identifier) for your application |
+| [settings.did] | <code>DID</code> | Application[DID](https://w3c-ccg.github.io/did-spec/#decentralized-identifiers-dids) (unique identifier) for your application |
 | [settings.privateKey] | <code>String</code> | A hex encoded 32 byte private key |
 | [settings.signer] | <code>SimpleSigner</code> | A signer object, see [Signer Functions](https://github.com/uport-project/did-jwt#signer-functions) |
 | [settings.ethrConfig] | <code>Object</code> | Configuration object for Ethr DID Resolver. See [ethr-did-resolver](https://github.com/uport-project/ethr-did-resolver) |
@@ -57,7 +57,8 @@ The following example is just for testing purposes. *You should never store a pr
 Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/specs/blob/develop/messages/sharereq.md)
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or rejects with an error  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or
+rejects with an error  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -74,7 +75,8 @@ Creates a [Selective Disclosure Request JWT](https://github.com/uport-project/sp
 
 #### Verifiable Claims Spec
 
-This is an json object that lives at the `verifiable` key within the `claims` object. It is not required, but provides you flexibility in clearly specifying the kind of claims you need.
+This is an json object that lives at the `verifiable` key within the `claims` object. It is not required, but provides
+you flexibility in clearly specifying the kind of claims you need.
 
 Name | Description | Required
 ---- | ----------- | --------
@@ -106,7 +108,8 @@ Examples:
 
 #### User Info Spec
 
-This is an json object that lives at the `user_info` key within the `claims` object. It is not required, but provides you flexibility in clearly specifying the kind of self presented user claims you need.
+This is an json object that lives at the `user_info` key within the `claims` object. It is not required, but provides
+you flexibility in clearly specifying the kind of self presented user claims you need.
 
 NOTE: These are claims specifically made by the user themselves and are not verifiable by an external party.
 
@@ -182,7 +185,8 @@ credentials.createDisclosureRequest(req).then(jwt => {
 Create a credential (a signed JSON Web Token)
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a credential (JWT) or rejects with an error  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a credential (JWT) or rejects
+with an error  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -204,10 +208,12 @@ credentials.createVerification({
 <a name="Credentials+createVerificationSignatureRequest"></a>
 
 ### credentials.createVerificationSignatureRequest(unsignedClaim, [opts]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Creates a request a for a DID to [sign a verification](https://github.com/uport-project/specs/blob/develop/messages/verificationreq.md)
+Creates a request a for a DID to
+[sign a verification](https://github.com/uport-project/specs/blob/develop/messages/verificationreq.md)
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - A promise which resolves with a signed JSON Web Token or rejects with an error  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - A promise which resolves with a signed JSON Web Token or
+rejects with an error  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -280,7 +286,8 @@ This can either be used to share information about the signing identity or as th
 where it can be used to authenticate the identity.
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or rejects with an error  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a signed JSON Web Token or
+rejects with an error  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -315,13 +322,16 @@ Parse a selective disclosure response and verify signatures on each signed claim
 <a name="Credentials+authenticateDisclosureResponse"></a>
 
 ### credentials.authenticateDisclosureResponse(token, [callbackUrl]) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Authenticates [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from uPort
- client as part of the [Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
+Authenticates
+[Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md) from
+uPort client as part of the
+[Selective Disclosure Flow](https://github.com/uport-project/specs/blob/develop/flows/selectivedisclosure.md).
 
  It Verifies and parses the given response token and verifies the challenge response flow.
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a parsed response or rejects with an error.  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a parsed response or rejects
+with an error. 
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -342,13 +352,15 @@ const resToken = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NksifQ.eyJyZXF1Z....'
 <a name="Credentials+verifyDisclosure"></a>
 
 ### credentials.verifyDisclosure(token) ⇒ <code>Promise.&lt;Object, Error&gt;</code>
-Verify and return profile from a [Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
+Verify and return profile from a
+[Selective Disclosure Response JWT](https://github.com/uport-project/specs/blob/develop/messages/shareresp.md).
 
 The main difference between this and `authenticateDisclosureResponse()` is that it does not verify the challenge.
 This can be used to verify user profiles that are shared through other methods such as QR codes and messages.
 
 **Kind**: instance method of [<code>Credentials</code>](#Credentials)  
-**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a parsed response or rejects with an error.  
+**Returns**: <code>Promise.&lt;Object, Error&gt;</code> - a promise which resolves with a parsed response or rejects
+with an error. 
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -382,7 +394,9 @@ Builds and returns a contract object which can be used to interact with
 <a name="Credentials.createIdentity"></a>
 
 ### Credentials.createIdentity() ⇒ <code>Object</code>
-Generate a DID and private key, effectively creating a new identity that can sign and verify data. This is intended to be used in a Node environment. To do something like this in react-native please use the [react-native-uport-signer](http://github.com/uport-project/react-native-uport-signer)
+Generate a DID and private key, effectively creating a new identity that can sign and verify data. This is intended to
+be used in a Node environment. To do something like this in react-native please use the
+[react-native-uport-signer](http://github.com/uport-project/react-native-uport-signer)
 
 **Kind**: static method of [<code>Credentials</code>](#Credentials)  
 **Returns**: <code>Object</code> - keypair
