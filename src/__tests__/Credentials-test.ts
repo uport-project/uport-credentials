@@ -61,7 +61,7 @@ function mockresolver(profile?: object) {
     }
     return doc
   }})
-  
+
 }
 
 describe('configuration', () => {
@@ -310,6 +310,13 @@ describe('createDisclosureRequest()', () => {
     const response = await createAndVerify({
       requested: ['name', 'phone'],
       notifications: true
+    })
+    return expect(response).toMatchSnapshot()
+  })
+
+  it('has correct payload in JWT for a request with boxPub', async () => {
+    const response = await createAndVerify({
+      boxPub: 'DummyPrivateKey'
     })
     return expect(response).toMatchSnapshot()
   })
@@ -600,7 +607,7 @@ describe('verifyDisclosure()', () => {
   beforeAll(() => {
     credentials = new Credentials({ privateKey, did })
   })
-  
+
   it('returns profile mixing public and private claims', async () => {
     const jwt = await credentials.createDisclosureResponse({
       own: { name: 'Davie', phone: '+15555551234' }

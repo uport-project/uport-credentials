@@ -103,7 +103,8 @@ interface DisclosureRequestParams {
   rpcUrl?: string
   vc?: string[]
   exp?: number
-  accountType?: 'none' | 'segregated' | 'keypair' | 'none',
+  accountType?: 'none' | 'segregated' | 'keypair' | 'none'
+  boxPub?: string
 }
 
 interface DisclosureRequestPayload extends JWTPayload{
@@ -116,6 +117,7 @@ interface DisclosureRequestPayload extends JWTPayload{
   rpc?: string
   vc?: string[]
   act?: 'none' | 'segregated' | 'keypair' | 'none'
+  boxPub?: string
 }
 
 interface DisclosureResponsePayload extends JWTPayload {
@@ -445,7 +447,7 @@ class Credentials {
    * `
    *
    *  @param    {Object}             [params={}]           request params object
-   * 
+   *
    *  @param    {Array}              params.requested      DEPRECATED an array of attributes for which you are requesting credentials to be shared for
    *  @param    {Array}              params.verified       DEPRECATED an array of attributes for which you are requesting verified credentials to be shared for
    *  @param    {Object}             params.claims         Claims spec Object
@@ -456,6 +458,7 @@ class Credentials {
    * (private or permissioned chain). The JSON-RPC url must match the `networkId`
    *  @param    {String[]}           params.vc            An array of JWTs about the requester, signed by 3rd parties
    *  @param    {String}             params.accountType    Ethereum account type: "general", "segregated", "keypair", or "none"
+   *  @param    {String}             params.boxPub         Public key for encrypted response
    *  @param    {Number}             expiresIn             Seconds until expiry
    *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
    */
@@ -495,6 +498,8 @@ class Credentials {
         )
       }
     }
+
+    if (params.boxPub) payload.boxPub = params.boxPub
 
     return this.signJWT(
       { ...payload, type: Types.DISCLOSURE_REQUEST },
