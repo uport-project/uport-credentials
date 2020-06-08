@@ -103,7 +103,7 @@ interface DisclosureRequestParams {
   rpcUrl?: string
   vc?: string[]
   exp?: number
-  accountType?: 'none' | 'segregated' | 'keypair' | 'none'
+  accountType?: 'none' | 'segregated' | 'keypair'
   boxPub?: string
 }
 
