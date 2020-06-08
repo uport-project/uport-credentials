@@ -116,7 +116,7 @@ interface DisclosureRequestPayload extends JWTPayload{
   net?: string
   rpc?: string
   vc?: string[]
-  act?: 'none' | 'segregated' | 'keypair' | 'none'
+  act?: 'none' | 'segregated' | 'keypair'
   boxPub?: string
 }
 
