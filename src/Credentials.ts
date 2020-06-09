@@ -378,8 +378,8 @@ class Credentials {
       }
     } else if (privateKey) {
       const kp = secp256k1.keyFromPrivate(privateKey)
-      const address = toEthereumAddress(kp.getPublic('hex'))
-      this.did = `did:ethr:${address}`
+      const hexAddress = toEthereumAddress(kp.getPublic('hex'))
+      this.did = `did:ethr:${hexAddress}`
     }
 
     if(resolver) {
@@ -392,8 +392,9 @@ class Credentials {
   }
 
   signJWT(payload: object, expiresIn?: number) {
-    if (!(this.did && this.signer))
+    if (!(this.did && this.signer)) {
       return Promise.reject(new Error('No Signing Identity configured'))
+    }
     return createJWT(payload, {
       issuer: this.did,
       signer: this.signer,
@@ -523,7 +524,8 @@ class Credentials {
    *
    * @param    {Object}            [credential]           a unsigned claim object
    * @param    {String}            credential.sub         subject of credential (a valid DID)
-   * @param    {String}            credential.claim       claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
+   * @param    {String}            credential.claim       claim about subject single key value or key mapping to object
+   *                                        with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
    * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
@@ -572,7 +574,7 @@ class Credentials {
       vc,
       callback: callbackUrl,
       type: Types.VERIFICATION_SIGNATURE_REQUEST,
-      rexp,
+      rexp
     }, expiresIn)
   }
 
@@ -630,8 +632,9 @@ class Credentials {
   ) {
     // Check if the typedData is a valid ERC712 request
     for (const prop of ['types', 'primaryType', 'message', 'domain']) {
-      if (!typedData[prop])
+      if (!typedData[prop]) {
         throw new Error(`Invalid EIP712 Request, must include '${prop}'`)
+      }
     }
 
     return await this.signJWT({
@@ -884,8 +887,9 @@ class Credentials {
   }
 
   async issueVerifiableCredential(vcPayload: VerifiableCredentialPayload) {
-    if (!(this.did && this.signer))
+    if (!(this.did && this.signer)) {
       return Promise.reject(new Error('No Signing Identity configured'))
+    }
     const issuer: Issuer = { did: this.did, signer: this.signer }
     return await createVerifiableCredential(vcPayload, issuer)
   }
@@ -906,7 +910,7 @@ class Credentials {
   contract(abi: ContractABI): Factory {
     const txObjHandler = (txObj: TransactionRequest, opts?: TxReqOptions) => {
       if (txObj.function) txObj.fn = txObj.function
-      delete txObj['function']
+      delete txObj.function
       return this.createTxRequest(txObj, opts)
     }
     return ContractFactory(txObjHandler.bind(this))(abi)
