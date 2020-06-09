@@ -301,10 +301,7 @@ describe('Contract', () => {
   })
 
   it('returns a well formed uri on contract function calls', () => {
-    const uri = tokenContract.transfer(
-      '0x41566e3a081f5032bdcad470adb797635ddfe1f0',
-      10
-    )
+    const uri = tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)
     expect(uri).toEqual(
       'me.uport:0x41566e3a081f5032bdcad470adb797635ddfe1f0?function=transfer(address 0x41566e3a081f5032bdcad470adb797635ddfe1f0, uint256 10)'
     )
@@ -322,10 +319,7 @@ describe('ContractFactory', () => {
 
     describe('function with address and uint256', () => {
       beforeAll(() => {
-        txObject = tokenContract.transfer(
-          '0x41566e3a081f5032bdcad470adb797635ddfe1f0',
-          10
-        )
+        txObject = tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)
       })
 
       it('returns a well formed txObject on contract function calls', () => {
@@ -334,20 +328,15 @@ describe('ContractFactory', () => {
       })
 
       it('returns a txObject with a human readable function and params', () => {
-        expect(txObject.function).toEqual(
-          'transfer(address 0x41566e3a081f5032bdcad470adb797635ddfe1f0, uint256 10)'
-        )
+        expect(txObject.function).toEqual('transfer(address 0x41566e3a081f5032bdcad470adb797635ddfe1f0, uint256 10)')
       })
     })
 
     describe('function with address, uint and bytes and txObject', () => {
       beforeAll(() => {
-        txObject = tokenContract.approveAndCall(
-          '0x41566e3a081f5032bdcad470adb797635ddfe1f0',
-          10,
-          '0x1234',
-          { gas: '0x123454' }
-        )
+        txObject = tokenContract.approveAndCall('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10, '0x1234', {
+          gas: '0x123454'
+        })
       })
 
       it('returns a well formed txObject on contract function calls', () => {
@@ -368,9 +357,7 @@ describe('ContractFactory', () => {
       const extend = _ => 'hello'
       const Contract = ContractFactory(extend)
       const tokenContract: any = Contract(abiToken).at(address)
-      expect(
-        tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)
-      ).toEqual('hello')
+      expect(tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10)).toEqual('hello')
     })
 
     it('passes additional args on Contract object function calls to the extend function', () => {
@@ -378,13 +365,7 @@ describe('ContractFactory', () => {
       const extend = (_, arg) => arg
       const Contract = ContractFactory(extend)
       const tokenContract: any = Contract(abiToken).at(address)
-      expect(
-        tokenContract.transfer(
-          '0x41566e3a081f5032bdcad470adb797635ddfe1f0',
-          10,
-          str
-        )
-      ).toEqual(str)
+      expect(tokenContract.transfer('0x41566e3a081f5032bdcad470adb797635ddfe1f0', 10, str)).toEqual(str)
     })
   })
 })

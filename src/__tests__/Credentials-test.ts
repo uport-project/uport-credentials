@@ -16,8 +16,7 @@ MockDate.set(NOW * 1000)
 
 const toSeconds = date => Math.floor(date / 1000)
 
-const privateKey =
-  '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
+const privateKey = '74894f8853f90e6e3d6dfdd343eb0eb70cca06e552ed8af80adadcc573b35da3'
 const address = '0xbc3ae59bc76f894822622cdef7a2018dbe353840'
 const did = `did:ethr:${address}`
 const mnid = '2nQtiQG6Cgm1GYTBaaKAgr76uY7iSexUkqX'
@@ -37,31 +36,32 @@ interface DIDDocumentWithProfile extends DIDDocument {
 
 function mockresolver(profile?: object) {
   const mockGetResolver = jest.spyOn(ethrResolver, 'getResolver')
-  mockGetResolver.mockReturnValue({'ethr': (id, parsed) => {
-    const doc: DIDDocumentWithProfile = {
-      '@context': 'https://w3id.org/did/v1',
-      id,
-      publicKey: [
-        {
-          id: `${id}#owner`,
-          type: 'Secp256k1VerificationKey2018',
-          owner: id,
-          ethereumAddress: parsed.id
-        }
-      ],
-      authentication: [
-        {
-          type: 'Secp256k1SignatureAuthentication2018',
-          publicKey: `${id}#owner`
-        }
-      ]
+  mockGetResolver.mockReturnValue({
+    ethr: (id, parsed) => {
+      const doc: DIDDocumentWithProfile = {
+        '@context': 'https://w3id.org/did/v1',
+        id,
+        publicKey: [
+          {
+            id: `${id}#owner`,
+            type: 'Secp256k1VerificationKey2018',
+            owner: id,
+            ethereumAddress: parsed.id
+          }
+        ],
+        authentication: [
+          {
+            type: 'Secp256k1SignatureAuthentication2018',
+            publicKey: `${id}#owner`
+          }
+        ]
+      }
+      if (profile) {
+        doc.uportProfile = profile
+      }
+      return doc
     }
-    if (profile) {
-      doc.uportProfile = profile
-    }
-    return doc
-  }})
-
+  })
 }
 
 describe('configuration', () => {
@@ -79,9 +79,7 @@ describe('configuration', () => {
     })
 
     describe('mnid `address` configured', () => {
-      expect(new Credentials({ address: mnid }).did).toEqual(
-        `did:uport:${mnid}`
-      )
+      expect(new Credentials({ address: mnid }).did).toEqual(`did:uport:${mnid}`)
     })
   })
 
@@ -115,7 +113,6 @@ describe('configuration', () => {
       }
       expect(() => new Credentials({ networks })).not.toThrow()
     })
-
   })
 })
 
@@ -166,16 +163,12 @@ describe('signJWT', () => {
   describe('validation', () => {
     it('should fail if no signer was configured', async () => {
       const badport = new Credentials({ did })
-      return expect(badport.signJWT({ type: 'request' })).rejects.toThrow(
-        'No Signing Identity configured'
-      )
+      return expect(badport.signJWT({ type: 'request' })).rejects.toThrow('No Signing Identity configured')
     })
 
     it('should fail if no did was configured', async () => {
       const badport = new Credentials({ signer: SimpleSigner(privateKey) })
-      return expect(badport.signJWT({ type: 'request' })).rejects.toThrow(
-        'No Signing Identity configured'
-      )
+      return expect(badport.signJWT({ type: 'request' })).rejects.toThrow('No Signing Identity configured')
     })
   })
 })
@@ -221,9 +214,7 @@ describe('createDisclosureRequest()', () => {
     })
 
     it('missing network id', async () => {
-      await expect(
-        createAndVerify({ rpcUrl: 'https://dai.poa.network/' })
-      ).rejects.toMatchSnapshot()
+      await expect(createAndVerify({ rpcUrl: 'https://dai.poa.network/' })).rejects.toMatchSnapshot()
     })
   })
 
@@ -558,9 +549,7 @@ describe('authenticateDisclosureResponse()', () => {
   describe('check original request', () => {
     it('rejects response with missing challenge', async () => {
       const jwt = await credentials.createDisclosureResponse({ own: { name: 'bob' } })
-      expect(credentials.authenticateDisclosureResponse(jwt)).rejects.toThrow(
-        'Challenge was not included in response'
-      )
+      expect(credentials.authenticateDisclosureResponse(jwt)).rejects.toThrow('Challenge was not included in response')
     })
 
     it('should reject if embedded request was not from me', async () => {
@@ -574,9 +563,7 @@ describe('authenticateDisclosureResponse()', () => {
         req
       })
       return expect(credentials.authenticateDisclosureResponse(jwt)).rejects.toThrow(
-        `JWT audience does not match your DID: aud: ${id.did} !== yours: ${
-          credentials.did
-        }`
+        `JWT audience does not match your DID: aud: ${id.did} !== yours: ${credentials.did}`
       )
     })
 
@@ -589,9 +576,7 @@ describe('authenticateDisclosureResponse()', () => {
         own: { name: 'Davie', phone: '+15555551234' },
         req
       })
-      return expect(credentials.authenticateDisclosureResponse(jwt)).rejects.toThrow(
-        `Challenge payload type invalid: `
-      )
+      return expect(credentials.authenticateDisclosureResponse(jwt)).rejects.toThrow(`Challenge payload type invalid: `)
     })
   })
 })
@@ -747,9 +732,7 @@ describe('issueVerifiableCredential', () => {
 
   it('Throws error if no signer configured', async () => {
     credentials = new Credentials({})
-    expect(credentials.issueVerifiableCredential(vcPayload)).rejects.toThrow(
-      'No Signing Identity configured'
-    )
+    expect(credentials.issueVerifiableCredential(vcPayload)).rejects.toThrow('No Signing Identity configured')
   })
 })
 
@@ -790,7 +773,5 @@ describe('verifyPresentation', () => {
     expect(result.payload.iss).toEqual(issuer.did)
     expect(result.payload.vp).toEqual(vpPayload.vp)
     expect(result.payload.vp.verifiableCredential).toEqual(vpPayload.vp.verifiableCredential)
-
   })
-
 })
