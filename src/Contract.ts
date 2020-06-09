@@ -1,12 +1,11 @@
-
 // A derivative work of Nick Dodson's eths-contract https://github.com/ethjs/ethjs-contract/blob/master/src/index.js
 
 export interface TransactionRequest {
-  from?: string,
-  to?: string,
-  data?: string,
-  value?: string | number,
-  gasPrice?: string | number,
+  from?: string
+  to?: string
+  data?: string
+  value?: string | number
+  gasPrice?: string | number
   gas?: string | number
   fn?: string
   function?: string
@@ -27,21 +26,21 @@ enum StateMutability {
 }
 
 export interface AbiParam {
-  name: string,
-  type: string,
+  name: string
+  type: string
   components?: AbiParam[]
 }
 
 interface AbiEntry {
-  type: AbiEntryType,
-  name?: string,
-  inputs?: AbiParam[],
+  type: AbiEntryType
+  name?: string
+  inputs?: AbiParam[]
 }
 
 export interface AbiFunction extends AbiEntry {
   // type: AbiEntryType.Function | AbiEntryType.Constructor | AbiEntryType.Constructor,
-  outputs?: AbiParam[],
-  stateMutability?: StateMutability,
+  outputs?: AbiParam[]
+  stateMutability?: StateMutability
   payable?: boolean
   constant?: boolean
 }
@@ -52,11 +51,11 @@ interface AbiEventParam extends AbiParam {
 
 export interface AbiEvent extends AbiEntry {
   // type: AbiEntryType.Event,
-  inputs?: AbiEventParam[],
+  inputs?: AbiEventParam[]
   anonymous?: boolean
 }
 
-export type ContractABI = Array<AbiEvent|AbiFunction>
+export type ContractABI = Array<AbiEvent | AbiFunction>
 
 const isTransactionObject = (txObj: TransactionRequest) => {
   const txObjectProperties = ['from', 'to', 'data', 'value', 'gasPrice', 'gas']
@@ -68,11 +67,13 @@ const isTransactionObject = (txObj: TransactionRequest) => {
     if (prop in txObj) return true
   }
 
-  return false;
+  return false
 }
 
 const getCallableMethodsFromABI = (contractABI: ContractABI): AbiFunction[] => {
-  return <AbiFunction[]>contractABI.filter((entry) => (entry.type === AbiEntryType.Function && entry.name && (!(<AbiFunction>entry).constant)));
+  return <AbiFunction[]>(
+    contractABI.filter(entry => entry.type === AbiEntryType.Function && entry.name && !(<AbiFunction>entry).constant)
+  )
 }
 
 const encodeMethodReadable = (methodObject: AbiFunction, methodArgs: any[]) => {
@@ -95,11 +96,11 @@ const encodeMethodReadable = (methodObject: AbiFunction, methodArgs: any[]) => {
 
     dataString += argString
 
-    if ((inputs.length - 1) !== i) {
+    if (inputs.length - 1 !== i) {
       dataString += `, `
     }
   }
-  return dataString += `)`
+  return (dataString += `)`)
 }
 
 export interface Factory {
@@ -114,15 +115,15 @@ export interface ContractInterface {
 interface DynamicABI {
   [method: string]: () => TransactionRequest
 }
-export const ContractFactory = (encoder?: (tx: any, params? : any) => any) => (contractABI: ContractABI): Factory => {
+export const ContractFactory = (encoder?: (tx: any, params?: any) => any) => (contractABI: ContractABI): Factory => {
   return {
-    at: (address: string) : any => {
-      const functionCalls : DynamicABI = {}
-      getCallableMethodsFromABI(contractABI).forEach((methodObject) => {
+    at: (address: string): any => {
+      const functionCalls: DynamicABI = {}
+      getCallableMethodsFromABI(contractABI).forEach(methodObject => {
         if (methodObject.name) {
           functionCalls[methodObject.name] = function contractMethod() {
-            let providedTxObject = {};
-            const methodArgs = [].slice.call(arguments);
+            let providedTxObject = {}
+            const methodArgs = [].slice.call(arguments)
             const nArgs = (methodObject.inputs || []).length
             // Remove transaction object if provided
             if (isTransactionObject(methodArgs[nArgs])) {
@@ -138,11 +139,10 @@ export const ContractFactory = (encoder?: (tx: any, params? : any) => any) => (c
 
             const extendArgs = methodArgs[methodArgs.length - 1]
             return encoder(methodTxObject, extendArgs)
-          }  
+          }
         }
       })
       return { ...functionCalls, abi: contractABI, address }
     }
   }
 }
-
