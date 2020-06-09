@@ -15,16 +15,18 @@
     "tutorial"
   ],
   "scripts": {
-    "test": "./node_modules/.bin/jest",
-    "test:ci": "./node_modules/.bin/jest -u --coverage",
-    "build:js": "./node_modules/.bin/microbundle",
-    "build:browser": "./node_modules/.bin/webpack --config webpack.config.js",
+    "test": "jest",
+    "test:ci": "jest -u --coverage && codecov",
+    "build:js": "microbundle",
+    "build:browser": "webpack --config webpack.config.js",
     "build": "npm run build:js && npm run test:ci && npm run build:browser",
-    "build:docs": "echo 'PLEASE UPDATE REFEREN DOCS MANUALLY'",
+    "build:docs": "echo 'PLEASE UPDATE REFERENCE DOCS MANUALLY'",
     "prepublish": "npm run build",
     "prepare": "npm run build",
-    "draft-release-notes": "GREN_GITHUB_TOKEN=$(vault read -field=value secret/mobile/release_token) gren release -d",
-    "publish-release-notes": "GREN_GITHUB_TOKEN=$(vault read -field=value secret/mobile/release_token) gren release"
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tslint -p tsconfig.json",
+    "prepublishOnly": "npm test && npm run lint",
+    "release": "semantic-release --debug"
   },
   "author": "Pelle Braendgaard <pelle.braendgaard@consensys.net>",
   "repository": {
@@ -68,10 +70,13 @@
     "testEnvironment": "node"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/git": "^9.0.0",
     "@types/elliptic": "^6.4.6",
     "@types/jest": "^24.0.11",
     "@types/mockdate": "^2.0.0",
     "body-parser": "^1.18.3",
+    "codecov": "^3.7.0",
     "express": "^4.16.3",
     "jest": "^24.7.1",
     "json-loader": "^0.5.4",
@@ -79,7 +84,7 @@
     "mockdate": "^2.0.1",
     "ngrok": "^3.2.7",
     "nock": "^9.4.3",
-    "prettier": "^1.17.0",
+    "prettier": "^1.19.1",
     "ts-jest": "^24.0.2",
     "tslint": "^5.16.0",
     "tslint-config-prettier": "^1.18.0",
