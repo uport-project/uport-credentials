@@ -54,10 +54,13 @@ Credentials when necessary.
 
 To hit the ground running with uPort Credentials, visit the [Getting Started guide](/docs/guides/index.md). 
 
-For details on uPort's underlying architecture, read our [spec repo](https://github.com/uport-project/specs) or check
-out the [uPort identity contracts](https://github.com/uport-project/uport-identity).
+For details on uPort's underlying architecture, read our [spec repo](https://github.com/uport-project/specs)
 
 This library is part of a suite of tools maintained by the uPort Project, a ConsenSys formation. For more information
 on the project, visit [uport.me](https://uport.me)
 
 [FAQ and helpdesk support](http://bit.ly/uPort_helpdesk)
+
+## Contributing
+
+Please see our [contribution guidelines](/Contributing.md) if you wish to contribute to this project.
