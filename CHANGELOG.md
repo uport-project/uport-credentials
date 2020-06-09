@@ -1,16 +1,25 @@
-# Release Notes
+## [1.3.0](https://github.com/uport-project/uport-credentials/compare/v1.2.3...1.3.0) (2020-02-07)
 
-## Version 1.2.3
+
+### Features
+
+* add support for did-jwt-vc ([#192](https://github.com/uport-project/uport-credentials/issues/192))
+
+## [1.2.3](https://github.com/uport-project/uport-credentials/compare/v1.1.0...v1.2.3) (2019-10-08)
+
+
+### Bug Fixes
+
 * Fixes exports to allow `Credentials` to be used as a type
 
-## Version 1.1.0
+## [1.2.3](https://github.com/uport-project/uport-credentials/compare/v1.0.0...v1.1.0)
 * New method `Credentials.createPersonalSignRequest()` for creating a message to request a `personal_sign` RPC call from a uPort mobile wallet
 * New method `Credentials.createTypedDataSignatureRequest()` for creating a message to request a `eth_signTypedData` RPC call from a uPort mobile wallet
 * Support for `vc` property throughout messages, see accompanying notes in `uport-connect@1.1.0`
 
 ----------------------------------------------------------------------------
 
-## Version 1.0.0
+## [1.0.0](https://github.com/uport-project/uport-credentials/compare/r0.6.0...v1.0.0)
 
 With the release of uPort Credentials `v1.0.0`, there are a number of changes to our API -- the main differences to watch out for are described in this document, and the full API reference can be found [here](https://developer.uport.me/uport-js/reference/index). The primary changes consist of function name changes, with the hope of improving clarity. We have also clarified the role of this library as the primary method for *creating* and *verifying* messages in the form of verifiable claims, all of which are described in the [uPort specs repo](https://github.com/uport-project/specs).
 
@@ -49,7 +58,7 @@ As the primary method for identity creation and management has changed, we no lo
 Push functionality is now handled by the new [`uport-transports`](https://github.com/uport-project/uport-transports) library. Additionally, when using `uport-connect`, a `Connect` instance will make requests using push automatically if given permission from a mobile app.
 
 ----------------------------------------------------------------------------
-## v0.6.0
+## [0.6.0](https://github.com/uport-project/uport-credentials/compare/r0.5.2...r0.6.0)
 * Support seconds (instead of milliseconds) for JWT timestamps
 * Support for encrypted push notifications
 * Docs update

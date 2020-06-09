@@ -10,14 +10,7 @@ import { Resolver } from 'did-resolver'
 import UportLite from 'uport-lite'
 import { isMNID, decode as mnidDecode } from 'mnid'
 
-import {
-  ContractFactory,
-  TransactionRequest,
-  AbiParam,
-  ContractABI,
-  ContractInterface,
-  Factory
-} from './Contract'
+import { ContractFactory, TransactionRequest, AbiParam, ContractABI, ContractInterface, Factory } from './Contract'
 import { DIDDocument, PublicKey } from 'did-resolver'
 import { VerifiableCredentialPayload, Issuer } from 'did-jwt-vc/lib/types'
 
@@ -48,7 +41,7 @@ interface Settings {
   signer?: Signer
   networks?: Networks
   registry?: (mnid: string) => Promise<object>
-  ethrConfig?: any,
+  ethrConfig?: any
   resolver?: Resolver
 }
 
@@ -84,9 +77,8 @@ interface VerifiableClaimsSpec {
   [claimType: string]: VerifiableClaimSpec
 }
 
-
 interface UserInfoSpec {
-  [claimType: string]: ClaimSpec|null
+  [claimType: string]: ClaimSpec | null
 }
 
 interface ClaimsSpec {
@@ -94,7 +86,7 @@ interface ClaimsSpec {
   user_info: UserInfoSpec
 }
 interface DisclosureRequestParams {
-  claims?: ClaimsSpec,
+  claims?: ClaimsSpec
   requested?: string[]
   verified?: string[]
   notifications?: boolean
@@ -107,8 +99,8 @@ interface DisclosureRequestParams {
   boxPub?: string
 }
 
-interface DisclosureRequestPayload extends JWTPayload{
-  claims?: ClaimsSpec,
+interface DisclosureRequestPayload extends JWTPayload {
+  claims?: ClaimsSpec
   requested?: string[]
   verified?: string[]
   permissions?: string[]
@@ -231,15 +223,15 @@ interface PersonalSignPayload {
 }
 
 interface PresentationResponse {
-  payload: PresentationPayload,
-  doc: DIDDocument,
-  issuer: string,
+  payload: PresentationPayload
+  doc: DIDDocument
+  issuer: string
   signer: {
-    id: string,
-    type: string,
-    owner: string,
+    id: string
+    type: string
+    owner: string
     ethereumAddress: string
-  },
+  }
   jwt: string
 }
 
@@ -351,16 +343,7 @@ class Credentials {
    * @param       {UportLite}         [settings.registry]      DEPRECATED a registry object from UportLite
    * @return      {Credentials}                                self
    */
-  constructor({
-    did,
-    address,
-    privateKey,
-    signer,
-    networks,
-    registry,
-    ethrConfig,
-    resolver
-  }: Settings) {
+  constructor({ did, address, privateKey, signer, networks, registry, ethrConfig, resolver }: Settings) {
     if (signer) {
       this.signer = signer
     } else if (privateKey) {
@@ -378,11 +361,11 @@ class Credentials {
       }
     } else if (privateKey) {
       const kp = secp256k1.keyFromPrivate(privateKey)
-      const address = toEthereumAddress(kp.getPublic('hex'))
-      this.did = `did:ethr:${address}`
+      const hexAddress = toEthereumAddress(kp.getPublic('hex'))
+      this.did = `did:ethr:${hexAddress}`
     }
 
-    if(resolver) {
+    if (resolver) {
       this.resolver = resolver
     } else {
       const ethrResolver = EthrDIDResolver.getResolver(ethrConfig || {})
@@ -392,15 +375,13 @@ class Credentials {
   }
 
   signJWT(payload: object, expiresIn?: number) {
-    if (!(this.did && this.signer))
+    if (!(this.did && this.signer)) {
       return Promise.reject(new Error('No Signing Identity configured'))
+    }
     return createJWT(payload, {
       issuer: this.did,
       signer: this.signer,
-      alg:
-        this.did.match('^did:uport:') || isMNID(this.did)
-          ? 'ES256K'
-          : 'ES256K-R',
+      alg: this.did.match('^did:uport:') || isMNID(this.did) ? 'ES256K' : 'ES256K-R',
       expiresIn
     })
   }
@@ -463,10 +444,7 @@ class Credentials {
    *  @param    {Number}             expiresIn             Seconds until expiry
    *  @return   {Promise<Object, Error>}                   a promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createDisclosureRequest(
-    params: DisclosureRequestParams = {},
-    expiresIn = 600
-  ) {
+  createDisclosureRequest(params: DisclosureRequestParams = {}, expiresIn = 600) {
     const payload: DisclosureRequestPayload = {}
     if (params.requested) payload.requested = params.requested
     if (params.verified) payload.verified = params.verified
@@ -478,34 +456,23 @@ class Credentials {
       if (params.networkId) {
         payload.rpc = params.rpcUrl
       } else {
-        return Promise.reject(
-          new Error(`rpcUrl was specified but no networkId`)
-        )
+        return Promise.reject(new Error(`rpcUrl was specified but no networkId`))
       }
     }
     if (params.vc) payload.vc = params.vc
     if (params.exp) payload.exp = params.exp
 
     if (params.accountType) {
-      if (
-        ['general', 'segregated', 'keypair', 'none'].indexOf(
-          params.accountType
-        ) >= 0
-      ) {
+      if (['general', 'segregated', 'keypair', 'none'].indexOf(params.accountType) >= 0) {
         payload.act = params.accountType
       } else {
-        return Promise.reject(
-          new Error(`Unsupported accountType ${params.accountType}`)
-        )
+        return Promise.reject(new Error(`Unsupported accountType ${params.accountType}`))
       }
     }
 
     if (params.boxPub) payload.boxPub = params.boxPub
 
-    return this.signJWT(
-      { ...payload, type: Types.DISCLOSURE_REQUEST },
-      params.exp ? undefined : expiresIn
-    )
+    return this.signJWT({ ...payload, type: Types.DISCLOSURE_REQUEST }, params.exp ? undefined : expiresIn)
   }
 
   /**
@@ -523,7 +490,8 @@ class Credentials {
    *
    * @param    {Object}            [credential]           a unsigned claim object
    * @param    {String}            credential.sub         subject of credential (a valid DID)
-   * @param    {String}            credential.claim       claim about subject single key value or key mapping to object with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
+   * @param    {String}            credential.claim       claim about subject single key value or key mapping to object
+   *                                        with multiple values (ie { address: {street: ..., zip: ..., country: ...}})
    * @param    {String}            credential.exp         time at which this claim expires and is no longer valid (seconds since epoch)
    * @return   {Promise<Object, Error>}                   a promise which resolves with a credential (JWT) or rejects with an error
    */
@@ -563,17 +531,23 @@ class Credentials {
    * @param    {Number}      [opts.expiresIn]    The duration in seconds after which the request expires
    * @returns  {Promise<Object, Error>}          A promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  createVerificationSignatureRequest(unsignedClaim: object, { aud, sub, riss, callbackUrl, vc, rexp, expiresIn }:VerificationRequest) {
-    return this.signJWT({
-      unsignedClaim,
-      sub,
-      riss,
-      aud,
-      vc,
-      callback: callbackUrl,
-      type: Types.VERIFICATION_SIGNATURE_REQUEST,
-      rexp,
-    }, expiresIn)
+  createVerificationSignatureRequest(
+    unsignedClaim: object,
+    { aud, sub, riss, callbackUrl, vc, rexp, expiresIn }: VerificationRequest
+  ) {
+    return this.signJWT(
+      {
+        unsignedClaim,
+        sub,
+        riss,
+        aud,
+        vc,
+        callback: callbackUrl,
+        type: Types.VERIFICATION_SIGNATURE_REQUEST,
+        rexp
+      },
+      expiresIn
+    )
   }
 
   /**
@@ -624,14 +598,12 @@ class Credentials {
    *   @param {String} opts.callback        callback URL to handle the response
    * @returns {Promise<Object, Error>}      a promise which resolves to a signed JWT or rejects with an error
    */
-  async createTypedDataSignatureRequest(
-    typedData: EIP712Object,
-    { from, net, callback }: NetworkRequest = {}
-  ) {
+  async createTypedDataSignatureRequest(typedData: EIP712Object, { from, net, callback }: NetworkRequest = {}) {
     // Check if the typedData is a valid ERC712 request
     for (const prop of ['types', 'primaryType', 'message', 'domain']) {
-      if (!typedData[prop])
+      if (!typedData[prop]) {
         throw new Error(`Invalid EIP712 Request, must include '${prop}'`)
+      }
     }
 
     return await this.signJWT({
@@ -649,10 +621,7 @@ class Credentials {
    * @param {Object} opts Additional options for request
    * @returns {Promise<Object, Error>}
    */
-  createPersonalSignRequest(
-    data: string,
-    { from, net, callback }: NetworkRequest = {}
-  ) {
+  createPersonalSignRequest(data: string, { from, net, callback }: NetworkRequest = {}) {
     return this.signJWT({
       data,
       from,
@@ -685,18 +654,12 @@ class Credentials {
    *  @param    {String}    [opts.label]
    *  @return   {String}                        a transaction request jwt
    */
-  createTxRequest(
-    txObj: TransactionRequest,
-    { callbackUrl, exp = 600, networkId, label }: TxReqOptions = {}
-  ) {
+  createTxRequest(txObj: TransactionRequest, { callbackUrl, exp = 600, networkId, label }: TxReqOptions = {}) {
     const payload: TxReqPayload = {}
     if (callbackUrl) payload.callback = callbackUrl
     if (networkId) payload.net = networkId
     if (label) payload.label = label
-    return this.signJWT(
-      { ...payload, ...txObj, type: Types.ETH_TX_REQUEST },
-      exp
-    )
+    return this.signJWT({ ...payload, ...txObj, type: Types.ETH_TX_REQUEST }, exp)
   }
 
   /**
@@ -720,20 +683,14 @@ class Credentials {
    *  @param    {Array}              payload.capabilities   An array of capability JWT's to include
    *  @return   {Promise<Object, Error>}                    a promise which resolves with a signed JSON Web Token or rejects with an error
    */
-  async createDisclosureResponse(
-    payload: DisclosureResponsePayload = {},
-    expiresIn = 600
-  ) {
+  async createDisclosureResponse(payload: DisclosureResponsePayload = {}, expiresIn = 600) {
     if (payload.req) {
       const verified = await verifyJWT(payload.req, { resolver: this.resolver })
       if (verified.issuer) {
         payload.aud = verified.issuer
       }
     }
-    return this.signJWT(
-      { ...payload, type: Types.DISCLOSURE_RESPONSE },
-      expiresIn
-    )
+    return this.signJWT({ ...payload, type: Types.DISCLOSURE_RESPONSE }, expiresIn)
   }
 
   /**
@@ -746,10 +703,7 @@ class Credentials {
    * @param     {Object}             response.payload   A selective disclosure response payload, with associated did doc
    * @param     {Object}             response.doc
    */
-  async processDisclosurePayload({
-    doc,
-    payload
-  }: DisclosurePayload): Promise<DisclosureResponse> {
+  async processDisclosurePayload({ doc, payload }: DisclosurePayload): Promise<DisclosureResponse> {
     // Extract known key-value pairs from payload
     const {
       own = {},
@@ -796,12 +750,11 @@ class Credentials {
     // Return invalid jwts in the `invalid` array
     if (verified) {
       const invalid: string[] = []
-      const verifying: Array<Promise<undefined | VerifiedJWT>> = verified.map(
-        token =>
-          verifyJWT(token, { resolver: this.resolver, audience: this.did }).catch(() => {
-            invalid.push(token)
-            return Promise.resolve(undefined)
-          })
+      const verifying: Array<Promise<undefined | VerifiedJWT>> = verified.map(token =>
+        verifyJWT(token, { resolver: this.resolver, audience: this.did }).catch(() => {
+          invalid.push(token)
+          return Promise.resolve(undefined)
+        })
       )
 
       // Format payloads and remove invalid JWTs
@@ -884,8 +837,9 @@ class Credentials {
   }
 
   async issueVerifiableCredential(vcPayload: VerifiableCredentialPayload) {
-    if (!(this.did && this.signer))
+    if (!(this.did && this.signer)) {
       return Promise.reject(new Error('No Signing Identity configured'))
+    }
     const issuer: Issuer = { did: this.did, signer: this.signer }
     return await createVerifiableCredential(vcPayload, issuer)
   }
@@ -906,7 +860,7 @@ class Credentials {
   contract(abi: ContractABI): Factory {
     const txObjHandler = (txObj: TransactionRequest, opts?: TxReqOptions) => {
       if (txObj.function) txObj.fn = txObj.function
-      delete txObj['function']
+      delete txObj.function
       return this.createTxRequest(txObj, opts)
     }
     return ContractFactory(txObjHandler.bind(this))(abi)
