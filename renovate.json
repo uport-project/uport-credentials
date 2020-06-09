@@ -1,0 +1,19 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "timezone": "GMT",
+  "schedule": ["before 7am every weekday"],
+  "labels": ["maintenance"],
+  "packageRules": [
+    {
+      "updateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    },
+    {
+      "depTypeList": ["devDependencies"],
+      "automerge": true
+    }
+  ],
+  "prCreation": "not-pending"
+}
