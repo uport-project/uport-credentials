@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/uport-project/uport-credentials/compare/1.3.0...1.3.1) (2020-06-09)
+
+
+### Bug Fixes
+
+* **build:** automatic release ([b9847b9](https://github.com/uport-project/uport-credentials/commit/b9847b9bd22ce5028f666af195097e81d350ff2e))
+
 ## [1.3.0](https://github.com/uport-project/uport-credentials/compare/v1.2.3...1.3.0) (2020-02-07)
 
 
