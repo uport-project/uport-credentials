@@ -1,25 +1,35 @@
+---
+name: Bug report
+about: Create a report to help us improve
+title: "[BUG]"
+labels: bug
+assignees: ''
+
+---
+
 Prerequisites
 
-Please answer the following questions for yourself before submitting an issue. **YOU MAY DELETE THE PREREQUISITES SECTION.**
+Please answer the following questions for yourself before submitting an issue.
 
 - [ ] I am running the latest version
 - [ ] I checked the documentation and found no answer
 - [ ] I checked to make sure that this issue has not already been filed
 
+**YOU MAY DELETE THE PREREQUISITES SECTION** if you're sure you checked all the boxes.
 
-# Current Behavior
+### Current Behavior
 
 What is the current behavior?
-# Expected Behavior
+
+### Expected Behavior
 
 Please describe the behavior you are expecting
 
+### Failure Information
 
-# Failure Information (for bugs)
+Please help provide information about the failure.
 
-Please help provide information about the failure if this is a bug. If it is not a bug, please remove the rest of this template.
-
-## Steps to Reproduce
+#### Steps to Reproduce
 
 Please provide detailed steps for reproducing the issue.
 
@@ -27,17 +37,24 @@ Please provide detailed steps for reproducing the issue.
 2. step 2
 3. you get it...
 
-## Environment Details
+#### Environment Details
 
 Please provide any relevant information about your setup. This is important in case the issue is not reproducible except for under certain conditions.
 
-* App Version:
-* Mobile OS Version:
+* node/browser version:
+* OS Version:
 * Device details:
 
-## Failure Logs/Screenshots
+#### Failure Logs/Screenshots
 
 Please include any relevant log snippets or files here.
-Create a [GIST](https://gist.github.com) which is a paste of your _full_ logs, and link them here.
+Create a [GIST](https://gist.github.com) which is a paste of your _full or sanitized_ logs, and link them here.
 Do _NOT_ paste your full logs here, as it will make this issue very long and hard to read!
-If you are reporting a bug, _always_ include logs!
+
+#### Alternatives you considered
+
+Please provide details about an environment where this bug does not occur.
+
+---
+
+> **Don't paste private keys anywhere public!**
