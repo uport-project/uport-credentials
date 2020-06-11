@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/uport-project/uport-credentials/compare/1.3.2...1.3.3) (2020-06-11)
+
+
+### Bug Fixes
+
+* **deps:** update dependency did-resolver to v2 ([#204](https://github.com/uport-project/uport-credentials/issues/204)) ([68f41e7](https://github.com/uport-project/uport-credentials/commit/68f41e7a743d4d07394f38642e2d05956919963e))
+
 ## [1.3.2](https://github.com/uport-project/uport-credentials/compare/1.3.1...1.3.2) (2020-06-11)
 
 
