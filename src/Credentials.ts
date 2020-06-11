@@ -3,11 +3,9 @@ import { ec as EC } from 'elliptic'
 import { createJWT, verifyJWT, SimpleSigner, Signer, toEthereumAddress } from 'did-jwt'
 import { createVerifiableCredential, verifyPresentation } from 'did-jwt-vc'
 import { PresentationPayload } from 'did-jwt-vc/lib/types'
-import UportDIDResolver from 'uport-did-resolver'
 import EthrDIDResolver from 'ethr-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
 import { Resolver } from 'did-resolver'
-import UportLite from 'uport-lite'
 import { isMNID, decode as mnidDecode } from 'mnid'
 
 import { ContractFactory, TransactionRequest, AbiParam, ContractABI, ContractInterface, Factory } from './Contract'
@@ -338,12 +336,9 @@ class Credentials {
    * **You are required to provide either `ethrConfig` or `resolver`**
    * @param       {Address}           [settings.address]       DEPRECATED your uPort address (may be the address of your
    * application's uPort identity)
-   * @param       {Object}            [settings.networks]      DEPRECATED networks config object, ie. {  '0x94365e3b': {
-   * rpcUrl: 'https://private.chain/rpc', address: '0x0101.... }}
-   * @param       {UportLite}         [settings.registry]      DEPRECATED a registry object from UportLite
    * @return      {Credentials}                                self
    */
-  constructor({ did, address, privateKey, signer, networks, registry, ethrConfig, resolver }: Settings) {
+  constructor({ did, address, privateKey, signer, ethrConfig, resolver }: Settings) {
     if (signer) {
       this.signer = signer
     } else if (privateKey) {
@@ -370,7 +365,11 @@ class Credentials {
     } else {
       const ethrResolver = EthrDIDResolver.getResolver(ethrConfig || {})
       const webResolver = WebDidResolver.getResolver()
-      this.resolver = new Resolver({ ...webResolver, ...ethrResolver })
+      this.resolver = new Resolver({ 
+        ...webResolver, 
+        ...ethrResolver,
+        https: webResolver.web
+      })
     }
   }
 
