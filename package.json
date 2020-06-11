@@ -36,7 +36,7 @@
   "dependencies": {
     "did-jwt": "^4.0.0",
     "did-jwt-vc": "^0.2.0",
-    "did-resolver": "^1.1.0",
+    "did-resolver": "^2.0.0",
     "elliptic": "^6.4.1",
     "ethr-did-resolver": "^2.0.0",
     "https-did-resolver": "^0.1.0",
