@@ -39,7 +39,7 @@
     "did-resolver": "^1.1.0",
     "elliptic": "^6.4.1",
     "ethr-did-resolver": "^2.0.0",
-    "https-did-resolver": "^0.1.0",
+    "https-did-resolver": "^1.0.0",
     "mnid": "^0.1.1",
     "uport-did-resolver": "^0.0.7",
     "uport-lite": "^1.0.5",
