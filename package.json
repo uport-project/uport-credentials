@@ -84,7 +84,7 @@
     "husky": "4.2.5",
     "jest": "24.7.1",
     "json-loader": "0.5.7",
-    "microbundle": "0.11.0",
+    "microbundle": "0.12.2",
     "mockdate": "2.0.2",
     "ngrok": "3.2.7",
     "nock": "9.6.1",
