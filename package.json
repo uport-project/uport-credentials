@@ -85,7 +85,7 @@
     "jest": "24.7.1",
     "json-loader": "0.5.7",
     "microbundle": "0.12.2",
-    "mockdate": "2.0.2",
+    "mockdate": "3.0.2",
     "ngrok": "3.2.7",
     "nock": "9.6.1",
     "prettier": "1.19.1",
