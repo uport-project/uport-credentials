@@ -99,6 +99,6 @@
     "typescript": "3.9.6",
     "uport-transports": "0.2.6",
     "webpack": "4.43.0",
-    "webpack-cli": "3.3.0"
+    "webpack-cli": "3.3.12"
   }
 }
