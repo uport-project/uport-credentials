@@ -82,7 +82,7 @@
     "codecov": "3.7.0",
     "express": "4.17.1",
     "husky": "4.2.5",
-    "jest": "24.7.1",
+    "jest": "26.1.0",
     "json-loader": "0.5.7",
     "microbundle": "0.12.2",
     "mockdate": "2.0.2",
