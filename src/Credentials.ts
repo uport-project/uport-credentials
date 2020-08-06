@@ -68,7 +68,7 @@ interface IssuerSpec {
 }
 
 interface VerifiableClaimSpec extends ClaimSpec {
-  iss: IssuerSpec[]
+  iss?: IssuerSpec[]
 }
 
 interface VerifiableClaimsSpec {
@@ -81,7 +81,7 @@ interface UserInfoSpec {
 
 interface ClaimsSpec {
   verifiable: VerifiableClaimsSpec
-  user_info: UserInfoSpec
+  user_info?: UserInfoSpec
 }
 interface DisclosureRequestParams {
   claims?: ClaimsSpec
@@ -365,8 +365,8 @@ class Credentials {
     } else {
       const ethrResolver = EthrDIDResolver.getResolver(ethrConfig || {})
       const webResolver = WebDidResolver.getResolver()
-      this.resolver = new Resolver({ 
-        ...webResolver, 
+      this.resolver = new Resolver({
+        ...webResolver,
         ...ethrResolver,
         https: webResolver.web
       })
