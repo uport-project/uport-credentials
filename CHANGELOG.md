@@ -1,3 +1,11 @@
+## [1.3.4](https://github.com/uport-project/uport-credentials/compare/1.3.3...1.3.4) (2020-08-07)
+
+
+### Bug Fixes
+
+* **deps:** update dependency elliptic to v6.5.3 [security] ([#241](https://github.com/uport-project/uport-credentials/issues/241)) ([b601c62](https://github.com/uport-project/uport-credentials/commit/b601c625ff3d7ae84ba2acc51e82aa6c5ef8ed21))
+* make ClaimSpec.user_info and VerifiableClaimSpec.iss optional ([#251](https://github.com/uport-project/uport-credentials/issues/251)) ([d598623](https://github.com/uport-project/uport-credentials/commit/d598623d3a1c0d2dfbfd1b1ed0ad3756614016e4)), closes [#250](https://github.com/uport-project/uport-credentials/issues/250)
+
 ## [1.3.3](https://github.com/uport-project/uport-credentials/compare/1.3.2...1.3.3) (2020-06-11)
 
 
