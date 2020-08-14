@@ -1,7 +1,7 @@
 import { ec as EC } from 'elliptic'
 
 import { createJWT, verifyJWT, SimpleSigner, Signer, toEthereumAddress } from 'did-jwt'
-import { createVerifiableCredential, verifyPresentation } from 'did-jwt-vc'
+import { createVerifiableCredentialJwt, verifyPresentation } from 'did-jwt-vc'
 import { PresentationPayload } from 'did-jwt-vc/lib/types'
 import EthrDIDResolver from 'ethr-did-resolver'
 import * as WebDidResolver from 'web-did-resolver'
@@ -10,7 +10,7 @@ import { isMNID, decode as mnidDecode } from 'mnid'
 
 import { ContractFactory, TransactionRequest, AbiParam, ContractABI, ContractInterface, Factory } from './Contract'
 import { DIDDocument, PublicKey } from 'did-resolver'
-import { VerifiableCredentialPayload, Issuer } from 'did-jwt-vc/lib/types'
+import { JwtCredentialPayload, Issuer, VerifiedPresentation, CredentialPayload } from 'did-jwt-vc/lib/types'
 
 const secp256k1 = new EC('secp256k1')
 
@@ -835,15 +835,15 @@ class Credentials {
     return this.processDisclosurePayload({ payload, doc })
   }
 
-  async issueVerifiableCredential(vcPayload: VerifiableCredentialPayload) {
+  async issueVerifiableCredential(vcPayload: JwtCredentialPayload | CredentialPayload) {
     if (!(this.did && this.signer)) {
       return Promise.reject(new Error('No Signing Identity configured'))
     }
     const issuer: Issuer = { did: this.did, signer: this.signer }
-    return await createVerifiableCredential(vcPayload, issuer)
+    return await createVerifiableCredentialJwt(vcPayload, issuer)
   }
 
-  async verifyPresentation(vpJwt: string): Promise<PresentationResponse> {
+  async verifyPresentation(vpJwt: string): Promise<VerifiedPresentation> {
     const verifiedVP = await verifyPresentation(vpJwt, this.resolver)
     return verifiedVP
   }

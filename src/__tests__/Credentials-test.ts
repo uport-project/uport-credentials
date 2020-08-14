@@ -1,6 +1,6 @@
 import { Credentials, SimpleSigner } from '../index'
 import { verifyJWT, decodeJWT } from 'did-jwt'
-import { createPresentation, verifyCredential } from 'did-jwt-vc'
+import { createVerifiablePresentationJwt, verifyCredential } from 'did-jwt-vc'
 import { Issuer } from 'did-jwt-vc/lib/types'
 
 import MockDate from 'mockdate'
@@ -767,7 +767,7 @@ describe('verifyPresentation', () => {
     }
 
     const issuer: Issuer = { did: credentials.did, signer: credentials.signer }
-    const vpJwt = await createPresentation(vpPayload, issuer)
+    const vpJwt = await createVerifiablePresentationJwt(vpPayload, issuer)
 
     const result = await credentials.verifyPresentation(vpJwt)
     expect(result.payload.iss).toEqual(issuer.did)
