@@ -83,10 +83,22 @@ interface ClaimsSpec {
   verifiable: VerifiableClaimsSpec
   user_info?: UserInfoSpec
 }
+declare type Comparable = number | Date;
+interface Constraint {
+  [operator: string]: boolean[] | Array<{
+    var: string;
+  } | string | Comparable>;
+}
+// same as jolocom-lib ICredentialRequest
+interface CredentialRequest {
+  type: string[]
+  constraints: Constraint[]
+}
 interface DisclosureRequestParams {
   claims?: ClaimsSpec
   requested?: string[]
   verified?: string[]
+  requestedCredentials?: CredentialRequest[]
   notifications?: boolean
   callbackUrl?: string
   networkId?: string
@@ -101,6 +113,7 @@ interface DisclosureRequestPayload extends JWTPayload {
   claims?: ClaimsSpec
   requested?: string[]
   verified?: string[]
+  requestedCredentials?: CredentialRequest[]
   permissions?: string[]
   callback?: string
   net?: string
@@ -448,6 +461,7 @@ class Credentials {
     if (params.requested) payload.requested = params.requested
     if (params.verified) payload.verified = params.verified
     if (params.claims) payload.claims = params.claims
+    if (params.requestedCredentials) payload.requestedCredentials = params.requestedCredentials
     if (params.notifications) payload.permissions = ['notifications']
     if (params.callbackUrl) payload.callback = params.callbackUrl
     if (params.networkId) payload.net = params.networkId
