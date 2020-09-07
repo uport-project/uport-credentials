@@ -86,7 +86,7 @@
     "json-loader": "0.5.7",
     "microbundle": "0.12.3",
     "mockdate": "3.0.2",
-    "ngrok": "3.2.7",
+    "ngrok": "3.3.0",
     "nock": "13.0.4",
     "prettier": "2.1.1",
     "semantic-release": "17.1.1",
