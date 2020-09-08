@@ -81,7 +81,7 @@
     "body-parser": "1.19.0",
     "codecov": "3.7.2",
     "express": "4.17.1",
-    "husky": "4.2.5",
+    "husky": "4.3.0",
     "jest": "26.4.2",
     "json-loader": "0.5.7",
     "microbundle": "0.12.3",
