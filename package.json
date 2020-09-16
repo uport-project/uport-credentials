@@ -88,7 +88,7 @@
     "mockdate": "3.0.2",
     "ngrok": "3.3.0",
     "nock": "13.0.4",
-    "prettier": "2.1.1",
+    "prettier": "2.1.2",
     "semantic-release": "17.1.1",
     "ts-jest": "26.3.0",
     "tslint": "6.1.3",
