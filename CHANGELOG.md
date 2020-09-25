@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/uport-project/uport-credentials/compare/1.3.4...1.3.5) (2020-09-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ethr-did-resolver to v3 ([#267](https://github.com/uport-project/uport-credentials/issues/267)) ([094bb57](https://github.com/uport-project/uport-credentials/commit/094bb57d70bb8ee0253d632f361391ea1be82413)), closes [#268](https://github.com/uport-project/uport-credentials/issues/268)
+
 ## [1.3.4](https://github.com/uport-project/uport-credentials/compare/1.3.3...1.3.4) (2020-08-07)
 
 
