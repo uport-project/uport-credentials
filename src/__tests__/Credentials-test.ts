@@ -97,7 +97,7 @@ describe('configuration', () => {
   describe('sets resolver', () => {
     describe('always uses resolver if passed in', () => {
       const web = webResolver.getResolver()
-      const ethr = ethrResolver.getResolver()
+      const ethr = ethrResolver.getResolver({})
       const resolver = new Resolver({ ...web, ...ethr })
       expect(new Credentials({ resolver }).resolver).toEqual(resolver)
     })
