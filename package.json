@@ -38,7 +38,7 @@
     "did-jwt-vc": "^1.0.0",
     "did-resolver": "^2.0.0",
     "elliptic": "^6.4.1",
-    "ethr-did-resolver": "^2.0.0",
+    "ethr-did-resolver": "^3.0.0",
     "mnid": "^0.1.1",
     "web-did-resolver": "^1.2.0"
   },
