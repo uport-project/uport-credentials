@@ -87,7 +87,7 @@
     "microbundle": "0.12.4",
     "mockdate": "3.0.2",
     "ngrok": "3.3.0",
-    "nock": "13.0.4",
+    "nock": "13.0.5",
     "prettier": "2.1.2",
     "semantic-release": "17.2.2",
     "ts-jest": "26.4.4",
