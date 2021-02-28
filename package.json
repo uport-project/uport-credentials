@@ -71,8 +71,8 @@
     }
   },
   "devDependencies": {
-    "@commitlint/cli": "12.0.0",
-    "@commitlint/config-conventional": "12.0.0",
+    "@commitlint/cli": "12.0.1",
+    "@commitlint/config-conventional": "12.0.1",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
     "@types/elliptic": "6.4.12",
@@ -87,7 +87,7 @@
     "microbundle": "0.13.0",
     "mockdate": "3.0.2",
     "ngrok": "3.4.0",
-    "nock": "13.0.8",
+    "nock": "13.0.9",
     "prettier": "2.2.1",
     "semantic-release": "17.4.0",
     "ts-jest": "26.5.2",
@@ -95,7 +95,7 @@
     "tslint-config-prettier": "1.18.0",
     "tslint-eslint-rules": "5.4.0",
     "typedoc": "0.20.28",
-    "typedoc-plugin-markdown": "3.5.0",
+    "typedoc-plugin-markdown": "3.6.0",
     "typescript": "4.2.2",
     "uport-transports": "0.2.6",
     "webpack": "5.24.2",
